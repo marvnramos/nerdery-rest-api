@@ -1,0 +1,323 @@
+openapi: "3.1.0"
+info:
+  title: "NodeJs Rest API architecture"
+  description: "This is the documentation for the REST API architecture"
+  version: "1.0.0"
+  contact:
+    email: "marvinramos@ravn.co"
+    name: "Marvin Ramos"
+tags:
+  - name: auth
+  - name: users
+  - name: favorites
+  - name: carts
+  - name: products
+  - name: orders
+servers:
+  - url: "https://localhost:3000/api/v1"
+paths:
+  /auth/signin:
+    post:
+      tags:
+        - auth
+      description: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+        required: true
+      responses:
+        '200':
+          description: "Successful login"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        400:
+          description: "Missing some fields"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginBadRequestResponse"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServerErrorResponse"
+  /auth/signout:
+    post:
+      tags:
+        - "auth"
+      security:
+        - bearerAuth: [ ]
+      responses:
+        '204':
+          description: "No Content"
+  /users/signup:
+    post:
+      tags:
+        - users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SingUpRequest"
+      responses:
+        201:
+          description: "Created"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SingUpResponse"
+        400:
+          description: "Missing some fields"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SignUpBadRequestResponse"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServerErrorResponse"
+  /users/forgot-password:
+    put:
+      summary: Request a password reset email
+      tags:
+        - users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ForgotPasswordRequest"
+      responses:
+        202:
+          description: "Password reset email sent if the email exists."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ForgotPasswordResponse"
+        400:
+          description: "Invalid email or bad request."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ForgotPasswordBadRequestResponse"
+        500:
+          description: "Internal server error."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServerErrorResponse"
+
+  /users/reset-password:
+    put:
+      summary: Reset password using a token
+      tags:
+        - users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResetPasswordRequest"
+      responses:
+        '204':
+          description: "Password successfully reset."
+        400:
+          description: "Invalid token or bad request."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResetPasswordBadRequestResponse"
+        500:
+          description: "Internal server error."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServerErrorResponse"
+
+  /favorites:
+    post:
+      summary: Add product to favorite
+      tags:
+        - favorites
+
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          example: "example@mail.com"
+        password:
+          type: string
+          example: "Myp@ssword123"
+      required:
+        - email
+        - password
+    LoginResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "success"
+        message:
+          type: string
+          example: "You've been logged successfully"
+        data:
+          type: object
+          properties:
+            bearer_token:
+              type: string
+              example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+            refresh_token:
+              type: string
+              example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+    LoginBadRequestResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Invalid payload"
+        detail:
+          type: object
+          properties:
+            email:
+              type: string
+              example: "This field is required!"
+    SingUpRequest:
+      type: object
+      properties:
+        first_name:
+          type: string
+          example: "John"
+        last_name:
+          type: string
+          example: "Doe"
+        email:
+          type: string
+          format: email
+          example: "johndoe@example.com"
+        address:
+          type: string
+          example: "123 Av. F"
+        password:
+          type: string
+          example: "P@ssw0rd!"
+      required:
+        - first_name
+        - last_name
+        - email
+        - password
+    ForgotPasswordRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          description: "The email address associated with the account."
+      required:
+        - email
+
+    ForgotPasswordResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "success"
+        message:
+          type: string
+          example: "An mail was sent to this email"
+        data:
+          type: object
+          example: {}
+
+    ForgotPasswordBadRequestResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Invalid payload"
+        detail:
+          type: object
+          properties:
+            email:
+              type: string
+              example: "This field is required!"
+    ResetPasswordRequest:
+      type: object
+      properties:
+        token:
+          type: string
+          example: "6264efef-d9ca-475b-91f5-5770d3b02fac"
+          description: "The reset token sent via email."
+        new_password:
+          type: string
+          example: 'P@ssw0rd!'
+          format: password
+          description: "The new password for the account."
+      required:
+        - token
+        - new_password
+    ResetPasswordBadRequestResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Invalid payload"
+        detail:
+          type: object
+          properties:
+            new_password:
+              type: string
+              example: "This field is required!"
+
+    SingUpResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "success"
+        message:
+          type: string
+          example: "You've been singed up successfully"
+        data:
+          type: object
+    SignUpBadRequestResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Invalid payload"
+        detail:
+          type: object
+          properties:
+            first_name:
+              type: string
+              example: "This field is required!"
+
+    ServerErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Something went wrong"
+        detail:
+          type: object
+          properties:
+            message:
+              type: string
+              example: "Internal Server Error"
