@@ -144,9 +144,17 @@ paths:
 
   /favorites:
     post:
-      summary: Add product to favorite
+      summary: Add product to my favorites
       tags:
         - favorites
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#components/schemas/FavoriteRequest"
 
 
 components:
@@ -261,14 +269,15 @@ components:
       type: object
       properties:
         token:
-          type: string
-          example: "6264efef-d9ca-475b-91f5-5770d3b02fac"
-          description: "The reset token sent via email."
+          type: uuid
+          format: uuid
+          example: 6264efef-d9ca-475b-91f5-5770d3b02fac
+          description: The reset token sent via email.
         new_password:
           type: string
-          example: 'P@ssw0rd!'
+          example: P@ssw0rd!
           format: password
-          description: "The new password for the account."
+          description: The new password for the account.
       required:
         - token
         - new_password
@@ -308,6 +317,22 @@ components:
             first_name:
               type: string
               example: "This field is required!"
+
+    FavoriteRequest:
+      type: object
+      properties:
+        product_id:
+          type: uuid
+          example: "6264efef-d9ca-475b-91f5-5770d3b02fac"
+          description: "The reset token sent via email."
+        new_password:
+          type: string
+          example: 'P@ssw0rd!'
+          format: password
+          description: "The new password for the account."
+      required:
+        - token
+        - new_password
 
     ServerErrorResponse:
       type: object
