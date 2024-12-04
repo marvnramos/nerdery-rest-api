@@ -20,7 +20,6 @@ paths:
     post:
       tags:
         - auth
-      description: ""
       requestBody:
         content:
           application/json:
@@ -29,19 +28,19 @@ paths:
         required: true
       responses:
         '200':
-          description: "Successful login"
+          description: Successfully login
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/LoginResponse"
         400:
-          description: "Missing some fields"
+          description: Missing some fields
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/LoginBadRequestResponse"
         500:
-          description: "Internal Server Error"
+          description: Internal Server Error
           content:
             application/json:
               schema:
@@ -53,8 +52,20 @@ paths:
       security:
         - bearerAuth: [ ]
       responses:
-        '204':
-          description: "No Content"
+        204:
+          description: You have been signed out
+        401:
+          description: Unauthorized access.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServerErrorResponse"
   /users/signup:
     post:
       tags:
@@ -67,19 +78,19 @@ paths:
               $ref: "#/components/schemas/SingUpRequest"
       responses:
         201:
-          description: "Created"
+          description: New user was recorded.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/SingUpResponse"
         400:
-          description: "Missing some fields"
+          description: Missing some fields
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/SignUpBadRequestResponse"
         500:
-          description: "Internal Server Error"
+          description: Internal Server Error
           content:
             application/json:
               schema:
@@ -97,19 +108,19 @@ paths:
               $ref: "#/components/schemas/ForgotPasswordRequest"
       responses:
         202:
-          description: "Password reset email sent if the email exists."
+          description: Password reset email sent if the email exists.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ForgotPasswordResponse"
         400:
-          description: "Invalid email or bad request."
+          description: Invalid email or bad request.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ForgotPasswordBadRequestResponse"
         500:
-          description: "Internal server error."
+          description: Internal server error.
           content:
             application/json:
               schema:
@@ -127,16 +138,16 @@ paths:
             schema:
               $ref: "#/components/schemas/ResetPasswordRequest"
       responses:
-        '204':
-          description: "Password successfully reset."
+        204:
+          description: Password successfully reset.
         400:
-          description: "Invalid token or bad request."
+          description: Invalid token or bad request.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ResetPasswordBadRequestResponse"
         500:
-          description: "Internal server error."
+          description: Internal server error.
           content:
             application/json:
               schema:
@@ -154,7 +165,122 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#components/schemas/FavoriteRequest"
+              $ref: "#/components/schemas/FavoritesRequest"
+      responses:
+        201:
+          description: Product added to user's favorites.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FavoritesResponse"
+        400:
+          description: Invalid id or bad request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FavoritesBadRequestResponse"
+        401:
+          description: Unauthorized access.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        500:
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServerErrorResponse"
+    get:
+      summary: Get all user's favorites products
+      tags:
+        - favorites
+      security:
+        - bearerAuth: [ ]
+      responses:
+        200:
+          description: Show all user's favorites products
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetFavoritesResponse"
+        401:
+          description: Unauthorized access.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        500:
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServerErrorResponse"
+  /favorites/{favorite_id}:
+    delete:
+      summary: Remove a product from favorites
+      tags:
+        - favorites
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: favorite_id
+          in: path
+          description: The unique identifier of the favorite item to be removed.
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: Successfully removed the favorite product.
+        400:
+          description: Invalid id or bad request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeleteFavoritesBadRequestResponse"
+        401:
+          description: Unauthorized access.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        500:
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServerErrorResponse"
+
+  /products:
+    post:
+      summary:
+      tags:
+        - products
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FavoritesRequest"
+      responses:
+        401:
+          description: Unauthorized access.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        500:
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServerErrorResponse"
+
+
 
 
 components:
@@ -169,10 +295,12 @@ components:
       properties:
         email:
           type: string
-          example: "example@mail.com"
+          format: email
+          example: example@mail.com
         password:
           type: string
-          example: "Myp@ssword123"
+          format: password
+          example: Myp@ssword123
       required:
         - email
         - password
@@ -181,50 +309,51 @@ components:
       properties:
         status:
           type: string
-          example: "success"
+          example: success
         message:
           type: string
-          example: "You've been logged successfully"
+          example: You've been logged successfully
         data:
           type: object
           properties:
             bearer_token:
               type: string
-              example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
-            refresh_token:
-              type: string
-              example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+              example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
     LoginBadRequestResponse:
       type: object
       properties:
-        error:
+        status:
           type: string
-          example: "Invalid payload"
-        detail:
+          example: failure
+        message:
+          type: string
+          example: Invalid payload
+        data:
           type: object
           properties:
             email:
               type: string
-              example: "This field is required!"
+              example: This field is required!
     SingUpRequest:
       type: object
       properties:
         first_name:
           type: string
-          example: "John"
+          example: John
         last_name:
           type: string
-          example: "Doe"
+          example: Doe
         email:
           type: string
           format: email
-          example: "johndoe@example.com"
+          example: johndoe@example.com
         address:
           type: string
-          example: "123 Av. F"
+          example: 123 Av. F
         password:
           type: string
-          example: "P@ssw0rd!"
+          format: password
+          example: P@ssw0rd!
       required:
         - first_name
         - last_name
@@ -236,7 +365,7 @@ components:
         email:
           type: string
           format: email
-          description: "The email address associated with the account."
+          description: The email address associated with the account.
       required:
         - email
 
@@ -245,31 +374,34 @@ components:
       properties:
         status:
           type: string
-          example: "success"
+          example: success
         message:
           type: string
-          example: "An mail was sent to this email"
+          example: An mail was sent to this email
         data:
           type: object
-          example: {}
+          example: { }
 
     ForgotPasswordBadRequestResponse:
       type: object
       properties:
-        error:
+        status:
           type: string
-          example: "Invalid payload"
-        detail:
+          example: failure
+        message:
+          type: string
+          example: Invalid payload
+        data:
           type: object
           properties:
             email:
               type: string
-              example: "This field is required!"
+              example: This field is required!
     ResetPasswordRequest:
       type: object
       properties:
         token:
-          type: uuid
+          type: string
           format: uuid
           example: 6264efef-d9ca-475b-91f5-5770d3b02fac
           description: The reset token sent via email.
@@ -284,65 +416,186 @@ components:
     ResetPasswordBadRequestResponse:
       type: object
       properties:
-        error:
+        status:
           type: string
-          example: "Invalid payload"
-        detail:
+          example: failure
+        message:
+          type: string
+          example: Invalid payload
+        data:
           type: object
           properties:
             new_password:
               type: string
-              example: "This field is required!"
+              example: This field is required!
 
     SingUpResponse:
       type: object
       properties:
         status:
           type: string
-          example: "success"
+          example: success
         message:
           type: string
-          example: "You've been singed up successfully"
+          example: You've been singed up successfully
         data:
           type: object
     SignUpBadRequestResponse:
       type: object
       properties:
-        error:
+        status:
           type: string
-          example: "Invalid payload"
-        detail:
+          example: failure
+        message:
+          type: string
+          example: Invalid payload
+        data:
           type: object
           properties:
             first_name:
               type: string
-              example: "This field is required!"
+              example: This field is required!
 
-    FavoriteRequest:
+    FavoritesRequest:
       type: object
       properties:
         product_id:
           type: uuid
-          example: "6264efef-d9ca-475b-91f5-5770d3b02fac"
-          description: "The reset token sent via email."
-        new_password:
-          type: string
-          example: 'P@ssw0rd!'
-          format: password
-          description: "The new password for the account."
+          example: 6264efef-d9ca-475b-91f5-5770d3b02fac
+          description: User's favorite product id.
       required:
-        - token
-        - new_password
+        - product_id
+    FavoritesResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        message:
+          type: string
+          example: A product was added to your favorites
+        data:
+          type: object
+          properties:
+            id:
+              type: uuid
+              example: 6264efef-d9ca-475b-91f5-5770d3b02fac
+            user_id:
+              type: uuid
+              example:  bb5127cb-88b9-4797-a930-5547dac5efed
+            product_id:
+              type: uuid
+              example: 97c978f0-3975-41a7-b9af-7fa0abfc5081
+    GetFavoritesResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        message:
+          type: string
+          example: A product was added to your favorites
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/GetFavoritesData"
+
+    GetFavoritesData:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 97c978f0-3975-41a7-b9af-7fa0abfc5081
+        product_id:
+          type: string
+          format: uuid
+          example: a09c037a-cead-42c8-8ac0-dbdc158b497f
+        product_name:
+          type: string
+          example: Samsung Galaxy A55
+        unit_price:
+          type: string
+          example: $ 350.00
+        image_url:
+          type: string
+          format: uri
+          example: https://storage-domain.com/image.png
+        uri:
+          type: string
+          format: uri
+          example: /products/a09c037a-cead-42c8-8ac0-dbdc158b497f
+
+    FavoritesBadRequestResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: failure
+        message:
+          type: string
+          example: Invalid payload
+        data:
+          type: object
+          properties:
+            product_id:
+              type: string
+              example: This field is required!
+    DeleteFavoritesBadRequestResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: failure
+        message:
+          type: string
+          example: Invalid payload
+        data:
+          type: object
+          properties:
+            favorite_id:
+              type: string
+              example: This field is required!
+
+    UnauthorizedResponse:
+      type: object
+      description: Response returned when the user is unauthorized to access the requested resource.
+      properties:
+        status:
+          type: string
+          description: Indicates the status of the response.
+          example: failure
+        message:
+          type: string
+          description: A message providing more details about the unauthorized access.
+          example: Unauthorized access.
+        data:
+          type: object
+          description: Contains additional details about the error.
+          properties:
+            error:
+              type: string
+              description: Specific error details.
+              example: Invalid token or token expired.
+
 
     ServerErrorResponse:
       type: object
+      description: Response returned when the server run into an error.
       properties:
-        error:
+        status:
           type: string
-          example: "Something went wrong"
-        detail:
+          description: Indicates the status of the response.
+          example: failure
+        message:
+          type: string
+          description: A message providing more details about server error.
+          example: Internal server error.
+        data:
           type: object
+          description: Contains additional details about the error.
           properties:
-            message:
+            error:
               type: string
-              example: "Internal Server Error"
+              description: Specific error details.
+              example: Can't implement that action.
