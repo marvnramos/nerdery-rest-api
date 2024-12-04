@@ -253,6 +253,40 @@ paths:
               schema:
                 $ref: "#/components/schemas/ServerErrorResponse"
 
+  /carts:
+    post:
+      summary: Add new cart record
+      tags:
+        - carts
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            $ref:
+      responses:
+        204:
+          description: Successfully removed the favorite product.
+        400:
+          description: Invalid id or bad request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeleteFavoritesBadRequestResponse"
+        401:
+          description: Unauthorized access.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        500:
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServerErrorResponse"
+
   /products:
     post:
       summary: Add a new product record
