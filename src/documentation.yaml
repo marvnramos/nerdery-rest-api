@@ -24,7 +24,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/LoginRequest"
+              $ref: "#/components/schemas/SignInRequest"
         required: true
       responses:
         '200':
@@ -32,7 +32,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/LoginResponse"
+                $ref: "#/components/schemas/SignInResponse"
         400:
           description: Missing some fields
           content:
@@ -255,9 +255,10 @@ paths:
 
   /products:
     post:
-      summary:
+      summary: Add a new product record
       tags:
         - products
+      description: Allows `admin` roles to create a new product record.
       security:
         - bearerAuth: [ ]
       requestBody:
@@ -268,13 +269,184 @@ paths:
               $ref: "#/components/schemas/FavoritesRequest"
       responses:
         401:
-          description: Unauthorized access.
+          description: Unauthorized access
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/UnauthorizedResponse"
+        403:
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PermissionResponse"
         500:
-          description: Internal server error.
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServerErrorResponse"
+    get:
+      summary: Show all products by pagination
+      tags:
+        - products
+      description: Allows `admin` roles to create a new product record.
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FavoritesRequest"
+      responses:
+        401:
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        403:
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PermissionResponse"
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServerErrorResponse"
+
+  /products/{product_id}:
+    get:
+      summary: Show product detail
+      tags:
+        - products
+      description: Allows `admin` roles to read a product detail.
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FavoritesRequest"
+      responses:
+        401:
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        403:
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PermissionResponse"
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServerErrorResponse"
+
+    put:
+      summary: Edit a product record
+      tags:
+        - products
+      description: Allows `admin` roles to edit a product record.
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FavoritesRequest"
+      responses:
+        401:
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        403:
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PermissionResponse"
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServerErrorResponse"
+
+    patch:
+      summary: Edit a product record field
+      tags:
+        - products
+      description: Allows `admin` roles to change product visibility and image url.
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FavoritesRequest"
+      responses:
+        401:
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        403:
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PermissionResponse"
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServerErrorResponse"
+
+    delete:
+      summary: Remove a product record
+      tags:
+        - products
+      description: Allows `admin` roles to remove a product record.
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FavoritesRequest"
+      responses:
+        401:
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        403:
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PermissionResponse"
+        500:
+          description: Internal server error
           content:
             application/json:
               schema:
@@ -290,7 +462,7 @@ components:
       scheme: bearer
       bearerFormat: JWT
   schemas:
-    LoginRequest:
+    SignInRequest:
       type: object
       properties:
         email:
@@ -304,7 +476,7 @@ components:
       required:
         - email
         - password
-    LoginResponse:
+    SignInResponse:
       type: object
       properties:
         status:
@@ -482,7 +654,7 @@ components:
               example: 6264efef-d9ca-475b-91f5-5770d3b02fac
             user_id:
               type: uuid
-              example:  bb5127cb-88b9-4797-a930-5547dac5efed
+              example: bb5127cb-88b9-4797-a930-5547dac5efed
             product_id:
               type: uuid
               example: 97c978f0-3975-41a7-b9af-7fa0abfc5081
@@ -578,6 +750,26 @@ components:
               description: Specific error details.
               example: Invalid token or token expired.
 
+    PermissionResponse:
+      type: object
+      description: Response returned when the user has not permissions to execute the requested action.
+      properties:
+        status:
+          type: string
+          description: Indicates the status of the response.
+          example: failure
+        message:
+          type: string
+          description: A message providing more details about the permission access.
+          example: Not permission access.
+        data:
+          type: object
+          description: Contains additional details about the error.
+          properties:
+            error:
+              type: string
+              description: Specific error details.
+              example: Invalid user permissions.
 
     ServerErrorResponse:
       type: object
