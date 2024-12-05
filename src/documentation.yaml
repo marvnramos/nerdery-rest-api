@@ -255,7 +255,7 @@ paths:
 
   /carts:
     post:
-      summary: Add new cart record
+      summary: Add a new cart record
       tags:
         - carts
       security:
@@ -264,16 +264,21 @@ paths:
         required: true
         content:
           application/json:
-            $ref:
+            schema:
+              $ref: "#/components/schemas/CartRequest"
       responses:
-        204:
-          description: Successfully removed the favorite product.
-        400:
-          description: Invalid id or bad request.
+        201:
+          description: The cart record was successfully added.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DeleteFavoritesBadRequestResponse"
+                $ref: "#/components/schemas/CartResponse"
+        400:
+          description: Invalid ID or bad request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CartBadRequestResponse"
         401:
           description: Unauthorized access.
           content:
@@ -286,6 +291,34 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ServerErrorResponse"
+    get:
+      summary: Show all user's carts
+      tags:
+        - carts
+      security:
+        - bearerAuth: [ ]
+      responses:
+        200:
+          description: Show your current carts list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetAllCartResponse"
+
+        401:
+          description: Unauthorized access.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        500:
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServerErrorResponse"
+
+
 
   /products:
     post:
@@ -686,12 +719,9 @@ components:
             id:
               type: uuid
               example: 6264efef-d9ca-475b-91f5-5770d3b02fac
-            user_id:
-              type: uuid
-              example: bb5127cb-88b9-4797-a930-5547dac5efed
-            product_id:
-              type: uuid
-              example: 97c978f0-3975-41a7-b9af-7fa0abfc5081
+            created_at:
+              type: string
+              example: 2024-12-05T14:00:00Z
     GetFavoritesResponse:
       type: object
       properties:
@@ -700,7 +730,7 @@ components:
           example: success
         message:
           type: string
-          example: A product was added to your favorites
+          example: Here are your favorites
         data:
           type: array
           items:
@@ -721,8 +751,11 @@ components:
           type: string
           example: Samsung Galaxy A55
         unit_price:
+          type: decimal
+          example: 350.00
+        currency:
           type: string
-          example: $ 350.00
+          example: USD
         image_url:
           type: string
           format: uri
@@ -762,6 +795,125 @@ components:
             favorite_id:
               type: string
               example: This field is required!
+
+    CartRequest:
+      type: object
+      properties:
+        product_id:
+          type: string
+          format: uuid
+          example: 6264efef-d9ca-475b-91f5-5770d3b02fac
+          description: List of product IDs to be added to the cart.
+        quantity:
+          type: int
+          example: 2
+      required:
+        - product_ids
+
+    CartResponse:
+      type: object
+      description: Response returned when the user is unauthorized to access the requested resource.
+      properties:
+        status:
+          type: string
+          description: Indicates the status of the response.
+          example: success
+        message:
+          type: string
+          description: A message providing more details about the unauthorized access.
+          example: Cart added successfully.
+        data:
+          type: object
+          description: Contains additional details about .
+          $ref: "#/components/schemas/CartItem"
+    CartBadRequestResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: failure
+        message:
+          type: string
+          example: Invalid payload
+        data:
+          type: object
+          properties:
+            product_id:
+              type: string
+              example: This field is required!
+
+    GetAllCartResponse:
+      type: object
+      description: Response returned when the user is unauthorized to access the requested resource.
+      properties:
+        status:
+          type: string
+          description: Indicates the status of the response.
+          example: success
+        message:
+          type: string
+          description: A message providing more details about the unauthorized access.
+          example: Cart added successfully.
+        data:
+          type: array
+          description: Response show all the user's carts
+          items:
+            $ref: "#/components/schemas/AllCartItem"
+
+
+    GetCartResponse:
+      type: object
+      description: Response returned when the user is unauthorized to access the requested resource.
+      properties:
+        status:
+          type: string
+          description: Indicates the status of the response.
+          example: success
+        message:
+          type: string
+          description: A message providing more details about the unauthorized access.
+          example: Cart added successfully.
+        data:
+          type: object
+          description: Contains additional details about .
+          $ref: "#/components/schemas/CartItem"
+
+    CartItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 97c978f0-3975-41a7-b9af-7fa0abfc5081
+        created_at:
+          type: string
+          example: 2024-12-05T14:10:00Z
+
+    AllCartItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 97c978f0-3975-41a7-b9af-7fa0abfc5081
+        product_id:
+          type: string
+          format: uuid
+          example: bb790a0e-a8d1-4c6e-8301-c2bbc8168431
+        product_name:
+          type: string
+          format: uuid
+          example: AJAZZ Keyboard
+        unit_price:
+          type: decimal
+          example: 20.66
+        currency:
+          type: string
+          example: USD
+        uri:
+          type: string
+          format: uri
+          example: /products/bb790a0e-a8d1-4c6e-8301-c2bbc8168431
 
     UnauthorizedResponse:
       type: object
