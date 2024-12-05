@@ -318,6 +318,76 @@ paths:
               schema:
                 $ref: "#/components/schemas/ServerErrorResponse"
 
+  /carts/{cart_id}:
+    patch:
+      summary: Allows user to increment or decrement the quantity of a product in the cart
+      tags:
+        - carts
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: cart_id
+          in: path
+          description: The unique identifier of the cart item to be edited.
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchCartRequest"
+      responses:
+        200:
+          description: Cart item updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CartResponse"
+        401:
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServerErrorResponse"
+
+    delete:
+      summary: Removes a product from the cart
+      tags:
+        - carts
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: cart_id
+          in: path
+          description: The unique identifier of the cart item to be deleted.
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: Cart item deleted successfully
+        401:
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServerErrorResponse"
 
 
   /products:
@@ -333,8 +403,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/FavoritesRequest"
+              $ref: "#/components/schemas/ProductRequest"
       responses:
+        201:
         401:
           description: Unauthorized access
           content:
@@ -805,10 +876,24 @@ components:
           example: 6264efef-d9ca-475b-91f5-5770d3b02fac
           description: List of product IDs to be added to the cart.
         quantity:
-          type: int
+          type: integer
           example: 2
       required:
-        - product_ids
+        - product_id
+
+    PatchCartRequest:
+      type: object
+      properties:
+        op:
+          type: string
+          example: replace
+        path:
+          type: string
+          example: /carts
+        value:
+          type: integer
+          example: 7
+
 
     CartResponse:
       type: object
@@ -914,6 +999,39 @@ components:
           type: string
           format: uri
           example: /products/bb790a0e-a8d1-4c6e-8301-c2bbc8168431
+
+    ProductRequest:
+      type: object
+      properties:
+        product_name:
+          type: string
+          example: Control xbox series x s one
+          description: product's name
+        description:
+          type: string
+          example: Conéctate a las consolas Xbox con la tecnología inalámbrica de Xbox.
+            Conéctate de forma inalámbrica a PC Windows 10/11, tabletas, iOS y Android mediante Bluetooth.
+        stock:
+          type: integer
+          example: 39
+          description: This field represents the existence of the product in the inventory.
+        is_available:
+          type: boolean
+          example: true
+          description: This field represent if product could be visible for customers
+        image_url:
+          type: string
+          example: http://storage.com/bb790a0e-a8d1-4c6e-8301-c2bbc8168431.png
+          description: This field represent product image
+        unit_price:
+          type: decimal
+          example: 59.99
+      required:
+        - product_name
+        - description
+        - stock
+        - image_url
+        - unit_price
 
     UnauthorizedResponse:
       type: object
