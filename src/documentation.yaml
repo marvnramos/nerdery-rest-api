@@ -13,6 +13,7 @@ tags:
   - name: carts
   - name: products
   - name: orders
+  - name: payments
 servers:
   - url: "https://localhost:3000/api/v1"
 paths:
@@ -724,6 +725,165 @@ paths:
               schema:
                 $ref: "#/components/schemas/ServerErrorResponse"
 
+  /orders:
+    post:
+      summary: Add a new order record
+      tags:
+        - orders
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderRequest"
+      responses:
+        201:
+          description: Order created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderResponse"
+        400:
+          description: Invalid ID or bad request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderBadRequest"
+        401:
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServerErrorResponse"
+
+    get:
+      summary: Show all orders by pagination
+      tags:
+        - orders
+      security:
+        - bearerAuth: [ ]
+      description: Retrieves a paginated list of orders, accessible to `admin`.
+      parameters:
+        - name: page
+          in: query
+          description: Page number for pagination
+          required: true
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          description: Number of records per page
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Paginated list of orders.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderListResponse"
+        400:
+          description: Invalid query param or bad request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetOrderBadRequest"
+        401:
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        403:
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PermissionResponse"
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServerErrorResponse"
+
+  /orders/user:
+    get:
+      summary: Show all user's orders
+      tags:
+        - orders
+      security:
+        - bearerAuth: [ ]
+      description: Retrieves a list of orders.
+      responses:
+        200:
+          description: Paginated list of orders.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserOrderListResponse"
+        401:
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServerErrorResponse"
+
+  /orders/{order_id}:
+    get:
+      summary: Show order details
+      tags:
+        - orders
+      security:
+        - bearerAuth: [ ]
+      description: Retrieve detailed information about a specific order.
+      parameters:
+        - name: order_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Order details retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetOrderResponse"
+        400:
+          description: Invalid query param or bad request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetOneOrderBadRequest"
+        401:
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServerErrorResponse"
 
 
 
@@ -734,6 +894,257 @@ components:
       scheme: bearer
       bearerFormat: JWT
   schemas:
+    OrderRequest:
+      type: object
+      properties:
+        address:
+          type: string
+          example: Av. 1243
+        nearby_landmark:
+          type: string
+          example: near to the hospital
+        product_id:
+          type: string
+          format: uuid
+          example: d1a4c389-e835-4df6-8331-0375f6c82ccd
+        quantity:
+          type: integer
+          example: 4
+      required:
+        - address
+        - nearby_landmark
+        - product_id
+        - quantity
+
+    OrderResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        message:
+          type: string
+          example: New order added successfully
+        data:
+          type: object
+          properties:
+            id:
+              type: uuid
+              example: 6264efef-d9ca-475b-91f5-5770d3b02fac
+            created_at:
+              type: string
+              example: 2024-12-05T14:00:00Z
+    OrderListResponse:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 1
+        limit:
+          type: integer
+          example: 10
+        totalPages:
+          type: integer
+          example: 5
+        totalItems:
+          type: integer
+          example: 50
+        orders:
+          type: array
+          items:
+            $ref: "#/components/schemas/Order"
+
+    GetOrderResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        message:
+          type: string
+          example: Orders retrieved successfully
+        data:
+          type: object
+          properties:
+            id:
+              type: string
+              example: 7b5dca1a-e65c-4f7e-88c0-dcfcad23ab67
+            address:
+              type: string
+              example: 1234 Calle Falsa, San Salvador, 56789
+            nearby_landmark:
+              type: string
+              example: Cerca de la Plaza ABC
+            products:
+              type: array
+              items:
+                $ref: "#/components/schemas/OrderProduct"
+            total_amount:
+              type: decimal
+              example: 1005.45
+            payment_status:
+              type: string
+              enum:
+                - pending
+                - paid
+                - failed
+              example: paid
+            created_at:
+              type: string
+              example: 2024-10-05T15:30:00Z
+
+
+    UserOrderListResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        message:
+          type: string
+          example: Orders retrieved successfully
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+                example: 97c978f0-3975-41a7-b9af-7fa0abfc5081
+              created_at:
+                type: string
+                example: 2024-12-05T14:00:00Z
+              status_payment:
+                type: string
+                example: pending
+              total_amount:
+                type: decimal
+                example: 200.21
+              currency:
+                type: string
+                example: USD
+              uri:
+                type: string
+                format: uri
+                example: /orders/97c978f0-3975-41a7-b9af-7fa0abfc5081
+
+
+    Order:
+      type: object
+      properties:
+        order_id:
+          type: string
+          format: uuid
+          example: 7b5dca1a-e65c-4f7e-88c0-dcfcad23ab67
+        customer:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+              example: 4a4bcf6e-6c85-4535-a605-66fc5ccecc8a
+            name:
+              type: string
+              example: Juan Pérez
+            email:
+              type: string
+              example: juan.perez@example.com
+        address:
+          type: string
+          example: 1234 Calle Falsa, San Salvador, 56789
+        nearby_landmark:
+          type: string
+          example: Cerca de la Plaza ABC
+        products:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderProduct"
+        total_amount:
+          type: decimal
+          example: 1005.45
+        payment_status:
+          type: string
+          enum:
+            - pending
+            - paid
+            - failed
+          example: paid
+        created_at:
+          type: string
+          example: 2024-10-05T15:30:00Z
+
+    OrderProduct:
+      type: object
+      properties:
+        product_id:
+          type: string
+          format: uuid
+          example: 2a43754a-8f7e-49d2-a748-f93e3edc24b9
+        name:
+          type: string
+          example: Laptop HP
+        quantity:
+          type: integer
+          example: 2
+        unit_price:
+          type: decimal
+          example: 480.99
+        total_price:
+          type: decimal
+          example: 961.98
+        uri:
+          type: string
+          example: /products/2a43754a-8f7e-49d2-a748-f93e3edc24b9
+
+    GetOneOrderBadRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          example: failure
+        message:
+          type: string
+          example: Invalid request
+        data:
+          type: object
+          properties:
+            order_id:
+              type: string
+              example: This field is required
+
+    GetOrderBadRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          example: failure
+        message:
+          type: string
+          example: Invalid request
+        data:
+          type: object
+          properties:
+            page:
+              type: string
+              example: This field must be positive integer
+
+    OrderBadRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          example: failure
+        message:
+          type: string
+          example: Invalid request
+        data:
+          type: object
+          properties:
+            quantity:
+              type: string
+              example: This field must be positive integer
+
     ProductImagesUpdateRequest:
       type: array
       items:
