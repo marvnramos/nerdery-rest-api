@@ -935,12 +935,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                payment_method:
-                  type: string
-                  description: Payment method ID associated with the PaymentIntent.
-                  example: "pm_1F7A2z2eZvKYlo2C9ijgX5qF"
+               $ref: "#/components/schemas/UpdatePaymentRequest"
       responses:
         204:
           description: PaymentIntent successfully updated.
@@ -971,16 +966,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                payment_intent_id:
-                  type: string
-                  description: The ID of the PaymentIntent that was created earlier.
-                  example: "pi_1F7A2z2eZvKYlo2CxVryFjXY"
-                amount:
-                  type: integer
-                  description: The amount to be charged, should match the initial amount.
-                  example: 5000
+              $ref: "#/components/schemas/IntentRequest"
       responses:
         204:
           description: The payment has been successfully processed.
@@ -1050,6 +1036,31 @@ components:
       scheme: bearer
       bearerFormat: JWT
   schemas:
+    IntentRequest:
+      type: object
+      properties:
+        payment_intent_id:
+          type: string
+          description: The ID of the PaymentIntent that was created earlier.
+          example: "pi_1F7A2z2eZvKYlo2CxVryFjXY"
+        amount:
+          type: integer
+          description: The amount to be charged, should match the initial amount.
+          example: 5000
+      required:
+        - payment_intent_id
+        - amount
+
+    UpdatePaymentRequest:
+      type: object
+      properties:
+        payment_method:
+          type: string
+          description: Payment method ID associated with the PaymentIntent.
+          example: pm_1F7A2z2eZvKYlo2C9ijgX5qF
+      required:
+        - payment_method
+
     PaymentRequest:
       type: object
       properties:
@@ -1157,10 +1168,13 @@ components:
                     order_id:
                       type: string
                       example: 5ca2db61-8ba8-4a4c-bac3-daa957020a02
-          required:
-            - status
-            - amount_received
-            - metadata
+                  required:
+                    - order_id
+      required:
+        - status
+        - amount_received
+        - metadata
+
     WebhookResponse:
       type: object
       properties:
