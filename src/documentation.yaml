@@ -389,7 +389,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/ServerErrorResponse"
 
-
   /products:
     post:
       summary: Add a new product record
@@ -406,6 +405,17 @@ paths:
               $ref: "#/components/schemas/ProductRequest"
       responses:
         201:
+          description: Product created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductResponse"
+        400:
+          description: Invalid ID or bad request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductBadRequest"
         401:
           description: Unauthorized access
           content:
@@ -424,32 +434,38 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ServerErrorResponse"
+
     get:
       summary: Show all products by pagination
       tags:
         - products
-      description: Allows `admin` roles to create a new product record.
-      security:
-        - bearerAuth: [ ]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/FavoritesRequest"
+      description: Retrieves a paginated list of products, accessible to both `admin` and authenticated users.
+      parameters:
+        - name: page
+          in: query
+          description: Page number for pagination
+          required: true
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          description: Number of records per page
+          required: true
+          schema:
+            type: integer
       responses:
-        401:
-          description: Unauthorized access
+        200:
+          description: Paginated list of products.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UnauthorizedResponse"
-        403:
-          description: Permission denied
+                $ref: "#/components/schemas/ProductListResponse"
+        400:
+          description: Pagination Bad Request
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PermissionResponse"
+                $ref: "#/components/schemas/PaginationProductBadRequest"
         500:
           description: Internal server error
           content:
@@ -462,28 +478,27 @@ paths:
       summary: Show product detail
       tags:
         - products
-      description: Allows `admin` roles to read a product detail.
-      security:
-        - bearerAuth: [ ]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/FavoritesRequest"
+      description: Retrieve detailed information about a specific product.
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
       responses:
-        401:
-          description: Unauthorized access
+        200:
+          description: Product details retrieved successfully.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UnauthorizedResponse"
-        403:
-          description: Permission denied
+                $ref: "#/components/schemas/GetProductResponse"
+        400:
+          description: Pagination Bad Request
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PermissionResponse"
+                $ref: "#/components/schemas/GetProductBadRequest"
         500:
           description: Internal server error
           content:
@@ -495,49 +510,30 @@ paths:
       summary: Edit a product record
       tags:
         - products
-      description: Allows `admin` roles to edit a product record.
+      description: Allows `admin` roles to update an existing product's information.
       security:
         - bearerAuth: [ ]
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          schema:
+            type: string
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/FavoritesRequest"
+              $ref: "#/components/schemas/ProductUpdateRequest"
       responses:
-        401:
-          description: Unauthorized access
+        204:
+          description: Product updated successfully.
+        400:
+          description: Bad Request
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UnauthorizedResponse"
-        403:
-          description: Permission denied
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/PermissionResponse"
-        500:
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ServerErrorResponse"
-
-    patch:
-      summary: Edit a product record field
-      tags:
-        - products
-      description: Allows `admin` roles to change product visibility and image url.
-      security:
-        - bearerAuth: [ ]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/FavoritesRequest"
-      responses:
+                $ref: "#/components/schemas/UpdateProductBadRequest"
         401:
           description: Unauthorized access
           content:
@@ -561,16 +557,24 @@ paths:
       summary: Remove a product record
       tags:
         - products
-      description: Allows `admin` roles to remove a product record.
+      description: Allows `admin` roles to delete a product record.
       security:
         - bearerAuth: [ ]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/FavoritesRequest"
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
+        204:
+          description: Product deleted successfully.
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdateProductBadRequest"
         401:
           description: Unauthorized access
           content:
@@ -590,6 +594,136 @@ paths:
               schema:
                 $ref: "#/components/schemas/ServerErrorResponse"
 
+  /products/{product_id}/categories:
+    patch:
+      summary: Edit categories product
+      tags:
+        - products
+      description: Allows `admin` roles to update specific fields like visibility or image URL.
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductPartialUpdateRequest"
+            examples:
+              addCategory:
+                summary: Add a category to a product
+                description: Example for adding one or more categories to a product.
+                value:
+                  - op: "add"
+                    path: "/categories"
+                    value: [ 7, 8 ]
+              removeCategory:
+                summary: Remove a category from a product
+                description: Example for removing one or more categories by their IDs.
+                value:
+                  - op: "remove"
+                    path: "/categories"
+                    value: [ 7 ]
+      responses:
+        204:
+          description: Categories updated successfully.
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdateProductBadRequest"
+        401:
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        403:
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PermissionResponse"
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServerErrorResponse"
+
+  /products/{product_id}/images:
+    patch:
+      summary: Modify product images
+      tags:
+        - products
+      description: Allows `admin` roles to add or remove images for a product using JSON Patch.
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductImagesUpdateRequest"
+            examples:
+              addImages:
+                summary: Add new images
+                description: Example for adding multiple images to a product.
+                value:
+                  - op: "add"
+                    path: "/images"
+                    value:
+                      - "https://example.com/image1.jpg"
+                      - "https://example.com/image2.jpg"
+              removeImages:
+                summary: Remove images
+                description: Example for removing specific images by ID.
+                value:
+                  - op: "remove"
+                    path: "/images"
+                    value:
+                      - "f9b34e77-e89b-12d3-a456-426614174001"
+                      - "f9b34e77-e89b-12d3-a456-426614174002"
+      responses:
+        204:
+          description: Product images updated successfully.
+        400:
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdateProductBadRequest"
+        401:
+          description: Unauthorized access.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        403:
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PermissionResponse"
+        500:
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServerErrorResponse"
+
 
 
 
@@ -600,6 +734,103 @@ components:
       scheme: bearer
       bearerFormat: JWT
   schemas:
+    ProductImagesUpdateRequest:
+      type: array
+      items:
+        type: object
+        required:
+          - op
+          - path
+        properties:
+          op:
+            type: string
+            enum:
+              - add
+              - remove
+            description: Operation to perform (add or remove).
+          path:
+            type: string
+            enum:
+              - "/images"
+            description: Path to the images property.
+          value:
+            type: array
+            description: Data to be added or removed.
+            items:
+              oneOf:
+                - type: string
+                  format: uri
+                  description: Image URL (for `add`).
+                - type: string
+                  format: uuid
+                  description: Image ID (for `remove`).
+    ProductUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the product.
+          example: "Wireless Mouse"
+        price:
+          type: number
+          format: float
+          description: Price of the product.
+          example: 29.99
+        description:
+          type: string
+          description: Detailed description of the product.
+          example: "A high-precision wireless mouse with ergonomic design."
+        stock:
+          type: integer
+          description: Quantity of the product in stock.
+          example: 150
+        isAvailable:
+          type: boolean
+          description: Indicates if the product is available for purchase.
+          example: true
+
+    ProductPartialUpdateRequest:
+      type: array
+      items:
+        type: object
+        required:
+          - op
+          - path
+        properties:
+          op:
+            type: string
+            enum:
+              - add
+              - remove
+            description: Operation to perform (add, replace, or remove).
+          path:
+            type: string
+            description: JSON Pointer path of the property to modify.
+            example: "/categories"
+          value:
+            description: The value to add or replace at the specified path (not required for `remove`).
+            nullable: true
+        additionalProperties: false
+      example:
+        - op: "add"
+          path: "/categories"
+          value: [ 7 ]
+
+    UpdateProductBadRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          example: failure
+        message:
+          type: string
+          example: Invalid request
+        data:
+          type: object
+          properties:
+            product_id:
+              type: string
+              example: This field is required!
     SignInRequest:
       type: object
       properties:
@@ -929,22 +1160,21 @@ components:
 
     GetAllCartResponse:
       type: object
-      description: Response returned when the user is unauthorized to access the requested resource.
+      description: Response returned when all carts belonging to the user are retrieved successfully.
       properties:
         status:
           type: string
-          description: Indicates the status of the response.
+          description: Indicates the status of the response, e.g., success or failure.
           example: success
         message:
           type: string
-          description: A message providing more details about the unauthorized access.
-          example: Cart added successfully.
+          description: A message providing additional context about the response.
+          example: Carts retrieved successfully.
         data:
           type: array
-          description: Response show all the user's carts
+          description: A list containing all the user's cart items.
           items:
             $ref: "#/components/schemas/AllCartItem"
-
 
     GetCartResponse:
       type: object
@@ -995,6 +1225,9 @@ components:
         currency:
           type: string
           example: USD
+        image_url:
+          type: string
+          example: http://storage-domain.com/bb790a0e-a8d1-4c6e-8301-c2bbc8168431.png
         uri:
           type: string
           format: uri
@@ -1015,6 +1248,12 @@ components:
           type: integer
           example: 39
           description: This field represents the existence of the product in the inventory.
+        categories:
+          type: array
+          description: This array contains a list of categories ids
+          items:
+            type: integer
+            example: 2
         is_available:
           type: boolean
           example: true
@@ -1032,6 +1271,166 @@ components:
         - stock
         - image_url
         - unit_price
+    ProductBadRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          example: failure
+        message:
+          type: string
+          example: Invalid payload
+        data:
+          type: object
+          properties:
+            stock:
+              type: string
+              example: This field is required!
+
+    ProductResponse:
+      type: object
+      description: Response returned when product record was added successfully.
+      properties:
+        status:
+          type: string
+          description: Indicates the status of the response.
+          example: success
+        message:
+          type: string
+          description: A message providing more details about the action.
+          example: Product added successfully.
+        data:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+              example: 671f720b-0186-4e65-b802-b4c6c6e1a41b
+            created_at:
+              type: string
+              example: 024-12-05T14:10:00Z
+    PaginationProductBadRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          example: failure
+        message:
+          type: string
+          example: Invalid payload
+        data:
+          type: object
+          properties:
+            limit:
+              type: string
+              example: This field is required!
+
+    GetProductResponse:
+      type: object
+      description: Response returned when a product record is retrieved successfully.
+      properties:
+        status:
+          type: string
+          description: Indicates the status of the response.
+          example: success
+        message:
+          type: string
+          description: A message providing more details about the action.
+          example: Product retrieved successfully.
+        data:
+          type: object
+          description: Contains the details of the retrieved product.
+          properties:
+            id:
+              type: string
+              format: uuid
+              example: 2a43754a-8f7e-49d2-a748-f93e3edc24b9
+            name:
+              type: string
+              example: Laptop HP
+            description:
+              type: string
+              example: Supera los obstáculos del trabajo híbrido con el HP EliteBook 845. El último procesador AMD, hasta 64 GB de memoria DDR5 y funciones que mejoran las reuniones en línea le permiten escuchar, ser escuchado y dar lo mejor de sí mismo.
+            stock:
+              type: integer
+              example: 23
+            is_available:
+              type: boolean
+              example: true
+            unit_price:
+              type: decimal
+              example: 480.99
+            currency:
+              type: string
+              example: USD
+            image_url:
+              type: string
+              example: http://storage-domain.com/2a43754a-8f7e-49d2-a748-f93e3edc24b9.png
+
+    GetProductBadRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          example: failure
+        message:
+          type: string
+          example: Invalid payload
+        data:
+          type: object
+          properties:
+            product_id:
+              type: string
+              example: This field is required!
+
+    ProductListResponse:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 1
+        limit:
+          type: integer
+          example: 10
+        totalPages:
+          type: integer
+          example: 5
+        totalItems:
+          type: integer
+          example: 50
+        products:
+          type: array
+          items:
+            $ref: "#/components/schemas/Products"
+
+    Products:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 2a43754a-8f7e-49d2-a748-f93e3edc24b9
+        name:
+          type: string
+          example: Laptop HP
+        categories:
+          type: array
+          items:
+            type: integer
+            example: 3
+        unit_price:
+          type: decimal
+          example: 480.99
+        currency:
+          type: string
+          example: USD
+        image_url:
+          type: string
+          example: http://storage-domain.com/2a43754a-8f7e-49d2-a748-f93e3edc24b9.png
+        uri:
+          type: string
+          example: /products/2a43754a-8f7e-49d2-a748-f93e3edc24b9
+
 
     UnauthorizedResponse:
       type: object
