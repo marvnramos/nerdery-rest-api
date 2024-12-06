@@ -885,6 +885,162 @@ paths:
               schema:
                 $ref: "#/components/schemas/ServerErrorResponse"
 
+  /payments:
+    post:
+      summary: Creates a PaymentIntent for a new payment
+      tags:
+        - payments
+      description: This endpoint creates a PaymentIntent in Stripe to initiate a payment process.
+      operationId: createPaymentIntent
+      requestBody:
+        description: Information needed to create a PaymentIntent.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaymentRequest"
+      responses:
+        201:
+          description: PaymentIntent successfully created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentResponse"
+        400:
+          description: Bad request, missing or invalid parameters.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentBadRequest"
+        401:
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServerErrorResponse"
+
+    put:
+      summary: Updates the PaymentIntent with card details
+      tags:
+        - payments
+      description: This endpoint updates an existing PaymentIntent with the card details provided by the user.
+      operationId: updatePaymentIntent
+      requestBody:
+        description: Information needed to update the PaymentIntent.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                payment_method:
+                  type: string
+                  description: Payment method ID associated with the PaymentIntent.
+                  example: "pm_1F7A2z2eZvKYlo2C9ijgX5qF"
+      responses:
+        204:
+          description: PaymentIntent successfully updated.
+        400:
+          description: Bad request, missing or invalid parameters.
+        401:
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServerErrorResponse"
+
+  /payments/intent-confirmation:
+    post:
+      summary: Confirms the PaymentIntent to process the payment
+      tags:
+        - payments
+      description: This endpoint confirms the PaymentIntent to proceed with the charge in Stripe.
+      operationId: confirmPaymentIntent
+      requestBody:
+        description: Additional information to confirm the payment.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                payment_intent_id:
+                  type: string
+                  description: The ID of the PaymentIntent that was created earlier.
+                  example: "pi_1F7A2z2eZvKYlo2CxVryFjXY"
+                amount:
+                  type: integer
+                  description: The amount to be charged, should match the initial amount.
+                  example: 5000
+      responses:
+        204:
+          description: The payment has been successfully processed.
+        400:
+          description: Bad request, missing or invalid parameters.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentBadRequest"
+        401:
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServerErrorResponse"
+
+  /payments/webhook:
+    post:
+      summary: Endpoint to receive Webhook Stripe events
+      tags:
+        - payments
+      description: This endpoint receives notifications from Stripe about the payment status.
+      operationId: handleStripeWebhook
+      requestBody:
+        description: Events sent by Stripe regarding the payment status.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WebhookRequest"
+      responses:
+        200:
+          description: Webhook received and processed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebhookResponse"
+        400:
+          description: Bad request, missing or invalid parameters.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebhookBadRequest"
+        401:
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServerErrorResponse"
 
 
 components:
@@ -894,6 +1050,148 @@ components:
       scheme: bearer
       bearerFormat: JWT
   schemas:
+    PaymentRequest:
+      type: object
+      properties:
+        amount:
+          type: integer
+          description: Payment amount in the smallest unit of the currency (cents for USD).
+          example: 5000
+        currency:
+          type: string
+          description: Currency of the payment (usd).
+          example: usd
+        metadata:
+          type: object
+          description: Additional data that can be stored with the PaymentIntent.
+          properties:
+            order_id:
+              type: string
+              description: Unique identifier for the order.
+              example: "5ca2db61-8ba8-4a4c-bac3-daa957020a02"
+          required:
+            - order_id
+      required:
+        - amount
+        - currency
+        - metadata
+
+    PaymentResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          description: Status of the request.
+          example: success
+        message:
+          type: string
+          description: A message providing more details about the action.
+          example: PaymentIntent created successfully.
+        data:
+          type: object
+          properties:
+            client_secret:
+              type: string
+              description: Used to complete the payment on the frontend.
+              example: "pi_1F7A2z2eZvKYlo2CxVryFjXY_secret_pkljA3jvnL03n6vb10vhAakdE"
+
+    UpdatePaymentBadRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          example: failure
+        message:
+          type: string
+          example: Invalid request
+        data:
+          type: object
+          properties:
+            payment_method:
+              type: string
+              example: This field is required
+
+    WebhookBadRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          example: failure
+        message:
+          type: string
+          example: Invalid request
+        data:
+          type: object
+          properties:
+            id:
+              type: string
+              example: This field is required
+    WebhookRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The event ID sent by Stripe.
+          example: "evt_1F7A2z2eZvKYlo2Cj2X3rTnq"
+        type:
+          type: string
+          description: The event type
+          example: payment_intent.succeeded
+        data:
+          type: object
+          description: Additional information about the payment.
+          properties:
+            object:
+              type: object
+              description: Details of the PaymentIntent.
+              properties:
+                status:
+                  type: string
+                  example: "succeeded"
+                amount_received:
+                  type: integer
+                  example: 5000
+                metadata:
+                  type: object
+                  properties:
+                    order_id:
+                      type: string
+                      example: 5ca2db61-8ba8-4a4c-bac3-daa957020a02
+          required:
+            - status
+            - amount_received
+            - metadata
+    WebhookResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          description: Status of the webhook processing.
+          example: success
+        message:
+          type: string
+          description: A message providing more details about the webhook status.
+          example: Webhook received and processed successfully.
+        data:
+          type: object
+          properties:
+            event_id:
+              type: string
+              description: The event ID sent by Stripe.
+              example: evt_1F7A2z2eZvKYlo2Cj2X3rTnq
+            event_type:
+              type: string
+              description: The event type (e.g., 'payment_intent.succeeded').
+              example: payment_intent.succeeded
+            payment_status:
+              type: string
+              description: The current payment status.
+              example: succeeded
+            order_id:
+              type: string
+              format: uuid
+              description: The order ID associated with the payment.
+              example: 5ca2db61-8ba8-4a4c-bac3-daa957020a02
     OrderRequest:
       type: object
       properties:
@@ -1096,6 +1394,22 @@ components:
         uri:
           type: string
           example: /products/2a43754a-8f7e-49d2-a748-f93e3edc24b9
+
+    PaymentBadRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          example: failure
+        message:
+          type: string
+          example: Invalid request
+        data:
+          type: object
+          properties:
+            amount:
+              type: string
+              example: This field is required
 
     GetOneOrderBadRequest:
       type: object
