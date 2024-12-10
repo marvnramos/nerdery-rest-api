@@ -1,0 +1,231 @@
+scalar Timestamp
+
+interface StandardResponse {
+    status: String!
+    message: String!
+}
+
+type SignInSuccessRes implements StandardResponse {
+    status: String!
+    message: String!
+    data: AuthToken
+}
+
+type SignUpSuccessRes implements StandardResponse {
+    status: String!
+    message: String!
+    data: SignUpData!
+}
+
+type InternalServerErrorRes implements StandardResponse {
+    status: String!
+    message: String!
+    data: DataError!
+}
+
+type SignUpBadRequestRes implements StandardResponse {
+    status: String!
+    message: String!
+    data: SignUpBadRequestData!
+}
+
+type UnauthorizedRes implements StandardResponse {
+    status: String!
+    message: String!
+    data: DataError!
+}
+
+type SignOutSuccessRes implements StandardResponse {
+    status: String!
+    message: String!
+    data: SignOutData!
+}
+
+type ForgotPasswordSuccessRes implements StandardResponse {
+    status: String!
+    message: String!
+    data: ForgotPasswordData
+}
+
+type ResetPasswordSuccessRes implements StandardResponse {
+    status: String!
+    message: String!
+    data: ResetPasswordData!
+}
+
+type ResetPasswordBadRequestRes implements StandardResponse {
+    status: String!
+    message: String!
+    data: ResetPasswordBadRequestData!
+}
+
+type ForgotPasswordBadRequestRes implements StandardResponse {
+    status: String!
+    message: String!
+    data: ForgotPasswordData
+}
+
+type AddFavoriteSuccessRes implements StandardResponse {
+    status: String!
+    message: String!
+    data: AddFvoriteData!
+}
+
+type AddFavoriteBadRequestRes implements StandardResponse {
+    status: String!
+    message: String!
+    data: AddFavoriteBadRequest!
+}
+
+type AddFavoriteBadRequest {
+    product_id: ID!
+}
+
+type AddFvoriteData {
+    id: ID!
+    created_at: Timestamp!
+}
+
+type ResetPasswordBadRequestData {
+    new_password: String!
+}
+
+type ResetPasswordData {
+    id: ID
+}
+
+type SignUpBadRequestData {
+    first_name: String!
+}
+
+type ForgotPasswordData {
+    id: ID!
+}
+
+type DataError {
+    error: String!
+}
+
+type SignOutData {
+    id: ID!
+}
+
+
+type SignUpData {
+    id: ID!
+}
+
+
+union SignOutRes = SignOutSuccessRes | InternalServerErrorRes | UnauthorizedRes
+
+union SignInRes = SignInSuccessRes | InternalServerErrorRes
+
+union SignUpRes = SignUpSuccessRes | InternalServerErrorRes | SignUpBadRequestRes
+
+union ForgotPasswordRes = ForgotPasswordSuccessRes | InternalServerErrorRes
+
+union ResetPasswordRes = ResetPasswordSuccessRes | InternalServerErrorRes | ResetPasswordBadRequestRes
+
+union AddFavoriteRes = AddFavoriteSuccessRes | AddFavoriteBadRequestRes | InternalServerErrorRes
+
+type AuthToken {
+    bearer_token: String!
+}
+
+input SignInReq {
+    email: String!
+    password: String!
+}
+
+input SingUpReq {
+    first_name: String!
+    last_name: String!
+    email: String!
+    address: String!
+    password: String!
+}
+
+input ForgotPasswordReq {
+    email: String!
+}
+
+input ResetPasswordReq {
+    token: String!
+    new_password: String!
+}
+
+input AddFavoriteReq {
+    product_id: ID
+}
+
+type User {
+    id: ID!
+    first_name: String!
+    last_name: String!
+    email: String!
+    is_email_verified: Boolean!
+    role_id: Int!
+    address: String
+    password: String!
+    created_at: String
+    updated_at: String
+}
+
+type Product {
+    id: ID!
+    product_name: String!
+    description: String
+    stock: Int!
+    is_available: Boolean!
+    unit_price: Float!
+    created_at: String
+    updated_at: String
+}
+
+type Order {
+    id: ID!
+    user_id: ID!
+    address: String!
+    nearby_landmark: String
+    created_at: String
+    updated_at: String
+}
+
+type OrderDetail {
+    id: ID!
+    order_id: ID!
+    product_id: ID!
+    quantity: Int!
+    unit_price: Float!
+    total_price: Float!
+    created_at: String
+    updated_at: String
+}
+
+type PaymentDetail {
+    id: ID!
+    payment_intent_id: String!
+    payment_method_id: String!
+    order_id: ID!
+    amount: Float!
+    currency: String!
+    status_id: Int!
+    payment_date: String
+    created_at: String
+    updated_at: String
+}
+
+type Mutation {
+    # auth
+    signIn(req: SignInReq!): SignInRes!
+    signOut : SignOutRes!
+
+    # user
+    signUp(req: SingUpReq): SignUpRes
+    forgotPassword(req: ForgotPasswordReq): ForgotPasswordRes
+    resetPassword(req: ResetPasswordReq): ResetPasswordRes
+
+    # favorites
+    addFavorite(req: AddFavoriteReq): AddFavoriteRes
+}
+
