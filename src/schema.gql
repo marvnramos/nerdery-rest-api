@@ -215,6 +215,13 @@ type PaymentDetail {
     updated_at: String
 }
 
+type Favorites {
+    id: ID!
+    product_id: ID!
+    product_name: String!
+    unit_price:
+}
+
 type Mutation {
     # auth
     signIn(req: SignInReq!): SignInRes!
@@ -227,5 +234,9 @@ type Mutation {
 
     # favorites
     addFavorite(req: AddFavoriteReq): AddFavoriteRes
+
 }
 
+type Query {
+    getAllUserFavorites: Favo
+}
