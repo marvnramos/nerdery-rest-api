@@ -343,6 +343,12 @@ paths:
       responses:
         204:
           description: Cart item updated successfully
+        400:
+          description: Invalid ID or bad request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatchBadRequestResponse"
         401:
           description: Unauthorized access
           content:
@@ -931,7 +937,7 @@ paths:
         content:
           application/json:
             schema:
-               $ref: "#/components/schemas/UpdatePaymentRequest"
+              $ref: "#/components/schemas/UpdatePaymentRequest"
       responses:
         204:
           description: PaymentIntent successfully updated.
@@ -1890,6 +1896,22 @@ components:
           type: object
           properties:
             product_id:
+              type: string
+              example: This field is required!
+
+    PatchBadRequestResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: failure
+        message:
+          type: string
+          example: Invalid payload
+        data:
+          type: object
+          properties:
+            value:
               type: string
               example: This field is required!
 
