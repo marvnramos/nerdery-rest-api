@@ -5,6 +5,10 @@ interface StandardResponse {
     message: String!
 }
 
+type AuthToken {
+    bearer_token: String!
+}
+
 type SignInSuccessRes implements StandardResponse {
     status: String!
     message: String!
@@ -15,24 +19,6 @@ type SignUpSuccessRes implements StandardResponse {
     status: String!
     message: String!
     data: SignUpData!
-}
-
-type InternalServerErrorRes implements StandardResponse {
-    status: String!
-    message: String!
-    data: DataError!
-}
-
-type SignUpBadRequestRes implements StandardResponse {
-    status: String!
-    message: String!
-    data: SignUpBadRequestData!
-}
-
-type UnauthorizedRes implements StandardResponse {
-    status: String!
-    message: String!
-    data: DataError!
 }
 
 type SignOutSuccessRes implements StandardResponse {
@@ -53,28 +39,10 @@ type ResetPasswordSuccessRes implements StandardResponse {
     data: ResetPasswordData!
 }
 
-type ResetPasswordBadRequestRes implements StandardResponse {
-    status: String!
-    message: String!
-    data: ResetPasswordBadRequestData!
-}
-
-type ForgotPasswordBadRequestRes implements StandardResponse {
-    status: String!
-    message: String!
-    data: ForgotPasswordData
-}
-
 type AddFavoriteSuccessRes implements StandardResponse {
     status: String!
     message: String!
-    data: CreateOrUpdateData!
-}
-
-type AddFavoriteBadRequestRes implements StandardResponse {
-    status: String!
-    message: String!
-    data: AddFavoriteBadRequest!
+    data: CreateData!
 }
 
 type GetAllUserFavoritesSuccessRes implements StandardResponse {
@@ -83,32 +51,19 @@ type GetAllUserFavoritesSuccessRes implements StandardResponse {
     data: [GetUserFavoritesData!]!
 }
 
-
 type DeleteFavoriteSuccessRes implements StandardResponse {
     status: String!
     message: String!
     data: DeleteFavoriteData!
 }
 
-type DeleteFavoriteBadRequestRes implements StandardResponse{
+type AddCartSucceesRes implements StandardResponse {
     status: String!
     message: String!
-    data:  DeleteFavoriteBadRequestData!
+    data: CreateData!
 }
 
-type AddCartSucceesRes implements  StandardResponse {
-    status: String!
-    message: String!
-    data: CreateOrUpdateData!
-}
-
-type AddCartBadRequestRes implements  StandardResponse {
-    status: String!
-    message: String!
-    data: AddCartData!
-}
-
-type GetUserCartsSucceesRes implements StandardResponse{
+type GetUserCartsSucceesRes implements StandardResponse {
     status: String!
     message: String!
     data: [CartData!]!
@@ -117,13 +72,7 @@ type GetUserCartsSucceesRes implements StandardResponse{
 type UpdateCartSuccessRes implements StandardResponse {
     status: String!
     message: String!
-    data: CreateOrUpdateData!
-}
-
-type UpdateCartBadRequestRes implements StandardResponse {
-    status: String!
-    message: String!
-    data: UpdateCartBadRequestData!
+    data: UpdateData!
 }
 
 type RemoveCartSucceesRes implements StandardResponse {
@@ -135,13 +84,38 @@ type RemoveCartSucceesRes implements StandardResponse {
 type AddProductSucceesRes implements StandardResponse {
     status: String!
     message: String!
-    Data: CreateOrUpdateData!
+    Data: CreateData!
 }
 
-type AddProductBadRequestRes implements StandardResponse {
+type UpdateProductSucceesRes implements StandardResponse {
     status: String!
     message: String!
-    Data: AddProductBadRequestData!
+    data: UpdateData!
+}
+
+type GetProductsSucceesRes implements StandardResponse {
+    status: String!
+    message: String!
+    data: GetProductsData!
+}
+
+type GetProductSucceesRes implements StandardResponse {
+    status: String!
+    message: String!
+    data: ProductData!
+}
+
+# Error Response Types
+type InternalServerErrorRes implements StandardResponse {
+    status: String!
+    message: String!
+    data: DataError!
+}
+
+type UnauthorizedRes implements StandardResponse {
+    status: String!
+    message: String!
+    data: DataError!
 }
 
 type PermissionDeniedRes implements StandardResponse {
@@ -150,31 +124,145 @@ type PermissionDeniedRes implements StandardResponse {
     Data: DataError!
 }
 
-type UpdateProductSucceesRes implements StandardResponse {
+type SignUpBadRequestRes implements StandardResponse {
     status: String!
     message: String!
-    data: CreateOrUpdateData!
+    data: StandardBadRequestData!
+}
+
+type ResetPasswordBadRequestRes implements StandardResponse {
+    status: String!
+    message: String!
+    data: StandardBadRequestData!
+}
+
+type ForgotPasswordBadRequestRes implements StandardResponse {
+    status: String!
+    message: String!
+    data: StandardBadRequestData
+}
+
+type AddFavoriteBadRequestRes implements StandardResponse {
+    status: String!
+    message: String!
+    data: StandardBadRequestData!
+}
+
+type DeleteFavoriteBadRequestRes implements StandardResponse {
+    status: String!
+    message: String!
+    data: StandardBadRequestData!
+}
+
+type AddCartBadRequestRes implements StandardResponse {
+    status: String!
+    message: String!
+    data: StandardBadRequestData!
+}
+
+type UpdateCartBadRequestRes implements StandardResponse {
+    status: String!
+    message: String!
+    data: StandardBadRequestData!
+}
+
+type AddProductBadRequestRes implements StandardResponse {
+    status: String!
+    message: String!
+    Data: StandardBadRequestData!
 }
 
 type UpdateProductBadRequestRes implements StandardResponse {
     status: String!
     message: String!
-    data: DataError!
+    data: StandardBadRequestData!
 }
 
-type AddProductBadRequestData {
-    stock: String!
+type RemoveProductSucceesRes implements StandardResponse {
+    status: String!
+    message: String!
+    data: RemoveData!
+}
+
+type RemoveProductBadRequestRes implements StandardResponse {
+    status: String!
+    message: String!
+    data: StandardBadRequestData!
+}
+
+type GetProductBadRequestRes implements StandardResponse {
+    status: String!
+    message: String!
+    data: StandardBadRequestData!
+}
+
+type GetProductsData {
+    page: Int!
+    limit: Int!
+    total_pages: Int!
+    total_items: Int!
+    products: [Product!]!
+}
+
+type ProductData {
+    id: ID!
+    name: String!
+    description: String!
+    stock: Int!
+    is_available: Int!
+    unit_price: Float!
+    currency: String!
+    image_url: String!
+}
+
+type Product {
+    id: ID!
+    name: String!
+    categories: [ID!]!
+    unit_price: Float!
+    currency: String!
+    image_url: String!
+    uri: String!
+}
+
+type StandardBadRequestData {
+    field: String!
+}
+
+type RemoveData {
+    id: ID!
+}
+
+type SignUpData {
+    id: ID!
+}
+
+type SignOutData {
+    id: ID!
+}
+
+type ForgotPasswordData {
+    id: ID!
+}
+
+type ResetPasswordData {
+    id: ID
+}
+
+type CreateData {
+    id: ID!
+    created_at: Timestamp!
+}
+
+type DeleteFavoriteData {
+    id: ID!
 }
 
 type RemoveCartData {
     id: ID
 }
 
-type UpdateCartBadRequestData {
-    value: String!
-}
-
-type CartData{
+type CartData {
     id: ID
     product_id: ID
     product_name: String!
@@ -184,18 +272,10 @@ type CartData{
     uri: String!
 }
 
-type AddCartData {
-    product_id: String!
-}
-
-type DeleteFavoriteBadRequestData {
-    favorite_id: String!
-}
-
-type DeleteFavoriteData {
+type UpdateData {
     id: ID!
+    updated_at: Timestamp!
 }
-
 
 type GetUserFavoritesData {
     id: ID!
@@ -205,77 +285,71 @@ type GetUserFavoritesData {
     currency: String!
     image_url: String!
     uri: String!
-
-}
-
-type AddFavoriteBadRequest {
-    product_id: String!
-}
-
-type CreateOrUpdateData {
-    id: ID!
-    created_at: Timestamp!
-}
-
-type ResetPasswordBadRequestData {
-    new_password: String!
-}
-
-type ResetPasswordData {
-    id: ID
-}
-
-type SignUpBadRequestData {
-    first_name: String!
-}
-
-type ForgotPasswordData {
-    id: ID!
 }
 
 type DataError {
     error: String!
 }
 
-type SignOutData {
-    id: ID!
-}
-
-type SignUpData {
-    id: ID!
-}
-
-union SignOutRes = SignOutSuccessRes | InternalServerErrorRes | UnauthorizedRes
-
-union SignInRes = SignInSuccessRes | InternalServerErrorRes
-
-union SignUpRes = SignUpSuccessRes | InternalServerErrorRes | SignUpBadRequestRes
-
-union ForgotPasswordRes = ForgotPasswordSuccessRes | InternalServerErrorRes
-
-union ResetPasswordRes = ResetPasswordSuccessRes | InternalServerErrorRes | ResetPasswordBadRequestRes
-
-union AddFavoriteRes = AddFavoriteSuccessRes | AddFavoriteBadRequestRes | InternalServerErrorRes | UnauthorizedRes
-
-union GetAllUserFavoritesRes = GetAllUserFavoritesSuccessRes | UnauthorizedRes | InternalServerErrorRes
-
-union DeleteFavoriteRes = DeleteFavoriteSuccessRes  | DeleteFavoriteBadRequestRes | UnauthorizedRes | InternalServerErrorRes
-
-union AddCartRes = AddCartSucceesRes | AddCartBadRequestRes | UnauthorizedRes | InternalServerErrorRes
-
-union GetUserCartsRes = GetUserCartsSucceesRes | InternalServerErrorRes | UnauthorizedRes
-
-union UpdateCartRes = UpdateCartSuccessRes | UpdateCartBadRequestRes | InternalServerErrorRes | UnauthorizedRes
-
-union RemoveCartRes = RemoveCartSucceesRes | UnauthorizedRes | InternalServerErrorRes
-
-union AddProductRes = AddProductSucceesRes | AddProductBadRequestRes | PermissionDeniedRes | UnauthorizedRes | InternalServerErrorRes
-
-union UpdateProductRes = UpdateProductSucceesRes  | UpdateProductBadRequestRes | UnauthorizedRes | PermissionDeniedRes | InternalServerErrorRes
-
-type AuthToken {
-    bearer_token: String!
-}
+union SignInRes = SignInSuccessRes
+    | InternalServerErrorRes
+union SignUpRes = SignUpSuccessRes
+    | InternalServerErrorRes
+    | SignUpBadRequestRes
+union SignOutRes = SignOutSuccessRes
+    | InternalServerErrorRes
+    | UnauthorizedRes
+union ForgotPasswordRes = ForgotPasswordSuccessRes
+    | InternalServerErrorRes
+union ResetPasswordRes = ResetPasswordSuccessRes
+    | InternalServerErrorRes
+    | ResetPasswordBadRequestRes
+union AddFavoriteRes = AddFavoriteSuccessRes
+    | AddFavoriteBadRequestRes
+    | InternalServerErrorRes
+    | UnauthorizedRes
+union GetAllUserFavoritesRes = GetAllUserFavoritesSuccessRes
+    | UnauthorizedRes
+    | InternalServerErrorRes
+union DeleteFavoriteRes = DeleteFavoriteSuccessRes
+    | DeleteFavoriteBadRequestRes
+    | UnauthorizedRes
+    | InternalServerErrorRes
+union AddCartRes = AddCartSucceesRes
+    | AddCartBadRequestRes
+    | UnauthorizedRes
+    | InternalServerErrorRes
+union GetUserCartsRes = GetUserCartsSucceesRes
+    | InternalServerErrorRes
+    | UnauthorizedRes
+union UpdateCartRes = UpdateCartSuccessRes
+    | UpdateCartBadRequestRes
+    | InternalServerErrorRes
+    | UnauthorizedRes
+union RemoveCartRes = RemoveCartSucceesRes
+    | UnauthorizedRes
+    | InternalServerErrorRes
+union AddProductRes = AddProductSucceesRes
+    | AddProductBadRequestRes
+    | PermissionDeniedRes
+    | UnauthorizedRes
+    | InternalServerErrorRes
+union UpdateProductRes = UpdateProductSucceesRes
+    | UpdateProductBadRequestRes
+    | UnauthorizedRes
+    | PermissionDeniedRes
+    | InternalServerErrorRes
+union RemoveProductRes = RemoveProductSucceesRes
+    | RemoveProductBadRequestRes
+    | UnauthorizedRes
+    | PermissionDeniedRes
+    | InternalServerErrorRes
+union GetProductsRes = GetProductsSucceesRes
+    | GetProductBadRequestRes
+    | InternalServerErrorRes
+union GetProductRes = GetProductSucceesRes
+    | GetProductBadRequestRes
+    | InternalServerErrorRes
 
 input SignInReq {
     email: String!
@@ -299,12 +373,12 @@ input ResetPasswordReq {
     new_password: String!
 }
 
-input DeleteFavoriteReq {
-    id: ID!
-}
-
 input AddFavoriteReq {
     product_id: ID
+}
+
+input DeleteFavoriteReq {
+    id: ID!
 }
 
 input AddCartReq {
@@ -334,104 +408,43 @@ input UpdateProductReq {
     description: String!
     stock: Int!
     is_available: Boolean!
-
 }
 
-type User {
-    id: ID!
-    first_name: String!
-    last_name: String!
-    email: String!
-    is_email_verified: Boolean!
-    role_id: Int!
-    address: String
-    password: String!
-    created_at: String
-    updated_at: String
-}
-
-type Product {
-    id: ID!
-    product_name: String!
-    description: String
-    stock: Int!
-    is_available: Boolean!
-    unit_price: Float!
-    created_at: String
-    updated_at: String
-}
-
-type Order {
-    id: ID!
-    user_id: ID!
-    address: String!
-    nearby_landmark: String
-    created_at: String
-    updated_at: String
-}
-
-type OrderDetail {
-    id: ID!
-    order_id: ID!
-    product_id: ID!
-    quantity: Int!
-    unit_price: Float!
-    total_price: Float!
-    created_at: String
-    updated_at: String
-}
-
-type PaymentDetail {
-    id: ID!
-    payment_intent_id: String!
-    payment_method_id: String!
-    order_id: ID!
-    amount: Float!
-    currency: String!
-    status_id: Int!
-    payment_date: String
-    created_at: String
-    updated_at: String
-}
-
-type Favorites {
-    id: ID!
-    product_id: ID!
-    product_name: String!
-    unit_price: Float!
-}
-
-type Mutation {
-    # auth
-    signIn(req: SignInReq!): SignInRes!
-    signOut: SignOutRes!
-
-    # user
-    signUp(req: SignUpReq): SignUpRes!
-    forgotPassword(req: ForgotPasswordReq): ForgotPasswordRes!
-    resetPassword(req: ResetPasswordReq): ResetPasswordRes!
-
-    # favorites
-    addFavorite(req: AddFavoriteReq): AddFavoriteRes!
-    removeFavorite(req: DeleteFavoriteReq): DeleteFavoriteRes!
-
-    # carts
-    addCart(req:  AddCartReq!): AddCartRes!
-    updateCart(cartId: ID!, req: UpdateCartReq!): UpdateCartRes!
-    removeCart(cartID: ID!): RemoveCartRes!
-
-    # products
-    addProduct(req: AddProductReq!): AddProductRes! # agregar schema request y response
-    updateProduct(product_id: ID!, req: UpdateProductReq): UpdateProductRes!
-    # removeProduct(id: ID!): RemoveProductRes!
-    # updateProductCategories(product_id: ID!, req: UpdateProductCategoriesReq!): UpdateProductCategoriesRes!
-    # updateProductImages(product_id: ID!, req UpdateProductImageReq!): UpdateProductImageRes!
-
+input GetProductsReq {
+    first: Int!
+    after: ID!
 }
 
 type Query {
     getAllUserFavorites: GetAllUserFavoritesRes!
     getUserCarts: GetUserCartsRes!
-    # getProducts: GetProductsRes # agregar paginacion
-    # getProduct(product_id: ID!): GetProductRes # agregar
+    getProducts(req: GetProductsReq): GetProductsRes!
+    getProduct(product_id: ID!): GetProductRes!
+
+}
+
+type Mutation {
+    # Auth
+    signIn(req: SignInReq!): SignInRes!
+    signOut: SignOutRes!
+
+    # User
+    signUp(req: SignUpReq): SignUpRes!
+    forgotPassword(req: ForgotPasswordReq): ForgotPasswordRes!
+    resetPassword(req: ResetPasswordReq): ResetPasswordRes!
+
+    # Favorites
+    addFavorite(req: AddFavoriteReq): AddFavoriteRes!
+    removeFavorite(req: DeleteFavoriteReq): DeleteFavoriteRes!
+
+    # Carts
+    addCart(req: AddCartReq!): AddCartRes!
+    updateCart(cart_Id: ID!, req: UpdateCartReq!): UpdateCartRes!
+    removeCart(cart_Id: ID!): RemoveCartRes!
+
+    # Products
+    addProduct(req: AddProductReq!): AddProductRes!
+    updateProduct(product_id: ID!, req: UpdateProductReq): UpdateProductRes!
+    removeProduct(product_id: ID!): RemoveProductRes!
+
 }
