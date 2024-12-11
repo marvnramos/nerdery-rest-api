@@ -84,7 +84,7 @@ type RemoveCartSucceesRes implements StandardResponse {
 type AddProductSucceesRes implements StandardResponse {
     status: String!
     message: String!
-    Data: CreateData!
+    data: CreateData!
 }
 
 type UpdateProductSucceesRes implements StandardResponse {
@@ -121,61 +121,73 @@ type UnauthorizedRes implements StandardResponse {
 type PermissionDeniedRes implements StandardResponse {
     status: String!
     message: String!
-    Data: DataError!
+    data: DataError!
 }
 
 type SignUpBadRequestRes implements StandardResponse {
     status: String!
     message: String!
-    data: StandardBadRequestData!
+    data: StandarBadRequestData!
 }
 
 type ResetPasswordBadRequestRes implements StandardResponse {
     status: String!
     message: String!
-    data: StandardBadRequestData!
+    data: StandarBadRequestData!
 }
 
 type ForgotPasswordBadRequestRes implements StandardResponse {
     status: String!
     message: String!
-    data: StandardBadRequestData
+    data: StandarBadRequestData
 }
 
 type AddFavoriteBadRequestRes implements StandardResponse {
     status: String!
     message: String!
-    data: StandardBadRequestData!
+    data: StandarBadRequestData!
 }
 
 type DeleteFavoriteBadRequestRes implements StandardResponse {
     status: String!
     message: String!
-    data: StandardBadRequestData!
+    data: StandarBadRequestData!
 }
 
 type AddCartBadRequestRes implements StandardResponse {
     status: String!
     message: String!
-    data: StandardBadRequestData!
+    data: StandarBadRequestData!
 }
 
 type UpdateCartBadRequestRes implements StandardResponse {
     status: String!
     message: String!
-    data: StandardBadRequestData!
+    data: StandarBadRequestData!
 }
 
 type AddProductBadRequestRes implements StandardResponse {
     status: String!
     message: String!
-    Data: StandardBadRequestData!
+    data: StandarBadRequestData!
 }
 
 type UpdateProductBadRequestRes implements StandardResponse {
     status: String!
     message: String!
-    data: StandardBadRequestData!
+    data: StandarBadRequestData!
+}
+
+type UpdateProductCategoriesBadRequestRes implements StandardResponse {
+    status: String!
+    message: String!
+    data: StandarBadRequestData!
+}
+
+type UpdateProductImagesBadRequestRes implements StandardResponse {
+    status: String!
+    message: String!
+    data: StandarBadRequestData!
 }
 
 type RemoveProductSucceesRes implements StandardResponse {
@@ -187,13 +199,25 @@ type RemoveProductSucceesRes implements StandardResponse {
 type RemoveProductBadRequestRes implements StandardResponse {
     status: String!
     message: String!
-    data: StandardBadRequestData!
+    data: StandarBadRequestData!
 }
 
 type GetProductBadRequestRes implements StandardResponse {
     status: String!
     message: String!
-    data: StandardBadRequestData!
+    data: StandarBadRequestData!
+}
+
+type UpdateProductCategoriesSucceesRes implements StandardResponse {
+    status: String!
+    message: String!
+    data: UpdateData!
+}
+
+type UpdateProductImagesSucceesRes implements StandardResponse {
+    status: String!
+    message: String!
+    data: UpdateData
 }
 
 type GetProductsData {
@@ -225,7 +249,7 @@ type Product {
     uri: String!
 }
 
-type StandardBadRequestData {
+type StandarBadRequestData {
     field: String!
 }
 
@@ -350,6 +374,17 @@ union GetProductsRes = GetProductsSucceesRes
 union GetProductRes = GetProductSucceesRes
     | GetProductBadRequestRes
     | InternalServerErrorRes
+union UpdateProductCategoriesRes = UpdateProductCategoriesSucceesRes
+    | UpdateProductCategoriesBadRequestRes
+    | UnauthorizedRes
+    | PermissionDeniedRes
+    | InternalServerErrorRes
+union UpdateProductImagesRes = UpdateProductImagesSucceesRes
+    | UpdateProductImagesBadRequestRes
+    | UnauthorizedRes
+    | PermissionDeniedRes
+    | InternalServerErrorRes
+
 
 input SignInReq {
     email: String!
@@ -415,6 +450,18 @@ input GetProductsReq {
     after: ID!
 }
 
+input UpdateProductCategoriesReq {
+    op: String!
+    path: String!
+    value: [ID!]!
+}
+
+input UpdateProductImagesReq {
+    op: String!
+    path: String!
+    value: [String!]!
+}
+
 type Query {
     getAllUserFavorites: GetAllUserFavoritesRes!
     getUserCarts: GetUserCartsRes!
@@ -444,7 +491,8 @@ type Mutation {
 
     # Products
     addProduct(req: AddProductReq!): AddProductRes!
-    updateProduct(product_id: ID!, req: UpdateProductReq): UpdateProductRes!
+    updateProduct(product_id: ID!, req: UpdateProductReq!): UpdateProductRes!
     removeProduct(product_id: ID!): RemoveProductRes!
-
+    updateProductCategories(product_id: ID!, req: UpdateProductCategoriesReq!): UpdateProductCategoriesRes!
+    updateProductImages(product_id: ID!, req: UpdateProductImagesReq!): UpdateProductImagesRes!
 }
