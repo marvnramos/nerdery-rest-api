@@ -1525,7 +1525,7 @@ components:
           type: integer
           description: Quantity of the product in stock.
           example: 150
-        isAvailable:
+        is_available:
           type: boolean
           description: Indicates if the product is available for purchase.
           example: true
