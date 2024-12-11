@@ -68,7 +68,7 @@ type ForgotPasswordBadRequestRes implements StandardResponse {
 type AddFavoriteSuccessRes implements StandardResponse {
     status: String!
     message: String!
-    data: AddFavoriteData!
+    data: CreateData!
 }
 
 type AddFavoriteBadRequestRes implements StandardResponse {
@@ -82,6 +82,60 @@ type GetAllUserFavoritesSuccessRes implements StandardResponse {
     message: String!
     data: [GetUserFavoritesData!]!
 }
+
+
+type DeleteFavoriteSuccessRes implements StandardResponse {
+    status: String!
+    message: String!
+    data: DeleteFavoriteData!
+}
+
+type DeleteFavoriteBadRequestRes implements StandardResponse{
+    status: String!
+    message: String!
+    data:  DeleteFavoriteBadRequestData!
+}
+
+type AddCartSuccessRes implements  StandardResponse {
+    status: String!
+    message: String!
+    data: CreateData!
+}
+
+type AddCartBadRequestRes implements  StandardResponse {
+    status: String!
+    message: String!
+    data: AddCartData!
+}
+
+type GetUserCartsSucceesRes implements StandardResponse{
+    status: String!
+    message: String!
+    data: [CartData!]!
+}
+
+type CartData{
+    id: ID
+    product_id: ID
+    product_name: String!
+    unit_price: Float!
+    currency: String!
+    image_url: String!
+    uri: String!
+}
+
+type AddCartData {
+    product_id: String!
+}
+
+type DeleteFavoriteBadRequestData {
+    favorite_id: String!
+}
+
+type DeleteFavoriteData {
+    id: ID!
+}
+
 
 type GetUserFavoritesData {
     id: ID!
@@ -98,7 +152,7 @@ type AddFavoriteBadRequest {
     product_id: String!
 }
 
-type AddFavoriteData {
+type CreateData {
     id: ID!
     created_at: Timestamp!
 }
@@ -145,6 +199,12 @@ union AddFavoriteRes = AddFavoriteSuccessRes | AddFavoriteBadRequestRes | Intern
 
 union GetAllUserFavoritesRes = GetAllUserFavoritesSuccessRes | UnauthorizedRes | InternalServerErrorRes
 
+union DeleteFavoriteRes = DeleteFavoriteSuccessRes  | DeleteFavoriteBadRequestRes | UnauthorizedRes | InternalServerErrorRes
+
+union AddCartRes = AddCartSuccessRes | AddCartBadRequestRes | UnauthorizedRes | InternalServerErrorRes
+
+union GetUserCartsRes = GetUserCartsSucceesRes | InternalServerErrorRes | UnauthorizedRes
+
 type AuthToken {
     bearer_token: String!
 }
@@ -171,8 +231,17 @@ input ResetPasswordReq {
     new_password: String!
 }
 
+input DeleteFavoriteReq {
+    id: ID!
+}
+
 input AddFavoriteReq {
     product_id: ID
+}
+
+input AddCartReq {
+    product_id: ID
+    quantity: Int
 }
 
 type User {
@@ -251,8 +320,13 @@ type Mutation {
 
     # favorites
     addFavorite(req: AddFavoriteReq): AddFavoriteRes
+    removeFavorite(req: DeleteFavoriteReq): DeleteFavoriteRes
+
+    # carts
+    addCart(req:  AddCartReq): AddCartRes
 }
 
 type Query {
     getAllUserFavorites: GetAllUserFavoritesRes
+    getUserCarts: GetUserCartsRes
 }
