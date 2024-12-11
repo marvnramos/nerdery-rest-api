@@ -132,6 +132,40 @@ type RemoveCartSucceesRes implements StandardResponse {
     data: RemoveCartData!
 }
 
+type AddProductSucceesRes implements StandardResponse {
+    status: String!
+    message: String!
+    Data: CreateOrUpdateData!
+}
+
+type AddProductBadRequestRes implements StandardResponse {
+    status: String!
+    message: String!
+    Data: AddProductBadRequestData!
+}
+
+type PermissionDeniedRes implements StandardResponse {
+    status: String!
+    message: String!
+    Data: DataError!
+}
+
+type UpdateProductSucceesRes implements StandardResponse {
+    status: String!
+    message: String!
+    data: CreateOrUpdateData!
+}
+
+type UpdateProductBadRequestRes implements StandardResponse {
+    status: String!
+    message: String!
+    data: DataError!
+}
+
+type AddProductBadRequestData {
+    stock: String!
+}
+
 type RemoveCartData {
     id: ID
 }
@@ -235,6 +269,10 @@ union UpdateCartRes = UpdateCartSuccessRes | UpdateCartBadRequestRes | InternalS
 
 union RemoveCartRes = RemoveCartSucceesRes | UnauthorizedRes | InternalServerErrorRes
 
+union AddProductRes = AddProductSucceesRes | AddProductBadRequestRes | PermissionDeniedRes | UnauthorizedRes | InternalServerErrorRes
+
+union UpdateProductRes = UpdateProductSucceesRes  | UpdateProductBadRequestRes | UnauthorizedRes | PermissionDeniedRes | InternalServerErrorRes
+
 type AuthToken {
     bearer_token: String!
 }
@@ -278,6 +316,25 @@ input UpdateCartReq {
     op: String!
     path: String!
     value: Int!
+}
+
+input AddProductReq {
+    product_name: String!
+    description: String!
+    stock: Int!
+    categories: [ID!]!
+    is_available: Boolean!
+    image_url: String!
+    unit_price: Float!
+}
+
+input UpdateProductReq {
+    name: String!
+    price: Float!
+    description: String!
+    stock: Int!
+    is_available: Boolean!
+
 }
 
 type User {
@@ -359,14 +416,22 @@ type Mutation {
     removeFavorite(req: DeleteFavoriteReq): DeleteFavoriteRes!
 
     # carts
-    addCart(req:  AddCartReq): AddCartRes!
-    updateCart(cartId: ID!, req: UpdateCartReq): UpdateCartRes!
-    removeCart(cartID: ID): RemoveCartRes!
+    addCart(req:  AddCartReq!): AddCartRes!
+    updateCart(cartId: ID!, req: UpdateCartReq!): UpdateCartRes!
+    removeCart(cartID: ID!): RemoveCartRes!
+
+    # products
+    addProduct(req: AddProductReq!): AddProductRes! # agregar schema request y response
+    updateProduct(product_id: ID!, req: UpdateProductReq): UpdateProductRes!
+    # removeProduct(id: ID!): RemoveProductRes!
+    # updateProductCategories(product_id: ID!, req: UpdateProductCategoriesReq!): UpdateProductCategoriesRes!
+    # updateProductImages(product_id: ID!, req UpdateProductImageReq!): UpdateProductImageRes!
 
 }
 
 type Query {
-    getAllUserFavorites: GetAllUserFavoritesRes
-    getUserCarts: GetUserCartsRes
-
+    getAllUserFavorites: GetAllUserFavoritesRes!
+    getUserCarts: GetUserCartsRes!
+    # getProducts: GetProductsRes # agregar paginacion
+    # getProduct(product_id: ID!): GetProductRes # agregar
 }
