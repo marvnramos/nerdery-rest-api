@@ -341,12 +341,8 @@ paths:
             schema:
               $ref: "#/components/schemas/PatchCartRequest"
       responses:
-        200:
+        204:
           description: Cart item updated successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CartResponse"
         401:
           description: Unauthorized access
           content:
