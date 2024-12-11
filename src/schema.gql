@@ -68,7 +68,7 @@ type ForgotPasswordBadRequestRes implements StandardResponse {
 type AddFavoriteSuccessRes implements StandardResponse {
     status: String!
     message: String!
-    data: CreateData!
+    data: CreateOrUpdateData!
 }
 
 type AddFavoriteBadRequestRes implements StandardResponse {
@@ -96,10 +96,10 @@ type DeleteFavoriteBadRequestRes implements StandardResponse{
     data:  DeleteFavoriteBadRequestData!
 }
 
-type AddCartSuccessRes implements  StandardResponse {
+type AddCartSucceesRes implements  StandardResponse {
     status: String!
     message: String!
-    data: CreateData!
+    data: CreateOrUpdateData!
 }
 
 type AddCartBadRequestRes implements  StandardResponse {
@@ -112,6 +112,32 @@ type GetUserCartsSucceesRes implements StandardResponse{
     status: String!
     message: String!
     data: [CartData!]!
+}
+
+type UpdateCartSuccessRes implements StandardResponse {
+    status: String!
+    message: String!
+    data: CreateOrUpdateData!
+}
+
+type UpdateCartBadRequestRes implements StandardResponse {
+    status: String!
+    message: String!
+    data: UpdateCartBadRequestData!
+}
+
+type RemoveCartSucceesRes implements StandardResponse {
+    status: String!
+    message: String!
+    data: RemoveCartData!
+}
+
+type RemoveCartData {
+    id: ID
+}
+
+type UpdateCartBadRequestData {
+    value: String!
 }
 
 type CartData{
@@ -152,7 +178,7 @@ type AddFavoriteBadRequest {
     product_id: String!
 }
 
-type CreateData {
+type CreateOrUpdateData {
     id: ID!
     created_at: Timestamp!
 }
@@ -201,9 +227,13 @@ union GetAllUserFavoritesRes = GetAllUserFavoritesSuccessRes | UnauthorizedRes |
 
 union DeleteFavoriteRes = DeleteFavoriteSuccessRes  | DeleteFavoriteBadRequestRes | UnauthorizedRes | InternalServerErrorRes
 
-union AddCartRes = AddCartSuccessRes | AddCartBadRequestRes | UnauthorizedRes | InternalServerErrorRes
+union AddCartRes = AddCartSucceesRes | AddCartBadRequestRes | UnauthorizedRes | InternalServerErrorRes
 
 union GetUserCartsRes = GetUserCartsSucceesRes | InternalServerErrorRes | UnauthorizedRes
+
+union UpdateCartRes = UpdateCartSuccessRes | UpdateCartBadRequestRes | InternalServerErrorRes | UnauthorizedRes
+
+union RemoveCartRes = RemoveCartSucceesRes | UnauthorizedRes | InternalServerErrorRes
 
 type AuthToken {
     bearer_token: String!
@@ -242,6 +272,12 @@ input AddFavoriteReq {
 input AddCartReq {
     product_id: ID
     quantity: Int
+}
+
+input UpdateCartReq {
+    op: String!
+    path: String!
+    value: Int!
 }
 
 type User {
@@ -314,19 +350,23 @@ type Mutation {
     signOut: SignOutRes!
 
     # user
-    signUp(req: SignUpReq): SignUpRes
-    forgotPassword(req: ForgotPasswordReq): ForgotPasswordRes
-    resetPassword(req: ResetPasswordReq): ResetPasswordRes
+    signUp(req: SignUpReq): SignUpRes!
+    forgotPassword(req: ForgotPasswordReq): ForgotPasswordRes!
+    resetPassword(req: ResetPasswordReq): ResetPasswordRes!
 
     # favorites
-    addFavorite(req: AddFavoriteReq): AddFavoriteRes
-    removeFavorite(req: DeleteFavoriteReq): DeleteFavoriteRes
+    addFavorite(req: AddFavoriteReq): AddFavoriteRes!
+    removeFavorite(req: DeleteFavoriteReq): DeleteFavoriteRes!
 
     # carts
-    addCart(req:  AddCartReq): AddCartRes
+    addCart(req:  AddCartReq): AddCartRes!
+    updateCart(cartId: ID!, req: UpdateCartReq): UpdateCartRes!
+    removeCart(cartID: ID): RemoveCartRes!
+
 }
 
 type Query {
     getAllUserFavorites: GetAllUserFavoritesRes
     getUserCarts: GetUserCartsRes
+
 }
