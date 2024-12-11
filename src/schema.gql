@@ -68,7 +68,7 @@ type ForgotPasswordBadRequestRes implements StandardResponse {
 type AddFavoriteSuccessRes implements StandardResponse {
     status: String!
     message: String!
-    data: AddFvoriteData!
+    data: AddFavoriteData!
 }
 
 type AddFavoriteBadRequestRes implements StandardResponse {
@@ -77,11 +77,28 @@ type AddFavoriteBadRequestRes implements StandardResponse {
     data: AddFavoriteBadRequest!
 }
 
-type AddFavoriteBadRequest {
-    product_id: ID!
+type GetAllUserFavoritesSuccessRes implements StandardResponse {
+    status: String!
+    message: String!
+    data: [GetUserFavoritesData!]!
 }
 
-type AddFvoriteData {
+type GetUserFavoritesData {
+    id: ID!
+    product_id: ID!
+    product_name: String!
+    unit_price: Float!
+    currency: String!
+    image_url: String!
+    uri: String!
+
+}
+
+type AddFavoriteBadRequest {
+    product_id: String!
+}
+
+type AddFavoriteData {
     id: ID!
     created_at: Timestamp!
 }
@@ -110,11 +127,9 @@ type SignOutData {
     id: ID!
 }
 
-
 type SignUpData {
     id: ID!
 }
-
 
 union SignOutRes = SignOutSuccessRes | InternalServerErrorRes | UnauthorizedRes
 
@@ -126,7 +141,9 @@ union ForgotPasswordRes = ForgotPasswordSuccessRes | InternalServerErrorRes
 
 union ResetPasswordRes = ResetPasswordSuccessRes | InternalServerErrorRes | ResetPasswordBadRequestRes
 
-union AddFavoriteRes = AddFavoriteSuccessRes | AddFavoriteBadRequestRes | InternalServerErrorRes
+union AddFavoriteRes = AddFavoriteSuccessRes | AddFavoriteBadRequestRes | InternalServerErrorRes | UnauthorizedRes
+
+union GetAllUserFavoritesRes = GetAllUserFavoritesSuccessRes | UnauthorizedRes | InternalServerErrorRes
 
 type AuthToken {
     bearer_token: String!
@@ -137,7 +154,7 @@ input SignInReq {
     password: String!
 }
 
-input SingUpReq {
+input SignUpReq {
     first_name: String!
     last_name: String!
     email: String!
@@ -219,24 +236,23 @@ type Favorites {
     id: ID!
     product_id: ID!
     product_name: String!
-    unit_price:
+    unit_price: Float!
 }
 
 type Mutation {
     # auth
     signIn(req: SignInReq!): SignInRes!
-    signOut : SignOutRes!
+    signOut: SignOutRes!
 
     # user
-    signUp(req: SingUpReq): SignUpRes
+    signUp(req: SignUpReq): SignUpRes
     forgotPassword(req: ForgotPasswordReq): ForgotPasswordRes
     resetPassword(req: ResetPasswordReq): ResetPasswordRes
 
     # favorites
     addFavorite(req: AddFavoriteReq): AddFavoriteRes
-
 }
 
 type Query {
-    getAllUserFavorites: Favo
+    getAllUserFavorites: GetAllUserFavoritesRes
 }
