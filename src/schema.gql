@@ -30,7 +30,7 @@ type SignOutSuccessRes implements StandardResponse {
 type ForgotPasswordSuccessRes implements StandardResponse {
     status: String!
     message: String!
-    data: ForgotPasswordData
+    data: ForgotPasswordData!
 }
 
 type ResetPasswordSuccessRes implements StandardResponse {
@@ -127,67 +127,67 @@ type PermissionDeniedRes implements StandardResponse {
 type SignUpBadRequestRes implements StandardResponse {
     status: String!
     message: String!
-    data: StandarBadRequestData!
+    data: StandardBadRequestData!
 }
 
 type ResetPasswordBadRequestRes implements StandardResponse {
     status: String!
     message: String!
-    data: StandarBadRequestData!
+    data: StandardBadRequestData!
 }
 
 type ForgotPasswordBadRequestRes implements StandardResponse {
     status: String!
     message: String!
-    data: StandarBadRequestData
+    data: StandardBadRequestData
 }
 
 type AddFavoriteBadRequestRes implements StandardResponse {
     status: String!
     message: String!
-    data: StandarBadRequestData!
+    data: StandardBadRequestData!
 }
 
 type DeleteFavoriteBadRequestRes implements StandardResponse {
     status: String!
     message: String!
-    data: StandarBadRequestData!
+    data: StandardBadRequestData!
 }
 
 type AddCartBadRequestRes implements StandardResponse {
     status: String!
     message: String!
-    data: StandarBadRequestData!
+    data: StandardBadRequestData!
 }
 
 type UpdateCartBadRequestRes implements StandardResponse {
     status: String!
     message: String!
-    data: StandarBadRequestData!
+    data: StandardBadRequestData!
 }
 
 type AddProductBadRequestRes implements StandardResponse {
     status: String!
     message: String!
-    data: StandarBadRequestData!
+    data: StandardBadRequestData!
 }
 
 type UpdateProductBadRequestRes implements StandardResponse {
     status: String!
     message: String!
-    data: StandarBadRequestData!
+    data: StandardBadRequestData!
 }
 
 type UpdateProductCategoriesBadRequestRes implements StandardResponse {
     status: String!
     message: String!
-    data: StandarBadRequestData!
+    data: StandardBadRequestData!
 }
 
 type UpdateProductImagesBadRequestRes implements StandardResponse {
     status: String!
     message: String!
-    data: StandarBadRequestData!
+    data: StandardBadRequestData!
 }
 
 type RemoveProductSucceesRes implements StandardResponse {
@@ -199,13 +199,25 @@ type RemoveProductSucceesRes implements StandardResponse {
 type RemoveProductBadRequestRes implements StandardResponse {
     status: String!
     message: String!
-    data: StandarBadRequestData!
+    data: StandardBadRequestData!
 }
 
 type GetProductBadRequestRes implements StandardResponse {
     status: String!
     message: String!
-    data: StandarBadRequestData!
+    data: StandardBadRequestData!
+}
+
+type GetOrderBadRequestRes implements StandardResponse {
+    status: String!
+    message: String!
+    data: StandardBadRequestData!
+}
+
+type AddOrderBadRequestRes implements StandardResponse {
+    status: String!
+    message: String!
+    data: StandardBadRequestData!
 }
 
 type UpdateProductCategoriesSucceesRes implements StandardResponse {
@@ -218,6 +230,84 @@ type UpdateProductImagesSucceesRes implements StandardResponse {
     status: String!
     message: String!
     data: UpdateData
+}
+
+type AddOrderSucceesRes implements StandardResponse {
+    status: String!
+    message: String!
+    data: CreateData!
+}
+
+type GetOrdersSucceesRes implements StandardResponse {
+    status: String!
+    message: String!
+    data: OrdersData!
+}
+
+type GetUserOrdersSucceesRes implements StandardResponse {
+    status: String!
+    message: String!
+    data: UserOrderData!
+}
+
+type GetOrderSucceesRes implements StandardResponse {
+    status: String!
+    message: String!
+    data: GetOrderData!
+}
+
+type GetOrderData {
+    id: ID!
+    address: String!
+    nearby_landmark: String!
+    products: [ProductsData!]!
+    total_amount: Float!
+    status_payment: String!
+    created_at: Timestamp!
+}
+
+type UserOrderData {
+    id: ID!
+    created_at: Timestamp!
+    status_payment: String!
+    total_amount: Float!
+    currency: String!
+    uri: String!
+
+}
+
+type OrdersData {
+    page: Int!
+    limit: Int!
+    total_pages: Int!
+    total_items: Int!
+    orders: [OrderData!]!
+}
+
+type OrderData {
+    order_id: ID!
+    customer: CustomerData!
+    address: String!
+    nearby_landmark: String!
+    products: ProductsData!
+    total_amount: Float!
+    status_payment: String!
+    created_at: Timestamp!
+}
+
+type ProductsData {
+    product_id: String!
+    name: String!
+    quantity: Int!
+    unit_price: Float!
+    total_price: Float!
+    uri: String!
+}
+
+type CustomerData {
+    id: ID!
+    name: String!
+    email: String!
 }
 
 type GetProductsData {
@@ -249,7 +339,7 @@ type Product {
     uri: String!
 }
 
-type StandarBadRequestData {
+type StandardBadRequestData {
     field: String!
 }
 
@@ -384,7 +474,22 @@ union UpdateProductImagesRes = UpdateProductImagesSucceesRes
     | UnauthorizedRes
     | PermissionDeniedRes
     | InternalServerErrorRes
-
+union AddOrderRes = AddOrderSucceesRes
+    | AddOrderBadRequestRes
+    | UnauthorizedRes
+    | InternalServerErrorRes
+union GetOrdersRes = GetOrdersSucceesRes
+    | GetOrderBadRequestRes
+    | UnauthorizedRes
+    | PermissionDeniedRes
+    | InternalServerErrorRes
+union GetUserOrdersRes = GetUserOrdersSucceesRes
+    | UnauthorizedRes
+    | InternalServerErrorRes
+union GetOrderRes = GetOrderSucceesRes
+    | GetOrderBadRequestRes
+    | UnauthorizedRes
+    | InternalServerErrorRes
 
 input SignInReq {
     email: String!
@@ -450,6 +555,11 @@ input GetProductsReq {
     after: ID!
 }
 
+input GetOrdersReq {
+    first: Int!
+    after: ID!
+}
+
 input UpdateProductCategoriesReq {
     op: String!
     path: String!
@@ -462,11 +572,21 @@ input UpdateProductImagesReq {
     value: [String!]!
 }
 
+input AddOrderReq {
+    address: String!
+    nearby_landmark: String!
+    product_id: ID!
+    quantity: Int!
+}
+
 type Query {
     getAllUserFavorites: GetAllUserFavoritesRes!
     getUserCarts: GetUserCartsRes!
     getProducts(req: GetProductsReq): GetProductsRes!
     getProduct(product_id: ID!): GetProductRes!
+    getOrders(req: GetOrdersReq): GetOrdersRes!
+    getUserOrders: GetUserOrdersRes!
+    getOrder(order_id: ID!): GetOrderRes!
 
 }
 
@@ -495,4 +615,11 @@ type Mutation {
     removeProduct(product_id: ID!): RemoveProductRes!
     updateProductCategories(product_id: ID!, req: UpdateProductCategoriesReq!): UpdateProductCategoriesRes!
     updateProductImages(product_id: ID!, req: UpdateProductImagesReq!): UpdateProductImagesRes!
+
+    # Orders
+    addOrder(req: AddOrderReq): AddOrderRes!
+
+    # Payments
+    createPaymentIntent(req: CreatePaymentIntentReq!): CreatePaymentIntentRes!
+
 }
