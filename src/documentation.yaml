@@ -1377,7 +1377,7 @@ components:
         total_amount:
           type: decimal
           example: 1005.45
-        payment_status:
+        status_payment:
           type: string
           enum:
             - pending
