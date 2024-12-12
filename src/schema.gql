@@ -16,7 +16,6 @@ enum Status {
     FAILURE
 }
 
-
 type AuthToken {
     bearer_token: String!
 }
@@ -24,7 +23,7 @@ type AuthToken {
 type SignInSuccessRes implements IStandardResponse {
     status: Status!
     message: String!
-    data: AuthToken
+    data: AuthToken!
 }
 
 type SignUpSuccessRes implements IStandardResponse {
@@ -151,7 +150,7 @@ type ResetPasswordBadRequestRes implements IStandardResponse {
 type ForgotPasswordBadRequestRes implements IStandardResponse {
     status: Status!
     message: String!
-    data: StandardBadRequestData
+    data: StandardBadRequestData!
 }
 
 type AddFavoriteBadRequestRes implements IStandardResponse {
@@ -311,7 +310,7 @@ type UpdatePaymentIntentSuccessRes implements IStandardResponse {
 type ConfirmPaymentIntentSuccessRes implements IStandardResponse {
     status: Status!
     message: String!
-    data: ConfirmPaymentIntentData
+    data: ConfirmPaymentIntentData!
 }
 
 type PaymentWebhookSuccessRes implements IStandardResponse {
@@ -434,7 +433,7 @@ type ForgotPasswordData {
 }
 
 type ResetPasswordData {
-    id: ID
+    id: ID!
 }
 
 type CreateData {
@@ -447,12 +446,12 @@ type DeleteFavoriteData {
 }
 
 type RemoveCartData {
-    id: ID
+    id: ID!
 }
 
 type CartData {
-    id: ID
-    product_id: ID
+    id: ID!
+    product_id: ID!
     product_name: String!
     unit_price: Float!
     currency: String!
@@ -623,7 +622,7 @@ input ResetPasswordReq {
 }
 
 input AddFavoriteReq {
-    product_id: ID
+    product_id: ID!
 }
 
 input DeleteFavoriteReq {
@@ -631,8 +630,8 @@ input DeleteFavoriteReq {
 }
 
 input AddCartReq {
-    product_id: ID
-    quantity: Int
+    product_id: ID!
+    quantity: Int!
 }
 
 input UpdateCartReq {
@@ -719,10 +718,14 @@ input MetaData {
     order_id: ID!
 }
 type Query {
+    # Favorites
     getAllUserFavorites: GetAllUserFavoritesRes!
+    # Carts
     getUserCarts: GetUserCartsRes!
+    # Products
     getProducts(req: GetProductsReq): GetProductsRes!
     getProduct(product_id: ID!): GetProductRes!
+    # Orders
     getOrders(req: GetOrdersReq): GetOrdersRes!
     getUserOrders: GetUserOrdersRes!
     getOrder(order_id: ID!): GetOrderRes!
@@ -734,13 +737,13 @@ type Mutation {
     signOut: SignOutRes!
 
     # User
-    signUp(req: SignUpReq): SignUpRes!
-    forgotPassword(req: ForgotPasswordReq): ForgotPasswordRes!
-    resetPassword(req: ResetPasswordReq): ResetPasswordRes!
+    signUp(req: SignUpReq!): SignUpRes!
+    forgotPassword(req: ForgotPasswordReq!): ForgotPasswordRes!
+    resetPassword(req: ResetPasswordReq!): ResetPasswordRes!
 
     # Favorites
-    addFavorite(req: AddFavoriteReq): AddFavoriteRes!
-    removeFavorite(req: DeleteFavoriteReq): DeleteFavoriteRes!
+    addFavorite(req: AddFavoriteReq!): AddFavoriteRes!
+    removeFavorite(req: DeleteFavoriteReq!): DeleteFavoriteRes!
 
     # Carts
     addCart(req: AddCartReq!): AddCartRes!
