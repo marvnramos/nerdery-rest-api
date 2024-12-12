@@ -1,259 +1,334 @@
 scalar Timestamp
 
-interface StandardResponse {
-    status: String!
+interface IStandardResponse {
+    status: Status!
     message: String!
 }
+
+enum Operation {
+    ADD
+    REMOVE
+    UPDATE
+}
+
+enum Status {
+    SUCCESS
+    FAILURE
+}
+
 
 type AuthToken {
     bearer_token: String!
 }
 
-type SignInSuccessRes implements StandardResponse {
-    status: String!
+type SignInSuccessRes implements IStandardResponse {
+    status: Status!
     message: String!
     data: AuthToken
 }
 
-type SignUpSuccessRes implements StandardResponse {
-    status: String!
+type SignUpSuccessRes implements IStandardResponse {
+    status: Status!
     message: String!
     data: SignUpData!
 }
 
-type SignOutSuccessRes implements StandardResponse {
-    status: String!
+type SignOutSuccessRes implements IStandardResponse {
+    status: Status!
     message: String!
     data: SignOutData!
 }
 
-type ForgotPasswordSuccessRes implements StandardResponse {
-    status: String!
+type ForgotPasswordSuccessRes implements IStandardResponse {
+    status: Status!
     message: String!
     data: ForgotPasswordData!
 }
 
-type ResetPasswordSuccessRes implements StandardResponse {
-    status: String!
+type ResetPasswordSuccessRes implements IStandardResponse {
+    status: Status!
     message: String!
     data: ResetPasswordData!
 }
 
-type AddFavoriteSuccessRes implements StandardResponse {
-    status: String!
+type AddFavoriteSuccessRes implements IStandardResponse {
+    status: Status!
     message: String!
     data: CreateData!
 }
 
-type GetAllUserFavoritesSuccessRes implements StandardResponse {
-    status: String!
+type GetAllUserFavoritesSuccessRes implements IStandardResponse {
+    status: Status!
     message: String!
     data: [GetUserFavoritesData!]!
 }
 
-type DeleteFavoriteSuccessRes implements StandardResponse {
-    status: String!
+type DeleteFavoriteSuccessRes implements IStandardResponse {
+    status: Status!
     message: String!
     data: DeleteFavoriteData!
 }
 
-type AddCartSucceesRes implements StandardResponse {
-    status: String!
+type AddCartSuccessRes implements IStandardResponse {
+    status: Status!
     message: String!
     data: CreateData!
 }
 
-type GetUserCartsSucceesRes implements StandardResponse {
-    status: String!
+type GetUserCartsSuccessRes implements IStandardResponse {
+    status: Status!
     message: String!
     data: [CartData!]!
 }
 
-type UpdateCartSuccessRes implements StandardResponse {
-    status: String!
+type UpdateCartSuccessRes implements IStandardResponse {
+    status: Status!
     message: String!
     data: UpdateData!
 }
 
-type RemoveCartSucceesRes implements StandardResponse {
-    status: String!
+type RemoveCartSuccessRes implements IStandardResponse {
+    status: Status!
     message: String!
     data: RemoveCartData!
 }
 
-type AddProductSucceesRes implements StandardResponse {
-    status: String!
+type AddProductSuccessRes implements IStandardResponse {
+    status: Status!
     message: String!
     data: CreateData!
 }
 
-type UpdateProductSucceesRes implements StandardResponse {
-    status: String!
+type UpdateProductSuccessRes implements IStandardResponse {
+    status: Status!
     message: String!
     data: UpdateData!
 }
 
-type GetProductsSucceesRes implements StandardResponse {
-    status: String!
+type GetProductsSuccessRes implements IStandardResponse {
+    status: Status!
     message: String!
     data: GetProductsData!
 }
 
-type GetProductSucceesRes implements StandardResponse {
-    status: String!
+type GetProductSuccessRes implements IStandardResponse {
+    status: Status!
     message: String!
     data: ProductData!
 }
 
 # Error Response Types
-type InternalServerErrorRes implements StandardResponse {
-    status: String!
+type InternalServerErrorRes implements IStandardResponse {
+    status: Status!
     message: String!
     data: DataError!
 }
 
-type UnauthorizedRes implements StandardResponse {
-    status: String!
+type UnauthorizedRes implements IStandardResponse {
+    status: Status!
     message: String!
     data: DataError!
 }
 
-type PermissionDeniedRes implements StandardResponse {
-    status: String!
+type PermissionDeniedRes implements IStandardResponse {
+    status: Status!
     message: String!
     data: DataError!
 }
 
-type SignUpBadRequestRes implements StandardResponse {
-    status: String!
+type SignUpBadRequestRes implements IStandardResponse {
+    status: Status!
     message: String!
     data: StandardBadRequestData!
 }
 
-type ResetPasswordBadRequestRes implements StandardResponse {
-    status: String!
+type ResetPasswordBadRequestRes implements IStandardResponse {
+    status: Status!
     message: String!
     data: StandardBadRequestData!
 }
 
-type ForgotPasswordBadRequestRes implements StandardResponse {
-    status: String!
+type ForgotPasswordBadRequestRes implements IStandardResponse {
+    status: Status!
     message: String!
     data: StandardBadRequestData
 }
 
-type AddFavoriteBadRequestRes implements StandardResponse {
-    status: String!
+type AddFavoriteBadRequestRes implements IStandardResponse {
+    status: Status!
     message: String!
     data: StandardBadRequestData!
 }
 
-type DeleteFavoriteBadRequestRes implements StandardResponse {
-    status: String!
+type DeleteFavoriteBadRequestRes implements IStandardResponse {
+    status: Status!
     message: String!
     data: StandardBadRequestData!
 }
 
-type AddCartBadRequestRes implements StandardResponse {
-    status: String!
+type AddCartBadRequestRes implements IStandardResponse {
+    status: Status!
     message: String!
     data: StandardBadRequestData!
 }
 
-type UpdateCartBadRequestRes implements StandardResponse {
-    status: String!
+type UpdateCartBadRequestRes implements IStandardResponse {
+    status: Status!
     message: String!
     data: StandardBadRequestData!
 }
 
-type AddProductBadRequestRes implements StandardResponse {
-    status: String!
+type AddProductBadRequestRes implements IStandardResponse {
+    status: Status!
     message: String!
     data: StandardBadRequestData!
 }
 
-type UpdateProductBadRequestRes implements StandardResponse {
-    status: String!
+type UpdateProductBadRequestRes implements IStandardResponse {
+    status: Status!
     message: String!
     data: StandardBadRequestData!
 }
 
-type UpdateProductCategoriesBadRequestRes implements StandardResponse {
-    status: String!
+type UpdateProductCategoriesBadRequestRes implements IStandardResponse {
+    status: Status!
     message: String!
     data: StandardBadRequestData!
 }
 
-type UpdateProductImagesBadRequestRes implements StandardResponse {
-    status: String!
+type UpdateProductImagesBadRequestRes implements IStandardResponse {
+    status: Status!
     message: String!
     data: StandardBadRequestData!
 }
 
-type RemoveProductSucceesRes implements StandardResponse {
-    status: String!
+type RemoveProductSuccessRes implements IStandardResponse {
+    status: Status!
     message: String!
     data: RemoveData!
 }
 
-type RemoveProductBadRequestRes implements StandardResponse {
-    status: String!
+type RemoveProductBadRequestRes implements IStandardResponse {
+    status: Status!
     message: String!
     data: StandardBadRequestData!
 }
 
-type GetProductBadRequestRes implements StandardResponse {
-    status: String!
+type GetProductBadRequestRes implements IStandardResponse {
+    status: Status!
     message: String!
     data: StandardBadRequestData!
 }
 
-type GetOrderBadRequestRes implements StandardResponse {
-    status: String!
+type GetOrderBadRequestRes implements IStandardResponse {
+    status: Status!
     message: String!
     data: StandardBadRequestData!
 }
 
-type AddOrderBadRequestRes implements StandardResponse {
-    status: String!
+type AddOrderBadRequestRes implements IStandardResponse {
+    status: Status!
     message: String!
     data: StandardBadRequestData!
 }
 
-type UpdateProductCategoriesSucceesRes implements StandardResponse {
-    status: String!
+type PaymentIntentBadRequestRes implements IStandardResponse {
+    status: Status!
+    message: String!
+    data: StandardBadRequestData!
+}
+
+type UpdatePaymentIntentBadRequestRes implements IStandardResponse {
+    status: Status!
+    message: String!
+    data: StandardBadRequestData!
+}
+
+type ConfirmPaymentIntentBadRequestRes implements IStandardResponse {
+    status: Status!
+    message: String!
+    data: StandardBadRequestData!
+}
+
+type PaymentWebhookBadRequestRes implements IStandardResponse {
+    status: Status!
+    message: String!
+    data: StandardBadRequestData!
+}
+
+type UpdateProductCategoriesSuccessRes implements IStandardResponse {
+    status: Status!
     message: String!
     data: UpdateData!
 }
 
-type UpdateProductImagesSucceesRes implements StandardResponse {
-    status: String!
+type UpdateProductImagesSuccessRes implements IStandardResponse {
+    status: Status!
     message: String!
     data: UpdateData
 }
 
-type AddOrderSucceesRes implements StandardResponse {
-    status: String!
+type AddOrderSuccessRes implements IStandardResponse {
+    status: Status!
     message: String!
     data: CreateData!
 }
 
-type GetOrdersSucceesRes implements StandardResponse {
-    status: String!
+type GetOrdersSuccessRes implements IStandardResponse {
+    status: Status!
     message: String!
     data: OrdersData!
 }
 
-type GetUserOrdersSucceesRes implements StandardResponse {
-    status: String!
+type GetUserOrdersSuccessRes implements IStandardResponse {
+    status: Status!
     message: String!
     data: UserOrderData!
 }
 
-type GetOrderSucceesRes implements StandardResponse {
-    status: String!
+type GetOrderSuccessRes implements IStandardResponse {
+    status: Status!
     message: String!
     data: GetOrderData!
+}
+
+type PaymentIntentSuccessRes implements IStandardResponse {
+    status: Status!
+    message: String!
+    data: PaymentIntentData!
+}
+
+type PaymentIntentData {
+    client_secret: String!
+}
+
+type UpdatePaymentIntentSuccessRes implements IStandardResponse {
+    status: Status!
+    message: String!
+    data: PaymentIntentData!
+}
+
+type ConfirmPaymentIntentSuccessRes implements IStandardResponse {
+    status: Status!
+    message: String!
+    data: ConfirmPaymentIntentData
+}
+
+type PaymentWebhookSuccessRes implements IStandardResponse {
+    status: Status!
+    message: String!
+    data: PaymentWebhookData!
+}
+
+type PaymentWebhookData {
+    event_id: String!
+    event_type: String!
+    payment_status: Status!
+    order_id: String!
+}
+
+type ConfirmPaymentIntentData {
+    confirmed: Boolean!
 }
 
 type GetOrderData {
@@ -273,7 +348,6 @@ type UserOrderData {
     total_amount: Float!
     currency: String!
     uri: String!
-
 }
 
 type OrdersData {
@@ -323,7 +397,7 @@ type ProductData {
     name: String!
     description: String!
     stock: Int!
-    is_available: Int!
+    is_available: Boolean!
     unit_price: Float!
     currency: String!
     image_url: String!
@@ -405,89 +479,124 @@ type DataError {
     error: String!
 }
 
-union SignInRes = SignInSuccessRes
-    | InternalServerErrorRes
+union SignInRes = SignInSuccessRes | InternalServerErrorRes
 union SignUpRes = SignUpSuccessRes
     | InternalServerErrorRes
     | SignUpBadRequestRes
-union SignOutRes = SignOutSuccessRes
-    | InternalServerErrorRes
-    | UnauthorizedRes
-union ForgotPasswordRes = ForgotPasswordSuccessRes
-    | InternalServerErrorRes
-union ResetPasswordRes = ResetPasswordSuccessRes
+union SignOutRes = SignOutSuccessRes | InternalServerErrorRes | UnauthorizedRes
+union ForgotPasswordRes = ForgotPasswordSuccessRes | InternalServerErrorRes
+union ResetPasswordRes =
+    ResetPasswordSuccessRes
     | InternalServerErrorRes
     | ResetPasswordBadRequestRes
-union AddFavoriteRes = AddFavoriteSuccessRes
+union AddFavoriteRes =
+    AddFavoriteSuccessRes
     | AddFavoriteBadRequestRes
     | InternalServerErrorRes
     | UnauthorizedRes
-union GetAllUserFavoritesRes = GetAllUserFavoritesSuccessRes
+union GetAllUserFavoritesRes =
+    GetAllUserFavoritesSuccessRes
     | UnauthorizedRes
     | InternalServerErrorRes
-union DeleteFavoriteRes = DeleteFavoriteSuccessRes
+union DeleteFavoriteRes =
+    DeleteFavoriteSuccessRes
     | DeleteFavoriteBadRequestRes
     | UnauthorizedRes
     | InternalServerErrorRes
-union AddCartRes = AddCartSucceesRes
+union AddCartRes =
+    AddCartSuccessRes
     | AddCartBadRequestRes
     | UnauthorizedRes
     | InternalServerErrorRes
-union GetUserCartsRes = GetUserCartsSucceesRes
+union GetUserCartsRes =
+    GetUserCartsSuccessRes
     | InternalServerErrorRes
     | UnauthorizedRes
-union UpdateCartRes = UpdateCartSuccessRes
+union UpdateCartRes =
+    UpdateCartSuccessRes
     | UpdateCartBadRequestRes
     | InternalServerErrorRes
     | UnauthorizedRes
-union RemoveCartRes = RemoveCartSucceesRes
+union RemoveCartRes =
+    RemoveCartSuccessRes
     | UnauthorizedRes
     | InternalServerErrorRes
-union AddProductRes = AddProductSucceesRes
+union AddProductRes =
+    AddProductSuccessRes
     | AddProductBadRequestRes
     | PermissionDeniedRes
     | UnauthorizedRes
     | InternalServerErrorRes
-union UpdateProductRes = UpdateProductSucceesRes
+union UpdateProductRes =
+    UpdateProductSuccessRes
     | UpdateProductBadRequestRes
     | UnauthorizedRes
     | PermissionDeniedRes
     | InternalServerErrorRes
-union RemoveProductRes = RemoveProductSucceesRes
+union RemoveProductRes =
+    RemoveProductSuccessRes
     | RemoveProductBadRequestRes
     | UnauthorizedRes
     | PermissionDeniedRes
     | InternalServerErrorRes
-union GetProductsRes = GetProductsSucceesRes
+union GetProductsRes =
+    GetProductsSuccessRes
     | GetProductBadRequestRes
     | InternalServerErrorRes
-union GetProductRes = GetProductSucceesRes
+union GetProductRes =
+    GetProductSuccessRes
     | GetProductBadRequestRes
     | InternalServerErrorRes
-union UpdateProductCategoriesRes = UpdateProductCategoriesSucceesRes
+union UpdateProductCategoriesRes =
+    UpdateProductCategoriesSuccessRes
     | UpdateProductCategoriesBadRequestRes
     | UnauthorizedRes
     | PermissionDeniedRes
     | InternalServerErrorRes
-union UpdateProductImagesRes = UpdateProductImagesSucceesRes
+union UpdateProductImagesRes =
+    UpdateProductImagesSuccessRes
     | UpdateProductImagesBadRequestRes
     | UnauthorizedRes
     | PermissionDeniedRes
     | InternalServerErrorRes
-union AddOrderRes = AddOrderSucceesRes
+union AddOrderRes =
+    AddOrderSuccessRes
     | AddOrderBadRequestRes
     | UnauthorizedRes
     | InternalServerErrorRes
-union GetOrdersRes = GetOrdersSucceesRes
+union GetOrdersRes =
+    GetOrdersSuccessRes
     | GetOrderBadRequestRes
     | UnauthorizedRes
     | PermissionDeniedRes
     | InternalServerErrorRes
-union GetUserOrdersRes = GetUserOrdersSucceesRes
+union GetUserOrdersRes =
+    GetUserOrdersSuccessRes
     | UnauthorizedRes
     | InternalServerErrorRes
-union GetOrderRes = GetOrderSucceesRes
+union GetOrderRes =
+    GetOrderSuccessRes
     | GetOrderBadRequestRes
+    | UnauthorizedRes
+    | InternalServerErrorRes
+union CreatePaymentIntentRes =
+    PaymentIntentSuccessRes
+    | PaymentIntentBadRequestRes
+    | UnauthorizedRes
+    | InternalServerErrorRes
+union UpdatePaymentIntentRes =
+    UpdatePaymentIntentSuccessRes
+    | UpdatePaymentIntentBadRequestRes
+    | UnauthorizedRes
+    | InternalServerErrorRes
+union ConfirmPaymentIntentRes =
+    ConfirmPaymentIntentSuccessRes
+    | ConfirmPaymentIntentBadRequestRes
+    | UnauthorizedRes
+    | InternalServerErrorRes
+union PaymentWebhookRes =
+    PaymentWebhookSuccessRes
+    | PaymentWebhookBadRequestRes
     | UnauthorizedRes
     | InternalServerErrorRes
 
@@ -527,7 +636,7 @@ input AddCartReq {
 }
 
 input UpdateCartReq {
-    op: String!
+    op: Operation!
     path: String!
     value: Int!
 }
@@ -561,13 +670,13 @@ input GetOrdersReq {
 }
 
 input UpdateProductCategoriesReq {
-    op: String!
+    op: Operation!
     path: String!
     value: [ID!]!
 }
 
 input UpdateProductImagesReq {
-    op: String!
+    op: Operation!
     path: String!
     value: [String!]!
 }
@@ -579,6 +688,36 @@ input AddOrderReq {
     quantity: Int!
 }
 
+input CreatePaymentIntentReq {
+    amount: Int!
+    currency: String!
+    metadata: MetaData!
+}
+
+input UpdatePaymentIntentReq {
+    payment_method: String!
+}
+
+input ConfirmPaymentIntentReq {
+    payment_intent_id: String!
+    amount: Int!
+}
+
+input PaymentWebhookEventReq {
+    id: ID!
+    type: String!
+    data: PaymentWebhookInputData!
+}
+
+input PaymentWebhookInputData {
+    status: Status!
+    amount_received: Int!
+    metadata: MetaData
+}
+
+input MetaData {
+    order_id: ID!
+}
 type Query {
     getAllUserFavorites: GetAllUserFavoritesRes!
     getUserCarts: GetUserCartsRes!
@@ -587,7 +726,6 @@ type Query {
     getOrders(req: GetOrdersReq): GetOrdersRes!
     getUserOrders: GetUserOrdersRes!
     getOrder(order_id: ID!): GetOrderRes!
-
 }
 
 type Mutation {
@@ -613,13 +751,24 @@ type Mutation {
     addProduct(req: AddProductReq!): AddProductRes!
     updateProduct(product_id: ID!, req: UpdateProductReq!): UpdateProductRes!
     removeProduct(product_id: ID!): RemoveProductRes!
-    updateProductCategories(product_id: ID!, req: UpdateProductCategoriesReq!): UpdateProductCategoriesRes!
-    updateProductImages(product_id: ID!, req: UpdateProductImagesReq!): UpdateProductImagesRes!
+    updateProductCategories(
+        product_id: ID!
+        req: UpdateProductCategoriesReq!
+    ): UpdateProductCategoriesRes!
+    updateProductImages(
+        product_id: ID!
+        req: UpdateProductImagesReq!
+    ): UpdateProductImagesRes!
 
     # Orders
     addOrder(req: AddOrderReq): AddOrderRes!
 
     # Payments
     createPaymentIntent(req: CreatePaymentIntentReq!): CreatePaymentIntentRes!
-
+    updatePaymentIntent(req: UpdatePaymentIntentReq!): UpdatePaymentIntentRes!
+    confirmPaymentIntent(req: ConfirmPaymentIntentReq!): ConfirmPaymentIntentRes!
+    handlePaymentWebhook(req: PaymentWebhookEventReq!): PaymentWebhookRes!
 }
+
+
+# GraphQL Editor: https://academy.graphqleditor.com/?lesson=graph
