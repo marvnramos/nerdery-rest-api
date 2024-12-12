@@ -1154,24 +1154,20 @@ components:
           type: object
           description: Additional information about the payment.
           properties:
-            object:
+            status:
+              type: string
+              example: "succeeded"
+            amount_received:
+              type: integer
+              example: 5000
+            metadata:
               type: object
-              description: Details of the PaymentIntent.
               properties:
-                status:
+                order_id:
                   type: string
-                  example: "succeeded"
-                amount_received:
-                  type: integer
-                  example: 5000
-                metadata:
-                  type: object
-                  properties:
-                    order_id:
-                      type: string
-                      example: 5ca2db61-8ba8-4a4c-bac3-daa957020a02
-                  required:
-                    - order_id
+                  example: 5ca2db61-8ba8-4a4c-bac3-daa957020a02
+              required:
+                - order_id
       required:
         - status
         - amount_received
