@@ -35,7 +35,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/SignInResponse"
         400:
-          description: Missing some fields
+          description: MisSign some fields
           content:
             application/json:
               schema:
@@ -76,16 +76,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/SingUpRequest"
+              $ref: "#/components/schemas/SignUpRequest"
       responses:
         201:
           description: New user was recorded.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SingUpResponse"
+                $ref: "#/components/schemas/SignUpResponse"
         400:
-          description: Missing some fields
+          description: MisSign some fields
           content:
             application/json:
               schema:
@@ -397,7 +397,7 @@ paths:
       summary: Add a new product record
       tags:
         - products
-      description: Allows `admin` roles to create a new product record.
+      description: Allows `manager` roles to create a new product record.
       security:
         - bearerAuth: [ ]
       requestBody:
@@ -442,18 +442,21 @@ paths:
       summary: Show all products by pagination
       tags:
         - products
-      description: Retrieves a paginated list of products, accessible to both `admin` and authenticated users.
+      description: Retrieves a paginated list of products, accessible to both `manager` and authenticated users with role `customer`.
       parameters:
         - name: page
           in: query
           description: Page number for pagination
-          required: true
           schema:
             type: integer
         - name: limit
           in: query
           description: Number of records per page
-          required: true
+          schema:
+            type: integer
+        - name: category_id
+          in: query
+          description: Filter products by category
           schema:
             type: integer
       responses:
@@ -513,7 +516,7 @@ paths:
       summary: Edit a product record
       tags:
         - products
-      description: Allows `admin` roles to update an existing product's information.
+      description: Allows `manager` roles to update an existing product's information.
       security:
         - bearerAuth: [ ]
       parameters:
@@ -560,7 +563,7 @@ paths:
       summary: Remove a product record
       tags:
         - products
-      description: Allows `admin` roles to delete a product record.
+      description: Allows `manager` roles to delete a product record.
       security:
         - bearerAuth: [ ]
       parameters:
@@ -602,7 +605,7 @@ paths:
       summary: Edit categories product
       tags:
         - products
-      description: Allows `admin` roles to update specific fields like visibility or image URL.
+      description: Allows `manager` roles to update specific fields like visibility or image URL.
       security:
         - bearerAuth: [ ]
       parameters:
@@ -665,7 +668,7 @@ paths:
       summary: Modify product images
       tags:
         - products
-      description: Allows `admin` roles to add or remove images for a product using JSON Patch.
+      description: Allows `manager` roles to add or remove images for a product using JSON Patch.
       security:
         - bearerAuth: [ ]
       parameters:
@@ -772,18 +775,21 @@ paths:
         - orders
       security:
         - bearerAuth: [ ]
-      description: Retrieves a paginated list of orders, accessible to `admin`.
+      description: Retrieves a paginated list of all orders to users with `manager` role and, retrieves orders for a specific user with the role of `customer`
       parameters:
         - name: page
           in: query
           description: Page number for pagination
-          required: true
           schema:
             type: integer
         - name: limit
           in: query
           description: Number of records per page
-          required: true
+          schema:
+            type: integer
+        - name: status_payment_id
+          in: query
+          description: Filtering by status payment id
           schema:
             type: integer
       responses:
@@ -811,34 +817,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/PermissionResponse"
-        500:
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ServerErrorResponse"
-
-  /orders/user:
-    get:
-      summary: Show all user's orders
-      tags:
-        - orders
-      security:
-        - bearerAuth: [ ]
-      description: Retrieves a list of orders.
-      responses:
-        200:
-          description: Paginated list of orders.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/UserOrderListResponse"
-        401:
-          description: Unauthorized access
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/UnauthorizedResponse"
         500:
           description: Internal server error
           content:
@@ -908,7 +886,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/PaymentResponse"
         400:
-          description: Bad request, missing or invalid parameters.
+          description: Bad request, misSign or invalid parameters.
           content:
             application/json:
               schema:
@@ -943,6 +921,10 @@ paths:
           description: PaymentIntent successfully updated.
         400:
           description: Bad request, missing or invalid parameters.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdatePaymentBadRequest"
         401:
           description: Unauthorized access
           content:
@@ -973,7 +955,7 @@ paths:
         204:
           description: The payment has been successfully processed.
         400:
-          description: Bad request, missing or invalid parameters.
+          description: Bad request, misSign or invalid parameters.
           content:
             application/json:
               schema:
@@ -1012,7 +994,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/WebhookResponse"
         400:
-          description: Bad request, missing or invalid parameters.
+          description: Bad request, misSign or invalid parameters.
           content:
             application/json:
               schema:
@@ -1045,13 +1027,14 @@ components:
           type: string
           description: The ID of the PaymentIntent that was created earlier.
           example: "pi_1F7A2z2eZvKYlo2CxVryFjXY"
-        amount:
-          type: integer
-          description: The amount to be charged, should match the initial amount.
-          example: 5000
+        order_id:
+          type: string
+          description: Unique identifier for the order.
+          format: uuid
+          example: "5ca2db61-8ba8-4a4c-bac3-daa957020a02"
       required:
+        - order_id
         - payment_intent_id
-        - amount
 
     UpdatePaymentRequest:
       type: object
@@ -1066,79 +1049,35 @@ components:
     PaymentRequest:
       type: object
       properties:
-        amount:
-          type: integer
-          description: Payment amount in the smallest unit of the currency (cents for USD).
-          example: 5000
-        currency:
+        order_id:
           type: string
-          description: Currency of the payment (usd).
-          example: usd
-        metadata:
-          type: object
-          description: Additional data that can be stored with the PaymentIntent.
-          properties:
-            order_id:
-              type: string
-              description: Unique identifier for the order.
-              example: "5ca2db61-8ba8-4a4c-bac3-daa957020a02"
-          required:
-            - order_id
+          description: Unique identifier for the order.
+          example: "5ca2db61-8ba8-4a4c-bac3-daa957020a02"
       required:
-        - amount
-        - currency
-        - metadata
+        - order_id
+
 
     PaymentResponse:
       type: object
       properties:
-        status:
+        client_secret:
           type: string
-          description: Status of the request.
-          example: success
-        message:
-          type: string
-          description: A message providing more details about the action.
-          example: PaymentIntent created successfully.
-        data:
-          type: object
-          properties:
-            client_secret:
-              type: string
-              description: Used to complete the payment on the frontend.
-              example: "pi_1F7A2z2eZvKYlo2CxVryFjXY_secret_pkljA3jvnL03n6vb10vhAakdE"
+          description: Used to complete the payment on the frontend.
+          example: "pi_1F7A2z2eZvKYlo2CxVryFjXY_secret_pkljA3jvnL03n6vb10vhAakdE"
 
     UpdatePaymentBadRequest:
       type: object
       properties:
-        status:
+        payment_method:
           type: string
-          example: failure
-        message:
-          type: string
-          example: Invalid request
-        data:
-          type: object
-          properties:
-            payment_method:
-              type: string
-              example: This field is required
+          example: This field is required
 
     WebhookBadRequest:
       type: object
       properties:
-        status:
+        id:
           type: string
-          example: failure
-        message:
-          type: string
-          example: Invalid request
-        data:
-          type: object
-          properties:
-            id:
-              type: string
-              example: This field is required
+          example: This field is required
     WebhookRequest:
       type: object
       properties:
@@ -1176,34 +1115,23 @@ components:
     WebhookResponse:
       type: object
       properties:
-        status:
+        event_id:
           type: string
-          description: Status of the webhook processing.
-          example: success
-        message:
+          description: The event ID sent by Stripe.
+          example: evt_1F7A2z2eZvKYlo2Cj2X3rTnq
+        event_type:
           type: string
-          description: A message providing more details about the webhook status.
-          example: Webhook received and processed successfully.
-        data:
-          type: object
-          properties:
-            event_id:
-              type: string
-              description: The event ID sent by Stripe.
-              example: evt_1F7A2z2eZvKYlo2Cj2X3rTnq
-            event_type:
-              type: string
-              description: The event type (e.g., 'payment_intent.succeeded').
-              example: payment_intent.succeeded
-            payment_status:
-              type: string
-              description: The current payment status.
-              example: succeeded
-            order_id:
-              type: string
-              format: uuid
-              description: The order ID associated with the payment.
-              example: 5ca2db61-8ba8-4a4c-bac3-daa957020a02
+          description: The event type (e.g., 'payment_intent.succeeded').
+          example: payment_intent.succeeded
+        payment_status:
+          type: string
+          description: The current payment status.
+          example: succeeded
+        order_id:
+          type: string
+          format: uuid
+          description: The order ID associated with the payment.
+          example: 5ca2db61-8ba8-4a4c-bac3-daa957020a02
     OrderRequest:
       type: object
       properties:
@@ -1229,21 +1157,12 @@ components:
     OrderResponse:
       type: object
       properties:
-        status:
+        id:
+          type: uuid
+          example: 6264efef-d9ca-475b-91f5-5770d3b02fac
+        created_at:
           type: string
-          example: success
-        message:
-          type: string
-          example: New order added successfully
-        data:
-          type: object
-          properties:
-            id:
-              type: uuid
-              example: 6264efef-d9ca-475b-91f5-5770d3b02fac
-            created_at:
-              type: string
-              example: 2024-12-05T14:00:00Z
+          example: 2024-12-05T14:00:00Z
     OrderListResponse:
       type: object
       properties:
@@ -1267,78 +1186,32 @@ components:
     GetOrderResponse:
       type: object
       properties:
-        status:
+        id:
           type: string
-          example: success
-        message:
+          example: 7b5dca1a-e65c-4f7e-88c0-dcfcad23ab67
+        address:
           type: string
-          example: Orders retrieved successfully
-        data:
-          type: object
-          properties:
-            id:
-              type: string
-              example: 7b5dca1a-e65c-4f7e-88c0-dcfcad23ab67
-            address:
-              type: string
-              example: 1234 Calle Falsa, San Salvador, 56789
-            nearby_landmark:
-              type: string
-              example: Cerca de la Plaza ABC
-            products:
-              type: array
-              items:
-                $ref: "#/components/schemas/OrderProduct"
-            total_amount:
-              type: decimal
-              example: 1005.45
-            status_payment:
-              type: string
-              enum:
-                - pending
-                - paid
-                - failed
-              example: paid
-            created_at:
-              type: string
-              example: 2024-10-05T15:30:00Z
-
-
-    UserOrderListResponse:
-      type: object
-      properties:
-        status:
+          example: 1234 Calle Falsa, San Salvador, 56789
+        nearby_landmark:
           type: string
-          example: success
-        message:
-          type: string
-          example: Orders retrieved successfully
-        data:
+          example: Cerca de la Plaza ABC
+        products:
           type: array
           items:
-            type: object
-            properties:
-              id:
-                type: string
-                format: uuid
-                example: 97c978f0-3975-41a7-b9af-7fa0abfc5081
-              created_at:
-                type: string
-                example: 2024-12-05T14:00:00Z
-              status_payment:
-                type: string
-                example: pending
-              total_amount:
-                type: decimal
-                example: 200.21
-              currency:
-                type: string
-                example: USD
-              uri:
-                type: string
-                format: uri
-                example: /orders/97c978f0-3975-41a7-b9af-7fa0abfc5081
-
+            $ref: "#/components/schemas/OrderProduct"
+        total_amount:
+          type: decimal
+          example: 1005.45
+        status_payment:
+          type: string
+          enum:
+            - pending
+            - paid
+            - failed
+          example: paid
+        created_at:
+          type: string
+          example: 2024-10-05T15:30:00Z
 
     Order:
       type: object
@@ -1410,66 +1283,30 @@ components:
     PaymentBadRequest:
       type: object
       properties:
-        status:
+        amount:
           type: string
-          example: failure
-        message:
-          type: string
-          example: Invalid request
-        data:
-          type: object
-          properties:
-            amount:
-              type: string
-              example: This field is required
+          example: This field is required
 
     GetOneOrderBadRequest:
       type: object
       properties:
-        status:
+        order_id:
           type: string
-          example: failure
-        message:
-          type: string
-          example: Invalid request
-        data:
-          type: object
-          properties:
-            order_id:
-              type: string
-              example: This field is required
+          example: This field is required
 
     GetOrderBadRequest:
       type: object
       properties:
-        status:
+        page:
           type: string
-          example: failure
-        message:
-          type: string
-          example: Invalid request
-        data:
-          type: object
-          properties:
-            page:
-              type: string
-              example: This field must be positive integer
+          example: This field must be positive integer
 
     OrderBadRequest:
       type: object
       properties:
-        status:
+        quantity:
           type: string
-          example: failure
-        message:
-          type: string
-          example: Invalid request
-        data:
-          type: object
-          properties:
-            quantity:
-              type: string
-              example: This field must be positive integer
+          example: This field must be positive integer
 
     ProductImagesUpdateRequest:
       type: array
@@ -1556,18 +1393,9 @@ components:
     UpdateProductBadRequest:
       type: object
       properties:
-        status:
+        product_id:
           type: string
-          example: failure
-        message:
-          type: string
-          example: Invalid request
-        data:
-          type: object
-          properties:
-            product_id:
-              type: string
-              example: This field is required!
+          example: This field is required!
     SignInRequest:
       type: object
       properties:
@@ -1585,34 +1413,16 @@ components:
     SignInResponse:
       type: object
       properties:
-        status:
+        bearer_token:
           type: string
-          example: success
-        message:
-          type: string
-          example: You've been logged successfully
-        data:
-          type: object
-          properties:
-            bearer_token:
-              type: string
-              example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
     LoginBadRequestResponse:
       type: object
       properties:
-        status:
+        email:
           type: string
-          example: failure
-        message:
-          type: string
-          example: Invalid payload
-        data:
-          type: object
-          properties:
-            email:
-              type: string
-              example: This field is required!
-    SingUpRequest:
+          example: This field is required!
+    SignUpRequest:
       type: object
       properties:
         first_name:
@@ -1650,31 +1460,16 @@ components:
     ForgotPasswordResponse:
       type: object
       properties:
-        status:
-          type: string
-          example: success
-        message:
-          type: string
-          example: An mail was sent to this email
-        data:
-          type: object
-          example: { }
+        accepted:
+          type: boolean
+          example: true
 
     ForgotPasswordBadRequestResponse:
       type: object
       properties:
-        status:
+        email:
           type: string
-          example: failure
-        message:
-          type: string
-          example: Invalid payload
-        data:
-          type: object
-          properties:
-            email:
-              type: string
-              example: This field is required!
+          example: This field is required!
     ResetPasswordRequest:
       type: object
       properties:
@@ -1694,45 +1489,21 @@ components:
     ResetPasswordBadRequestResponse:
       type: object
       properties:
-        status:
+        new_password:
           type: string
-          example: failure
-        message:
-          type: string
-          example: Invalid payload
-        data:
-          type: object
-          properties:
-            new_password:
-              type: string
-              example: This field is required!
+          example: This field is required!
 
-    SingUpResponse:
+    SignUpResponse:
       type: object
       properties:
-        status:
-          type: string
-          example: success
-        message:
-          type: string
-          example: You've been singed up successfully
-        data:
-          type: object
+        created_at:
+          example: "2023-09-01T14:30:00Z"
     SignUpBadRequestResponse:
       type: object
       properties:
-        status:
+        first_name:
           type: string
-          example: failure
-        message:
-          type: string
-          example: Invalid payload
-        data:
-          type: object
-          properties:
-            first_name:
-              type: string
-              example: This field is required!
+          example: This field is required!
 
     FavoritesRequest:
       type: object
@@ -1746,30 +1517,15 @@ components:
     FavoritesResponse:
       type: object
       properties:
-        status:
+        id:
+          type: uuid
+          example: 6264efef-d9ca-475b-91f5-5770d3b02fac
+        created_at:
           type: string
-          example: success
-        message:
-          type: string
-          example: A product was added to your favorites
-        data:
-          type: object
-          properties:
-            id:
-              type: uuid
-              example: 6264efef-d9ca-475b-91f5-5770d3b02fac
-            created_at:
-              type: string
-              example: 2024-12-05T14:00:00Z
+          example: 2024-12-05T14:00:00Z
     GetFavoritesResponse:
       type: object
       properties:
-        status:
-          type: string
-          example: success
-        message:
-          type: string
-          example: Here are your favorites
         data:
           type: array
           items:
@@ -1807,33 +1563,15 @@ components:
     FavoritesBadRequestResponse:
       type: object
       properties:
-        status:
+        product_id:
           type: string
-          example: failure
-        message:
-          type: string
-          example: Invalid payload
-        data:
-          type: object
-          properties:
-            product_id:
-              type: string
-              example: This field is required!
+          example: This field is required!
     DeleteFavoritesBadRequestResponse:
       type: object
       properties:
-        status:
+        favorite_id:
           type: string
-          example: failure
-        message:
-          type: string
-          example: Invalid payload
-        data:
-          type: object
-          properties:
-            favorite_id:
-              type: string
-              example: This field is required!
+          example: This field is required!
 
     CartRequest:
       type: object
@@ -1867,84 +1605,37 @@ components:
       type: object
       description: Response returned when the user is unauthorized to access the requested resource.
       properties:
-        status:
+        id:
           type: string
-          description: Indicates the status of the response.
-          example: success
-        message:
+          format: uuid
+          example: 97c978f0-3975-41a7-b9af-7fa0abfc5081
+        created_at:
           type: string
-          description: A message providing more details about the unauthorized access.
-          example: Cart added successfully.
-        data:
-          type: object
-          description: Contains additional details about .
-          $ref: "#/components/schemas/CartItem"
+          example: 2024-12-05T14:10:00Z
+
     CartBadRequestResponse:
       type: object
       properties:
-        status:
+        product_id:
           type: string
-          example: failure
-        message:
-          type: string
-          example: Invalid payload
-        data:
-          type: object
-          properties:
-            product_id:
-              type: string
-              example: This field is required!
+          example: This field is required!
 
     PatchBadRequestResponse:
       type: object
       properties:
-        status:
+        value:
           type: string
-          example: failure
-        message:
-          type: string
-          example: Invalid payload
-        data:
-          type: object
-          properties:
-            value:
-              type: string
-              example: This field is required!
+          example: This field is required!
 
     GetAllCartResponse:
       type: object
       description: Response returned when all carts belonging to the user are retrieved successfully.
       properties:
-        status:
-          type: string
-          description: Indicates the status of the response, e.g., success or failure.
-          example: success
-        message:
-          type: string
-          description: A message providing additional context about the response.
-          example: Carts retrieved successfully.
         data:
           type: array
           description: A list containing all the user's cart items.
           items:
             $ref: "#/components/schemas/AllCartItem"
-
-    GetCartResponse:
-      type: object
-      description: Response returned when the user is unauthorized to access the requested resource.
-      properties:
-        status:
-          type: string
-          description: Indicates the status of the response.
-          example: success
-        message:
-          type: string
-          description: A message providing more details about the unauthorized access.
-          example: Cart added successfully.
-        data:
-          type: object
-          description: Contains additional details about .
-          $ref: "#/components/schemas/CartItem"
 
     CartItem:
       type: object
@@ -1995,8 +1686,8 @@ components:
           description: product's name
         description:
           type: string
-          example: Conéctate a las consolas Xbox con la tecnología inalámbrica de Xbox.
-            Conéctate de forma inalámbrica a PC Windows 10/11, tabletas, iOS y Android mediante Bluetooth.
+          example: Connect to Xbox consoles with Xbox wireless technology.
+            Connect wirelessly to Windows 10/11 PCs, tablets, iOS and Android via Bluetooth.
         stock:
           type: integer
           example: 39
@@ -2027,114 +1718,64 @@ components:
     ProductBadRequest:
       type: object
       properties:
-        status:
+        stock:
           type: string
-          example: failure
-        message:
-          type: string
-          example: Invalid payload
-        data:
-          type: object
-          properties:
-            stock:
-              type: string
-              example: This field is required!
+          example: This field is required!
 
     ProductResponse:
       type: object
       description: Response returned when product record was added successfully.
       properties:
-        status:
+        id:
           type: string
-          description: Indicates the status of the response.
-          example: success
-        message:
+          format: uuid
+          example: 671f720b-0186-4e65-b802-b4c6c6e1a41b
+        created_at:
           type: string
-          description: A message providing more details about the action.
-          example: Product added successfully.
-        data:
-          type: object
-          properties:
-            id:
-              type: string
-              format: uuid
-              example: 671f720b-0186-4e65-b802-b4c6c6e1a41b
-            created_at:
-              type: string
-              example: 024-12-05T14:10:00Z
+          example: 024-12-05T14:10:00Z
     PaginationProductBadRequest:
       type: object
       properties:
-        status:
+        limit:
           type: string
-          example: failure
-        message:
-          type: string
-          example: Invalid payload
-        data:
-          type: object
-          properties:
-            limit:
-              type: string
-              example: This field is required!
+          example: This field is required!
 
     GetProductResponse:
       type: object
       description: Response returned when a product record is retrieved successfully.
       properties:
-        status:
+        id:
           type: string
-          description: Indicates the status of the response.
-          example: success
-        message:
+          format: uuid
+          example: 2a43754a-8f7e-49d2-a748-f93e3edc24b9
+        name:
           type: string
-          description: A message providing more details about the action.
-          example: Product retrieved successfully.
-        data:
-          type: object
-          description: Contains the details of the retrieved product.
-          properties:
-            id:
-              type: string
-              format: uuid
-              example: 2a43754a-8f7e-49d2-a748-f93e3edc24b9
-            name:
-              type: string
-              example: Laptop HP
-            description:
-              type: string
-              example: Supera los obstáculos del trabajo híbrido con el HP EliteBook 845. El último procesador AMD, hasta 64 GB de memoria DDR5 y funciones que mejoran las reuniones en línea le permiten escuchar, ser escuchado y dar lo mejor de sí mismo.
-            stock:
-              type: integer
-              example: 23
-            is_available:
-              type: boolean
-              example: true
-            unit_price:
-              type: decimal
-              example: 480.99
-            currency:
-              type: string
-              example: USD
-            image_url:
-              type: string
-              example: http://storage-domain.com/2a43754a-8f7e-49d2-a748-f93e3edc24b9.png
+          example: Laptop HP
+        description:
+          type: string
+          example: Overcome the obstacles of hybrid work with the HP EliteBook 845. The latest AMD processor, up to 64 GB of DDR5 memory and features that enhance online meetings let you listen, be heard and perform at your best.
+        stock:
+          type: integer
+          example: 23
+        is_available:
+          type: boolean
+          example: true
+        unit_price:
+          type: decimal
+          example: 480.99
+        currency:
+          type: string
+          example: USD
+        image_url:
+          type: string
+          example: http://storage-domain.com/2a43754a-8f7e-49d2-a748-f93e3edc24b9.png
 
     GetProductBadRequest:
       type: object
       properties:
-        status:
+        product_id:
           type: string
-          example: failure
-        message:
-          type: string
-          example: Invalid payload
-        data:
-          type: object
-          properties:
-            product_id:
-              type: string
-              example: This field is required!
+          example: This field is required!
 
     ProductListResponse:
       type: object
@@ -2189,61 +1830,25 @@ components:
       type: object
       description: Response returned when the user is unauthorized to access the requested resource.
       properties:
-        status:
+        error:
           type: string
-          description: Indicates the status of the response.
-          example: failure
-        message:
-          type: string
-          description: A message providing more details about the unauthorized access.
-          example: Unauthorized access.
-        data:
-          type: object
-          description: Contains additional details about the error.
-          properties:
-            error:
-              type: string
-              description: Specific error details.
-              example: Invalid token or token expired.
+          description: Specific error details.
+          example: Invalid token or token expired.
 
     PermissionResponse:
       type: object
       description: Response returned when the user has not permissions to execute the requested action.
       properties:
-        status:
+        error:
           type: string
-          description: Indicates the status of the response.
-          example: failure
-        message:
-          type: string
-          description: A message providing more details about the permission access.
-          example: Not permission access.
-        data:
-          type: object
-          description: Contains additional details about the error.
-          properties:
-            error:
-              type: string
-              description: Specific error details.
-              example: Invalid user permissions.
+          description: Specific error details.
+          example: Invalid user permissions.
 
     ServerErrorResponse:
       type: object
       description: Response returned when the server run into an error.
       properties:
-        status:
+        error:
           type: string
-          description: Indicates the status of the response.
-          example: failure
-        message:
-          type: string
-          description: A message providing more details about server error.
-          example: Internal server error.
-        data:
-          type: object
-          description: Contains additional details about the error.
-          properties:
-            error:
-              type: string
-              description: Specific error details.
-              example: Can't implement that action.
+          description: Specific error details.
+          example: Can't implement that action.
