@@ -15,6 +15,19 @@ interface IResponse {
     id: ID!
 }
 
+interface IUpdateResponse {
+    updated_at: Timestamp!
+}
+
+interface ICreatedResponse {
+
+    created_at: Timestamp!
+}
+
+interface  IDeletedResponse {
+    deleted_at: Timestamp!
+}
+
 type ErrorRes {
     error: Error!
 }
@@ -23,12 +36,11 @@ type Error {
     error: String!
 }
 
+"""
+Client and Manager Role Responses
+"""
 type SignInSuccessRes {
     bearer_token: String!
-}
-
-type SignUpSuccessRes {
-    created_at: Timestamp
 }
 
 type SignOutSuccessRes implements IResponse {
@@ -39,114 +51,55 @@ type ForgotPasswordSuccessRes implements IResponse {
     id: ID!
 }
 
-type ResetPasswordSuccessRes {
-    data: ResetPasswordData!
+type ResetPasswordSuccessRes implements IUpdateResponse {
+    updated_at: Timestamp!
 }
 
-type AddFavoriteSuccessRes {
-    data: CreateData!
+
+"""
+Client Role Responses
+"""
+type SignUpSuccessRes implements ICreatedResponse  {
+    created_at: Timestamp!
+}
+
+type AddFavoriteSuccessRes implements ICreatedResponse {
+    created_at: Timestamp!
 }
 
 type GetAllUserFavoritesSuccessRes {
     data: [GetUserFavoritesData!]!
 }
 
-type DeleteFavoriteSuccessRes {
-    data: DeleteFavoriteData!
+type DeleteFavoriteSuccessRes implements IDeletedResponse {
+    deleted_at: Timestamp!
 }
 
-type AddCartSuccessRes {
-    data: CreateData!
+type AddCartSuccessRes implements ICreatedResponse  {
+    created_at: Timestamp!
 }
 
 type GetUserCartsSuccessRes {
     data: [CartData!]!
 }
 
-type UpdateCartSuccessRes {
-    data: UpdateData!
+type UpdateCartSuccessRes implements IUpdateResponse {
+    updated_at: Timestamp!
 }
 
-type RemoveCartSuccessRes {
-    data: RemoveCartData!
+type RemoveCartSuccessRes implements IDeletedResponse {
+    deleted_at: Timestamp!
 }
 
-type AddProductSuccessRes {
-    data: CreateData!
-}
-
-type UpdateProductSuccessRes {
-    data: UpdateData!
-}
-
-type GetProductsSuccessRes {
-    data: GetProductsData!
-}
-
-type GetProductSuccessRes {
-    data: ProductData!
-}
-
-type RemoveProductSuccessRes {
-    data: RemoveData!
-}
-
-type UpdateProductCategoriesSuccessRes {
-    data: UpdateData!
-}
-
-type UpdateProductImagesSuccessRes {
-    data: UpdateData
-}
-
-type AddOrderSuccessRes {
-    data: CreateData!
+type AddOrderSuccessRes implements ICreatedResponse  {
+    created_at: Timestamp!
 }
 
 type GetOrdersSuccessRes {
     data: OrdersData!
 }
 
-type GetUserOrdersSuccessRes {
-    data: UserOrderData!
-}
-
 type GetOrderSuccessRes {
-    data: GetOrderData!
-}
-
-type PaymentIntentSuccessRes {
-    data: PaymentIntentData!
-}
-
-type PaymentIntentData {
-    client_secret: String!
-}
-
-type UpdatePaymentIntentSuccessRes {
-    data: PaymentIntentData!
-}
-
-type ConfirmPaymentIntentSuccessRes {
-    data: ConfirmPaymentIntentData!
-}
-
-type PaymentWebhookSuccessRes {
-    data: PaymentWebhookData!
-}
-
-type PaymentWebhookData {
-    event_id: String!
-    event_type: String!
-    payment_status: Status!
-    order_id: String!
-}
-
-type ConfirmPaymentIntentData {
-    confirmed: Boolean!
-}
-
-type GetOrderData {
     id: ID!
     address: String!
     nearby_landmark: String!
@@ -156,6 +109,101 @@ type GetOrderData {
     created_at: Timestamp!
 }
 
+type PaymentIntentSuccessRes {
+    client_secret: String!
+}
+
+
+type UpdatePaymentIntentSuccessRes implements IUpdateResponse{
+    updated_at: Timestamp!
+}
+
+type ConfirmPaymentIntentSuccessRes {
+    confirmed: Boolean!
+}
+
+type PaymentWebhookSuccessRes {
+    event_id: String!
+    event_type: String!
+    payment_status: Status!
+    order_id: String!
+}
+
+"""
+Responses to manager role
+"""
+type AddProductSuccessRes implements ICreatedResponse {
+    created_at: Timestamp!
+}
+
+type UpdateProductSuccessRes implements IUpdateResponse{
+    updated_at: Timestamp!
+}
+
+type GetProductsSuccessRes {
+    page: Int!
+    limit: Int!
+    total_pages: Int!
+    total_items: Int!
+    products: [Product!]!
+}
+
+type GetProductSuccessRes {
+    id: ID!
+    name: String!
+    description: String!
+    stock: Int!
+    is_available: Boolean!
+    unit_price: Float!
+    currency: String!
+    image_url: String!
+}
+
+type RemoveProductSuccessRes implements IDeletedResponse {
+    deleted_at: Timestamp!
+}
+
+type UpdateProductCategoriesSuccessRes implements IUpdateResponse{
+    updated_at: Timestamp!
+}
+
+type UpdateProductImagesSuccessRes implements IUpdateResponse{
+    updated_at: Timestamp!
+}
+
+"""
+Manager Responses Data Types
+"""
+type ProductsData {
+    product_id: String!
+    name: String!
+    quantity: Int!
+    unit_price: Float!
+    total_price: Float!
+    uri: String!
+}
+
+type GetProductsData {
+    page: Int!
+    limit: Int!
+    total_pages: Int!
+    total_items: Int!
+    products: [Product!]!
+}
+
+type Product {
+    id: ID!
+    name: String!
+    categories: [ID!]!
+    unit_price: Float!
+    currency: String!
+    image_url: String!
+    uri: String!
+}
+
+"""
+Client Role Data Types
+"""
 type UserOrderData {
     id: ID!
     created_at: Timestamp!
@@ -178,80 +226,16 @@ type OrderData {
     customer: CustomerData!
     address: String!
     nearby_landmark: String!
-    products: ProductsData!
+    products: [ProductsData!]!
     total_amount: Float!
     status_payment: String!
     created_at: Timestamp!
-}
-
-type ProductsData {
-    product_id: String!
-    name: String!
-    quantity: Int!
-    unit_price: Float!
-    total_price: Float!
-    uri: String!
 }
 
 type CustomerData {
     id: ID!
     name: String!
     email: String!
-}
-
-type GetProductsData {
-    page: Int!
-    limit: Int!
-    total_pages: Int!
-    total_items: Int!
-    products: [Product!]!
-}
-
-type ProductData {
-    id: ID!
-    name: String!
-    description: String!
-    stock: Int!
-    is_available: Boolean!
-    unit_price: Float!
-    currency: String!
-    image_url: String!
-}
-
-type Product {
-    id: ID!
-    name: String!
-    categories: [ID!]!
-    unit_price: Float!
-    currency: String!
-    image_url: String!
-    uri: String!
-}
-
-type StandardBadRequestData {
-    field: String!
-}
-
-type RemoveData {
-    id: ID!
-}
-
-
-type ResetPasswordData {
-    id: ID!
-}
-
-type CreateData {
-    id: ID!
-    created_at: Timestamp!
-}
-
-type DeleteFavoriteData {
-    id: ID!
-}
-
-type RemoveCartData {
-    id: ID!
 }
 
 type CartData {
@@ -264,11 +248,6 @@ type CartData {
     uri: String!
 }
 
-type UpdateData {
-    id: ID!
-    updated_at: Timestamp!
-}
-
 type GetUserFavoritesData {
     id: ID!
     product_id: ID!
@@ -279,20 +258,9 @@ type GetUserFavoritesData {
     uri: String!
 }
 
-input PaymentWebhookInputData {
-    status: Status!
-    amount_received: Int!
-    metadata: MetaData
-}
-
-input MetaData {
-    order_id: ID!
-}
-
-type DataError {
-    error: String!
-}
-
+"""
+Responses
+"""
 union SignInRes = SignInSuccessRes | ErrorRes
 union SignUpRes = SignUpSuccessRes | ErrorRes
 union SignOutRes = SignOutSuccessRes | ErrorRes
@@ -314,23 +282,59 @@ union UpdateProductCategoriesRes = UpdateProductCategoriesSuccessRes | ErrorRes
 union UpdateProductImagesRes = UpdateProductImagesSuccessRes | ErrorRes
 union AddOrderRes = AddOrderSuccessRes | ErrorRes
 union GetOrdersRes = GetOrdersSuccessRes | ErrorRes
-union GetUserOrdersRes = GetUserOrdersSuccessRes | ErrorRes
 union GetOrderRes = GetOrderSuccessRes | ErrorRes
 union CreatePaymentIntentRes = PaymentIntentSuccessRes | ErrorRes
 union UpdatePaymentIntentRes = UpdatePaymentIntentSuccessRes | ErrorRes
 union ConfirmPaymentIntentRes = ConfirmPaymentIntentSuccessRes | ErrorRes
 union PaymentWebhookRes = PaymentWebhookSuccessRes | ErrorRes
 
-input SignInReq {
-    email: String!
-    password: String!
+"""
+Manager Requests
+"""
+
+input AddProductReq {
+    product_name: String!
+    description: String!
+    stock: Int!
+    categories: [ID!]!
+    is_available: Boolean!
+    image_url: String!
+    unit_price: Float!
 }
 
-input SignUpReq {
-    first_name: String!
-    last_name: String!
+input UpdateProductReq {
+    name: String!
+    price: Float!
+    description: String!
+    stock: Int!
+    is_available: Boolean!
+}
+
+"""
+Manager and Client Requests
+"""
+
+input GetProductsReq {
+    first: Int!
+    after: ID!
+}
+
+
+
+input UpdateProductCategoriesReq {
+    op: Operation!
+    path: String!
+    value: [ID!]!
+}
+
+input UpdateProductImagesReq {
+    op: Operation!
+    path: String!
+    value: [String!]!
+}
+
+input SignInReq {
     email: String!
-    address: String!
     password: String!
 }
 
@@ -341,6 +345,18 @@ input ForgotPasswordReq {
 input ResetPasswordReq {
     token: String!
     new_password: String!
+}
+
+"""
+Client Requests
+"""
+
+input SignUpReq {
+    first_name: String!
+    last_name: String!
+    email: String!
+    address: String!
+    password: String!
 }
 
 input AddFavoriteReq {
@@ -362,44 +378,11 @@ input UpdateCartReq {
     value: Int!
 }
 
-input AddProductReq {
-    product_name: String!
-    description: String!
-    stock: Int!
-    categories: [ID!]!
-    is_available: Boolean!
-    image_url: String!
-    unit_price: Float!
-}
 
-input UpdateProductReq {
-    name: String!
-    price: Float!
-    description: String!
-    stock: Int!
-    is_available: Boolean!
-}
-
-input GetProductsReq {
-    first: Int!
-    after: ID!
-}
 
 input GetOrdersReq {
     first: Int!
     after: ID!
-}
-
-input UpdateProductCategoriesReq {
-    op: Operation!
-    path: String!
-    value: [ID!]!
-}
-
-input UpdateProductImagesReq {
-    op: Operation!
-    path: String!
-    value: [String!]!
 }
 
 input AddOrderReq {
@@ -407,6 +390,16 @@ input AddOrderReq {
     nearby_landmark: String!
     product_id: ID!
     quantity: Int!
+}
+
+input PaymentWebhookInputData {
+    status: Status!
+    amount_received: Int!
+    metadata: MetaData
+}
+
+input MetaData {
+    order_id: ID!
 }
 
 input CreatePaymentIntentReq {
@@ -430,30 +423,34 @@ input PaymentWebhookEventReq {
     data: PaymentWebhookInputData!
 }
 
-
-type Query {
+type ClientQuery {
+    """
+    To need header authentication
+    """
     # Favorites
     getAllUserFavorites: GetAllUserFavoritesRes!
     # Carts
     getUserCarts: GetUserCartsRes!
-    # Products
-    getProducts(req: GetProductsReq): GetProductsRes!
-    getProduct(product_id: ID!): GetProductRes!
     # Orders
     getOrders(req: GetOrdersReq): GetOrdersRes!
-    getUserOrders: GetUserOrdersRes!
     getOrder(order_id: ID!): GetOrderRes!
 }
 
-type Mutation {
-    # Auth
-    signIn(req: SignInReq!): SignInRes!
-    signOut: SignOutRes!
+type ClientAndManagerQuery {
+    """
+    Don't need header authentication
+    """
+    # Products
+    getProducts(req: GetProductsReq): GetProductsRes!
+    getProduct(product_id: ID!): GetProductRes!
+}
 
+type ClientMutation {
+    """
+    To need header authentication
+    """
     # User
     signUp(req: SignUpReq!): SignUpRes!
-    forgotPassword(req: ForgotPasswordReq!): ForgotPasswordRes!
-    resetPassword(req: ResetPasswordReq!): ResetPasswordRes!
 
     # Favorites
     addFavorite(req: AddFavoriteReq!): AddFavoriteRes!
@@ -463,8 +460,6 @@ type Mutation {
     addCart(req: AddCartReq!): AddCartRes!
     updateCart(cart_Id: ID!, req: UpdateCartReq!): UpdateCartRes!
     removeCart(cart_Id: ID!): RemoveCartRes!
-
-
 
     # Orders
     addOrder(req: AddOrderReq): AddOrderRes!
@@ -476,7 +471,26 @@ type Mutation {
     handlePaymentWebhook(req: PaymentWebhookEventReq!): PaymentWebhookRes!
 }
 
+type ClientAndManagerMutation {
+    # Auth
+    """
+    To need header authentication
+    """
+    signIn(req: SignInReq!): SignInRes!
+    forgotPassword(req: ForgotPasswordReq!): ForgotPasswordRes!
+    resetPassword(req: ResetPasswordReq!): ResetPasswordRes!
+
+    """
+    Don't need header authentication
+    """
+    signOut: SignOutRes!
+
+}
+
 type ManagerMutation {
+    """
+    To need header authentication
+    """
     # Products
     addProduct(req: AddProductReq!): AddProductRes!
     updateProduct(product_id: ID!, req: UpdateProductReq!): UpdateProductRes!
@@ -490,6 +504,3 @@ type ManagerMutation {
         req: UpdateProductImagesReq!
     ): UpdateProductImagesRes!
 }
-
-
-# GraphQL Editor: https://academy.graphqleditor.com/?lesson=graph
