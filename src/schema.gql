@@ -316,10 +316,9 @@ Manager and Client Requests
 
 input GetProductsReq {
     first: Int!
-    after: ID!
+    after: Int!
+    category_id: ID!
 }
-
-
 
 input UpdateProductCategoriesReq {
     op: Operation!
@@ -382,7 +381,8 @@ input UpdateCartReq {
 
 input GetOrdersReq {
     first: Int!
-    after: ID!
+    after: Int!
+    status_payment_id: ID!
 }
 
 input AddOrderReq {
