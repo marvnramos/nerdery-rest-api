@@ -61,7 +61,7 @@ model UserRole {
 
 model VerificationToken {
   id             String                @id @default(uuid())
-  token          String
+  token          String                @unique
   user_id        String
   token_type_id  Int
   is_used        Boolean
