@@ -33,22 +33,22 @@ export class UsersController {
     req.password = await this.usersService.hashPassword(req.password);
     const userData = { ...req, is_email_verified: false };
 
-    const user = await this.usersService.create(userData);
-
+    const userPromise = this.usersService.create(userData);
     const token = randomUUID();
-    await this.usersService.addVerificationToken({
-      token: token,
+    const tokenData = {
+      token,
       is_used: false,
       expired_at: getExpirationTimestamp(),
-      user: {
-        connect: { id: user.id },
-      },
-      tokenType: {
-        connect: { id: 1 },
-      },
-    });
+      user: { connect: { id: (await userPromise).id } },
+      tokenType: { connect: { id: 1 } },
+    };
 
-    const encodedToken = await this.usersService.encodeVerificationToken(token);
+    const [user, , encodedToken] = await Promise.all([
+      userPromise,
+      this.usersService.addVerificationToken(tokenData),
+      this.usersService.encodeVerificationToken(token),
+    ]);
+
     await this.mailService.sendUserConfirmationEmail(
       req.email,
       `${user.first_name} ${user.last_name}`,
