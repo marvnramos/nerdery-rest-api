@@ -62,7 +62,7 @@ export class UsersService {
 
   async hashPassword(password: string): Promise<string> {
     try {
-      const saltRounds = 12;
+      const saltRounds = 10;
       return await bcrypt.hash(password, saltRounds);
     } catch (error) {
       console.error('Error hashing password:', error);
