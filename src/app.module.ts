@@ -10,6 +10,8 @@ import { UsersController } from './users/users.controller';
 import { UsersModule } from './users/users.module';
 import { PrismaService } from './prisma/prisma.service';
 import { PrismaModule } from './prisma/prisma.module';
+import { MailService } from './utils/mailer/mail.service';
+import { MailModule } from './utils/mailer/mail.module';
 
 @Module({
   imports: [
@@ -21,8 +23,9 @@ import { PrismaModule } from './prisma/prisma.module';
     GraphqlModule,
     UsersModule,
     PrismaModule,
+    MailModule,
   ],
   controllers: [AuthController, StripeController, UsersController],
-  providers: [AuthService, PrismaService],
+  providers: [AuthService, PrismaService, MailService],
 })
 export class AppModule {}
