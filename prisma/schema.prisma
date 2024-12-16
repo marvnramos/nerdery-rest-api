@@ -48,6 +48,7 @@ model User {
   orders             Order[]
   favorites          Favorite[]
   verificationTokens VerificationToken[]
+  @@index([email, id])
 }
 
 model UserRole {
@@ -71,6 +72,8 @@ model VerificationToken {
 
   user           User                  @relation(fields: [user_id], references: [id])
   tokenType      VerificationTokenType @relation(fields: [token_type_id], references: [id])
+  @@index([user_id])
+  @@index([expired_at])
 }
 
 model VerificationTokenType {
@@ -97,6 +100,7 @@ model Product {
   favorites    Favorite[]
   categories   ProductCategory[]
   images       ProductImage[]
+  @@index([id, is_available])
 }
 
 model Cart {
@@ -111,6 +115,7 @@ model Cart {
   product    Product   @relation(fields: [product_id], references: [id])
 
   @@unique([user_id, product_id])
+  @@index([id, user_id])
 }
 
 model Order {
@@ -124,6 +129,7 @@ model Order {
   user            User           @relation(fields: [user_id], references: [id])
   orderDetails    OrderDetail[]
   paymentDetails  PaymentDetail[]
+  @@index([id, user_id])
 }
 
 model OrderDetail {
@@ -137,6 +143,7 @@ model OrderDetail {
 
   order       Order     @relation(fields: [order_id], references: [id])
   product     Product   @relation(fields: [product_id], references: [id])
+  @@index([order_id, product_id, id])
 }
 
 model Favorite {
@@ -150,6 +157,7 @@ model Favorite {
   product    Product   @relation(fields: [product_id], references: [id])
 
   @@unique([user_id, product_id])
+  @@index([user_id, id])
 }
 
 model ProductCategory {
@@ -162,6 +170,7 @@ model ProductCategory {
   category    Category  @relation(fields: [category_id], references: [id])
 
   @@id([product_id, category_id])
+  @@index([product_id, category_id])
 }
 
 model Category {
@@ -181,6 +190,7 @@ model ProductImage {
   updated_at DateTime  @default(now()) @updatedAt
 
   product    Product   @relation(fields: [product_id], references: [id])
+  @@index([product_id, id])
 }
 
 model PaymentDetail {
@@ -196,6 +206,7 @@ model PaymentDetail {
 
   order             Order          @relation(fields: [order_id], references: [id])
   status            StatusPayment  @relation(fields: [status_id], references: [id])
+  @@index([order_id])
 }
 
 model StatusPayment {
