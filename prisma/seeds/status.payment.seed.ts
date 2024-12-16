@@ -4,17 +4,17 @@ export default async (prisma: PrismaClient): Promise<StatusPayment[]> => {
   return Promise.all([
     prisma.statusPayment.upsert({
       where: { id: 1 },
-      create: { status: StatusPaymentType.PENDING },
+      create: { id: 1, status: StatusPaymentType.PENDING },
       update: {},
     }),
     prisma.statusPayment.upsert({
       where: { id: 2 },
-      create: { status: StatusPaymentType.COMPLETED },
+      create: { id: 2, status: StatusPaymentType.COMPLETED },
       update: {},
     }),
     prisma.statusPayment.upsert({
       where: { id: 3 },
-      create: { status: StatusPaymentType.FAILED },
+      create: { id: 3, status: StatusPaymentType.FAILED },
       update: {},
     }),
   ]);

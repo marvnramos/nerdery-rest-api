@@ -5,6 +5,7 @@ export default async (prisma: PrismaClient): Promise<UserRole[]> => {
     prisma.userRole.upsert({
       where: { id: 1 },
       create: {
+        id: 1,
         role: UserRoleType.MANAGER,
       },
       update: {},
@@ -12,6 +13,7 @@ export default async (prisma: PrismaClient): Promise<UserRole[]> => {
     prisma.userRole.upsert({
       where: { id: 2 },
       create: {
+        id: 2,
         role: UserRoleType.CLIENT,
       },
       update: {},
