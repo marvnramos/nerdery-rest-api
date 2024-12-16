@@ -30,4 +30,11 @@ export class UsersController {
       created_at: user.created_at,
     };
   }
+
+  @Get('validate-email/:token')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async validateEmail(@Param('token') token: string): Promise<void> {
+    const decodedToken = await this.usersService.decodeVerificationToken(token);
+    await this.usersService.verifyEmail(decodedToken);
+  }
 }
