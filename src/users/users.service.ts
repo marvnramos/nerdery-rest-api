@@ -112,17 +112,25 @@ export class UsersService {
 
   async verifyEmail(verificationToken: string): Promise<boolean> {
     try {
-      const token = await this.prismaService.verificationToken.findUnique({
-        where: { token: verificationToken },
-      });
+      const token = await this.findVerificationToken(verificationToken);
 
       if (!token) {
         return false;
       }
-      const tokenExpirationDate = new Date(token.expired_at);
-      if (tokenExpirationDate <= getCurrentTimestamp()) {
+
+      if (token.token_type_id !== 1) {
         return false;
       }
+
+      if (token.is_used) {
+        return false;
+      }
+
+      const tokenExpirationDate = new Date(token.expired_at);
+      if (getCurrentTimestamp() <= tokenExpirationDate) {
+        return false;
+      }
+
       const updatedVerificationToken =
         await this.prismaService.verificationToken.update({
           where: { token: verificationToken },
