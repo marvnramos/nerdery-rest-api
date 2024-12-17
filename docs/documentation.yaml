@@ -1460,9 +1460,9 @@ components:
     ForgotPasswordResponse:
       type: object
       properties:
-        accepted:
-          type: boolean
-          example: true
+        message:
+          type: string
+          example: Email sent
 
     ForgotPasswordBadRequestResponse:
       type: object
