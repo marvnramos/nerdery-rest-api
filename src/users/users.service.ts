@@ -49,7 +49,7 @@ export class UsersService {
 
   async findVerificationToken(token: string): Promise<VerificationToken> {
     try {
-      return await this.prismaService.verificationToken.findFirst({
+      return await this.prismaService.verificationToken.findUnique({
         where: { token },
       });
     } catch (error) {
@@ -67,6 +67,46 @@ export class UsersService {
     } catch (error) {
       console.error('Error hashing password:', error);
       throw new InternalServerErrorException('Failed to hash password');
+    }
+  }
+
+  async resetPassword(
+    verificationToken: string,
+    hashedPassword: string,
+  ): Promise<boolean> {
+    try {
+      const token = await this.findVerificationToken(verificationToken);
+      if (!token) {
+        return false;
+      }
+
+      if (token.token_type_id !== 2) {
+        return false;
+      }
+
+      if (token.is_used) {
+        return false;
+      }
+
+      const tokenExpirationDate = new Date(token.expired_at);
+      if (getCurrentTimestamp() > tokenExpirationDate || token.is_used) {
+        return false;
+      }
+
+      await this.prismaService.user.update({
+        where: { id: token.user_id },
+        data: { password: hashedPassword },
+      });
+
+      await this.prismaService.verificationToken.update({
+        where: { id: token.id },
+        data: { is_used: true },
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error during password reset:', error);
+      throw new InternalServerErrorException('Failed to reset password');
     }
   }
 
