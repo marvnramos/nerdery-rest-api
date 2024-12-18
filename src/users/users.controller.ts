@@ -114,11 +114,19 @@ export class UsersController {
 
   @Put('reset-password')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async resetPassword(@Body() req: ResetPasswordReqDto) {
+  async resetPassword(@Body() req: ResetPasswordReqDto, @Res() res: Response) {
     const [decodedToken, hashedPassword] = await Promise.all([
       this.usersService.decodeVerificationToken(req.token),
       this.usersService.hashPassword(req.new_password),
     ]);
-    await this.usersService.resetPassword(decodedToken, hashedPassword);
+
+    const isPasswordReset = await this.usersService.resetPassword(
+      decodedToken,
+      hashedPassword,
+    );
+
+    if (isPasswordReset) {
+      res.clearCookie('token', { httpOnly: false });
+    }
   }
 }
