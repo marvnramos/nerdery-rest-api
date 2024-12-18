@@ -7,13 +7,15 @@ import { User } from '@prisma/client';
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
   constructor(private authService: AuthService) {
-    super({ usernameField: 'email' });
+    super({
+      usernameField: 'email',
+    });
   }
 
   async validate(email: string, password: string): Promise<User> {
     const user = await this.authService.verifyCredentials(email, password);
     if (!user) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Invalid credentials');
     }
     return user;
   }
