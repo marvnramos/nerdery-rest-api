@@ -71,7 +71,12 @@ export class UsersController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async validateEmail(@Param('token') token: string): Promise<void> {
     const decodedToken = await this.usersService.decodeVerificationToken(token);
-    await this.usersService.verifyEmail(decodedToken);
+    const verifiedEmail = await this.usersService.verifyEmail(decodedToken);
+    if (!verifiedEmail) {
+      throw new BadRequestException(
+        'This link has expired or is already used.',
+      );
+    }
   }
 
   @Put('forgot-password')
@@ -114,7 +119,7 @@ export class UsersController {
 
   @Put('reset-password')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async resetPassword(@Body() req: ResetPasswordReqDto, @Res() res: Response) {
+  async resetPassword(@Body() req: ResetPasswordReqDto) {
     const [decodedToken, hashedPassword] = await Promise.all([
       this.usersService.decodeVerificationToken(req.token),
       this.usersService.hashPassword(req.new_password),
@@ -125,8 +130,10 @@ export class UsersController {
       hashedPassword,
     );
 
-    if (isPasswordReset) {
-      res.clearCookie('token', { httpOnly: false });
+    if (!isPasswordReset) {
+      throw new BadRequestException(
+        'This link has expired or is already used.',
+      );
     }
   }
 }
