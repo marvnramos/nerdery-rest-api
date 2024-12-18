@@ -146,16 +146,4 @@ export class UsersService {
       throw new InternalServerErrorException('Failed to verify email');
     }
   }
-
-  async verifyPassword(
-    hashedPassword: string,
-    password: string,
-  ): Promise<boolean> {
-    try {
-      return await bcrypt.compare(password, hashedPassword);
-    } catch (error) {
-      console.error('Error verifying password:', error);
-      throw new InternalServerErrorException('Failed to verify password');
-    }
-  }
 }
