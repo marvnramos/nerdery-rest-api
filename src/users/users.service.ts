@@ -18,7 +18,7 @@ export class UsersService {
 
   async findByEmail(email: string): Promise<User | null> {
     try {
-      return await this.prismaService.user.findFirst({ where: { email } });
+      return await this.prismaService.user.findUnique({ where: { email } });
     } catch (error) {
       console.error(`Error finding user with email ${email}:`, error);
       throw new InternalServerErrorException('Failed to find user by email');
