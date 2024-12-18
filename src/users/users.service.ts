@@ -2,7 +2,6 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma, User, VerificationToken } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
-import { getCurrentTimestamp } from '../utils/timestamp';
 
 @Injectable()
 export class UsersService {
@@ -19,7 +18,7 @@ export class UsersService {
 
   async findByEmail(email: string): Promise<User | null> {
     try {
-      return await this.prismaService.user.findFirst({ where: { email } });
+      return await this.prismaService.user.findUnique({ where: { email } });
     } catch (error) {
       console.error(`Error finding user with email ${email}:`, error);
       throw new InternalServerErrorException('Failed to find user by email');
@@ -49,7 +48,7 @@ export class UsersService {
 
   async findVerificationToken(token: string): Promise<VerificationToken> {
     try {
-      return await this.prismaService.verificationToken.findFirst({
+      return await this.prismaService.verificationToken.findUnique({
         where: { token },
       });
     } catch (error) {
@@ -70,28 +69,71 @@ export class UsersService {
     }
   }
 
+  async resetPassword(
+    verificationToken: string,
+    hashedPassword: string,
+  ): Promise<boolean> {
+    try {
+      const token = await this.findVerificationToken(verificationToken);
+      if (!token) {
+        return false;
+      }
+
+      if (token.token_type_id !== 2) {
+        return false;
+      }
+
+      if (token.is_used) {
+        return false;
+      }
+
+      const tokenExpirationDate = new Date(token.expired_at);
+      if (new Date() > tokenExpirationDate) {
+        return false;
+      }
+
+      await this.prismaService.user.update({
+        where: { id: token.user_id },
+        data: { password: hashedPassword },
+      });
+
+      await this.prismaService.verificationToken.update({
+        where: { id: token.id },
+        data: { is_used: true },
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error during password reset:', error);
+      throw new InternalServerErrorException('Failed to reset password');
+    }
+  }
+
   async verifyEmail(verificationToken: string): Promise<boolean> {
     try {
-      const token = await this.prismaService.verificationToken.findUnique({
-        where: { token: verificationToken },
-      });
+      const token = await this.findVerificationToken(verificationToken);
 
       if (!token) {
         return false;
       }
-      const tokenExpirationDate = new Date(token.expired_at);
-      if (tokenExpirationDate <= getCurrentTimestamp()) {
-        return false;
-      }
-      const updatedVerificationToken =
-        await this.prismaService.verificationToken.update({
-          where: { token: verificationToken },
-          data: { is_used: true },
-        });
 
-      if (!updatedVerificationToken) {
+      if (token.token_type_id !== 1) {
         return false;
       }
+
+      if (token.is_used) {
+        return false;
+      }
+
+      const tokenExpirationDate = new Date(token.expired_at);
+      if (new Date() > tokenExpirationDate) {
+        return false;
+      }
+
+      await this.prismaService.verificationToken.update({
+        where: { token: verificationToken },
+        data: { is_used: true },
+      });
 
       await this.prismaService.user.update({
         where: { id: token.user_id },
@@ -102,18 +144,6 @@ export class UsersService {
     } catch (error) {
       console.error('Error verifying email:', error);
       throw new InternalServerErrorException('Failed to verify email');
-    }
-  }
-
-  async verifyPassword(
-    hashedPassword: string,
-    password: string,
-  ): Promise<boolean> {
-    try {
-      return await bcrypt.compare(password, hashedPassword);
-    } catch (error) {
-      console.error('Error verifying password:', error);
-      throw new InternalServerErrorException('Failed to verify password');
     }
   }
 }

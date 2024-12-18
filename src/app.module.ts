@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AuthController } from './auth/auth.controller';
-import { AuthService } from './auth/auth.service';
 import { AuthModule } from './auth/auth.module';
 import { StripeController } from './stripe/stripe.controller';
 import { StripeModule } from './stripe/stripe.module';
@@ -26,6 +25,6 @@ import { MailModule } from './utils/mailer/mail.module';
     MailModule,
   ],
   controllers: [AuthController, StripeController, UsersController],
-  providers: [AuthService, PrismaService, MailService],
+  providers: [PrismaService, MailService],
 })
 export class AppModule {}

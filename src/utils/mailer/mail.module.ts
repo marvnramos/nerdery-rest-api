@@ -19,7 +19,7 @@ import { MailService } from './mail.service';
         from: process.env.EMAIL_FROM,
       },
       template: {
-        dir: process.cwd() + '/src/public/templates',
+        dir: process.cwd() + '/public/templates/mails',
         adapter: new HandlebarsAdapter(),
         options: {
           strict: true,
