@@ -2,7 +2,6 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma, User, VerificationToken } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
-import { getCurrentTimestamp } from '../utils/timestamp';
 
 @Injectable()
 export class UsersService {
@@ -89,7 +88,7 @@ export class UsersService {
       }
 
       const tokenExpirationDate = new Date(token.expired_at);
-      if (getCurrentTimestamp() > tokenExpirationDate || token.is_used) {
+      if (new Date() > tokenExpirationDate) {
         return false;
       }
 
@@ -127,19 +126,14 @@ export class UsersService {
       }
 
       const tokenExpirationDate = new Date(token.expired_at);
-      if (getCurrentTimestamp() <= tokenExpirationDate) {
+      if (new Date() > tokenExpirationDate) {
         return false;
       }
 
-      const updatedVerificationToken =
-        await this.prismaService.verificationToken.update({
-          where: { token: verificationToken },
-          data: { is_used: true },
-        });
-
-      if (!updatedVerificationToken) {
-        return false;
-      }
+      await this.prismaService.verificationToken.update({
+        where: { token: verificationToken },
+        data: { is_used: true },
+      });
 
       await this.prismaService.user.update({
         where: { id: token.user_id },
