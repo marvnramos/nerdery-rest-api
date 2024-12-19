@@ -11,6 +11,9 @@ import { MailService } from './utils/mailer/mail.service';
 import { MailModule } from './utils/mailer/mail.module';
 import { PaymentsModule } from './payments/payments.module';
 import { OrdersModule } from './orders/orders.module';
+import { FavoritesModule } from './favorites/favorites.module';
+import { CartsModule } from './carts/carts.module';
+import { ProductsModule } from './products/products.module';
 
 @Module({
   imports: [
@@ -24,6 +27,9 @@ import { OrdersModule } from './orders/orders.module';
     PrismaModule,
     MailModule,
     OrdersModule,
+    FavoritesModule,
+    CartsModule,
+    ProductsModule,
   ],
   controllers: [AuthController, UsersController],
   providers: [PrismaService, MailService],
