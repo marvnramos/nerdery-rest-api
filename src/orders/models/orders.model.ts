@@ -1,6 +1,6 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql';
-// import { OrderDetail } from 'src/order-details/order-detail.model';
-// import { PaymentDetail } from 'src/payments/payment-detail.model';
+import { OrderDetail } from './order.details.model';
+import { PaymentDetail } from 'src/payments/models/payment.details.model';
 
 @ObjectType()
 export class Order {
@@ -22,8 +22,8 @@ export class Order {
   @Field()
   updated_at: Date;
 
-  // @Field(() => [OrderDetail], { nullable: true })
-  // orderDetails?: OrderDetail[];
-  // @Field(() => [PaymentDetail], { nullable: true })
-  // paymentDetails?: PaymentDetail[];
+  @Field(() => [OrderDetail], { nullable: true })
+  orderDetails?: OrderDetail[];
+  @Field(() => [PaymentDetail], { nullable: true })
+  paymentDetails?: PaymentDetail[];
 }
