@@ -5,21 +5,21 @@ export class OrderDetail {
   @Field(() => ID)
   id: string;
 
-  @Field()
-  order_id: string;
+  @Field({ name: 'order_id' })
+  orderId: string;
 
-  @Field()
-  product_id: string;
+  @Field({ name: 'product_id' })
+  productId: string;
 
   @Field()
   quantity: number;
 
-  @Field()
+  @Field({ name: 'unit_price' })
   unitPrice: number;
 
-  @Field()
-  created_at: Date;
+  @Field({ name: 'created_at' })
+  createdAt: Date;
 
-  @Field()
-  updated_at: Date;
+  @Field({ name: 'updated_at' })
+  updatedAt: Date;
 }

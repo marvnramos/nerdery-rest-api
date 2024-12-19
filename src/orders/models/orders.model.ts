@@ -7,20 +7,20 @@ export class Order {
   @Field(() => ID)
   id: string;
 
-  @Field()
-  user_id: string;
+  @Field({ name: 'user_id' })
+  userId: string;
 
   @Field()
   address: string;
 
-  @Field()
-  nearby_landmark: string;
+  @Field({ name: 'nearby_landmark' })
+  nearbyLandmark: string;
 
-  @Field()
-  created_at: Date;
+  @Field({ name: 'created_at' })
+  createdAt: Date;
 
-  @Field()
-  updated_at: Date;
+  @Field({ name: 'updated_at' })
+  updatedAt: Date;
 
   @Field(() => [OrderDetail], { nullable: true })
   orderDetails?: OrderDetail[];
