@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AuthController } from './auth/auth.controller';
 import { AuthModule } from './auth/auth.module';
-import { GraphqlModule } from './graphql/graphql.module';
+import { GraphqlModule } from './graphql.module';
 import { UsersController } from './users/users.controller';
 import { UsersModule } from './users/users.module';
 import { PrismaService } from './utils/prisma/prisma.service';
