@@ -14,6 +14,7 @@ import { OrdersModule } from './orders/orders.module';
 import { FavoritesModule } from './favorites/favorites.module';
 import { CartsModule } from './carts/carts.module';
 import { ProductsModule } from './products/products.module';
+import { VerificationTokenModule } from './verification.token/verification.token.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { ProductsModule } from './products/products.module';
     FavoritesModule,
     CartsModule,
     ProductsModule,
+    VerificationTokenModule,
   ],
   controllers: [AuthController, UsersController],
   providers: [PrismaService, MailService],
