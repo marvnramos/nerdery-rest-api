@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@apollo/server": "^4.11.2",
+    "@golevelup/nestjs-stripe": "^0.9.0",
     "@nestjs-modules/mailer": "^2.0.2",
     "@nestjs/apollo": "^12.2.2",
     "@nestjs/bull": "^10.2.3",
