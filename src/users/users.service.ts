@@ -39,6 +39,15 @@ export class UsersService {
     }
   }
 
+  async findById(id: string): Promise<User | null> {
+    try {
+      return await this.prismaService.user.findUnique({ where: { id } });
+    } catch (error) {
+      console.error(`Error finding user with id ${id}:`, error);
+      throw new InternalServerErrorException('Failed to find user by id');
+    }
+  }
+
   async resetPassword(
     verificationToken: string,
     hashedPassword: string,
