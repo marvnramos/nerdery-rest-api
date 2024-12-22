@@ -21,11 +21,13 @@ import { ForgotPasswordReqDto } from './dto/requests/forgot.password.req.dto';
 import { ResetPasswordResDto } from './dto/responses/reset.password.res.dto';
 import { Response } from 'express';
 import { ResetPasswordReqDto } from './dto/requests/reset.password.req.dto';
+import { VerificationTokenService } from '../verification.token/verification.token.service';
 
 @Controller('users')
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
+    private readonly verificationTokenService: VerificationTokenService,
     private readonly mailService: MailService,
   ) {}
 
@@ -52,15 +54,17 @@ export class UsersController {
 
     const [user, , encodedToken] = await Promise.all([
       userPromise,
-      this.usersService.addVerificationToken(tokenData),
-      this.usersService.encodeVerificationToken(token),
+      this.verificationTokenService.create(tokenData),
+      this.verificationTokenService.encodeVerificationToken(token),
     ]);
 
-    await this.mailService.sendUserConfirmationEmail(
-      req.email,
-      `${user.first_name} ${user.last_name}`,
-      encodedToken,
-    );
+    await this.mailService.sendEmail({
+      email: user.email,
+      fullName: `${user.first_name} ${user.last_name}`,
+      subject: 'Email Verification',
+      uri: `${process.env.BASE_URL}/users/validate-email/${encodedToken}`,
+      template: './confirmation',
+    });
 
     return {
       created_at: user.created_at,
@@ -70,7 +74,8 @@ export class UsersController {
   @Get('validate-email/:token')
   @HttpCode(HttpStatus.NO_CONTENT)
   async validateEmail(@Param('token') token: string): Promise<void> {
-    const decodedToken = await this.usersService.decodeVerificationToken(token);
+    const decodedToken =
+      await this.verificationTokenService.decodeVerificationToken(token);
     const verifiedEmail = await this.usersService.verifyEmail(decodedToken);
     if (!verifiedEmail) {
       throw new BadRequestException(
@@ -98,14 +103,17 @@ export class UsersController {
       tokenType: { connect: { id: 2 } },
     };
 
-    const encodedToken = await this.usersService.encodeVerificationToken(token);
+    const encodedToken =
+      await this.verificationTokenService.encodeVerificationToken(token);
     await Promise.all([
-      this.usersService.addVerificationToken(tokenData),
-      this.mailService.sendResetPasswordEmail(
-        req.email,
-        `${user.first_name} ${user.last_name}`,
-        encodedToken,
-      ),
+      this.verificationTokenService.create(tokenData),
+      this.mailService.sendEmail({
+        email: user.email,
+        subject: 'Reset Password',
+        uri: `${process.env.BASE_URL}/users/reset-password/${encodedToken}`,
+        template: './reset-password',
+        fullName: `${user.first_name} ${user.last_name}`,
+      }),
     ]);
 
     return { message: 'Email sent' };
@@ -121,7 +129,7 @@ export class UsersController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async resetPassword(@Body() req: ResetPasswordReqDto) {
     const [decodedToken, hashedPassword] = await Promise.all([
-      this.usersService.decodeVerificationToken(req.token),
+      this.verificationTokenService.decodeVerificationToken(req.token),
       this.usersService.hashPassword(req.new_password),
     ]);
 
@@ -129,6 +137,16 @@ export class UsersController {
       decodedToken,
       hashedPassword,
     );
+
+    const token =
+      await this.verificationTokenService.findVerificationToken(decodedToken);
+    const user = await this.usersService.findById(token.user_id);
+    await this.mailService.sendEmail({
+      email: user.email,
+      fullName: `${user.first_name} ${user.last_name}`,
+      subject: 'Password Reset',
+      template: './password-reset',
+    });
 
     if (!isPasswordReset) {
       throw new BadRequestException(
