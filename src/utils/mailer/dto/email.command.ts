@@ -1,5 +1,4 @@
-import { IsEmail, IsEnum, IsNotEmpty, IsString } from 'class-validator';
-import { EmailType } from '../enums/email.types';
+import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class EmailCommand {
   @IsString()
@@ -13,13 +12,14 @@ export class EmailCommand {
 
   @IsString()
   @IsNotEmpty()
-  token: string;
-
-  @IsEnum(EmailType)
-  @IsNotEmpty()
-  emailType: EmailType;
+  template: string;
 
   @IsString()
   @IsNotEmpty()
-  template: string;
+  @IsOptional()
+  uri?: string;
+
+  @IsString()
+  @IsNotEmpty()
+  subject: string;
 }
