@@ -145,7 +145,7 @@ export class UsersController {
       email: user.email,
       fullName: `${user.first_name} ${user.last_name}`,
       subject: 'Password Reset',
-      template: './password-reset',
+      template: './reset-password-confirmation',
     });
 
     if (!isPasswordReset) {
