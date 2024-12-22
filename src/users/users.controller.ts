@@ -60,10 +60,10 @@ export class UsersController {
 
     await this.mailService.sendEmail({
       email: user.email,
-      subject: 'Email Verification',
-      template: './confirmation',
       fullName: `${user.first_name} ${user.last_name}`,
-      token: encodedToken,
+      subject: 'Email Verification',
+      uri: `${process.env.BASE_URL}/users/validate-email/${encodedToken}`,
+      template: './confirmation',
     });
 
     return {
@@ -110,9 +110,9 @@ export class UsersController {
       this.mailService.sendEmail({
         email: user.email,
         subject: 'Reset Password',
+        uri: `${process.env.BASE_URL}/users/reset-password/${encodedToken}`,
         template: './reset-password',
         fullName: `${user.first_name} ${user.last_name}`,
-        token: encodedToken,
       }),
     ]);
 
@@ -137,6 +137,16 @@ export class UsersController {
       decodedToken,
       hashedPassword,
     );
+
+    const token =
+      await this.verificationTokenService.findVerificationToken(decodedToken);
+    const user = await this.usersService.findById(token.user_id);
+    await this.mailService.sendEmail({
+      email: user.email,
+      fullName: `${user.first_name} ${user.last_name}`,
+      subject: 'Password Reset',
+      template: './password-reset',
+    });
 
     if (!isPasswordReset) {
       throw new BadRequestException(
