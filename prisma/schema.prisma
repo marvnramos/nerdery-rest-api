@@ -195,7 +195,7 @@ model Category {
   products     ProductCategory[]
 }
 
-model ProductImage {
+model ProductImages {
   id         String    @id @default(uuid())
   product_id String
   image_url  String
