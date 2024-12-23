@@ -7,6 +7,7 @@ import {
   IsArray,
   IsPositive,
   IsNumber,
+  IsNotEmpty,
 } from 'class-validator';
 
 @InputType()
@@ -14,10 +15,12 @@ export class AddProductReq {
   @Field(() => String, { name: 'product_name' })
   @Expose({ name: 'product_name' })
   @IsString()
+  @IsNotEmpty()
   productName: string;
 
   @Field(() => String)
   @IsString()
+  @IsNotEmpty()
   description: string;
 
   @Field(() => Number)
@@ -37,6 +40,7 @@ export class AddProductReq {
   @Field(() => String!, { name: 'image_base64' })
   @Expose({ name: 'image_base64' })
   @IsString()
+  @IsNotEmpty()
   imageBase64: string;
 
   @Field(() => Number!, { name: 'unit_price' })
