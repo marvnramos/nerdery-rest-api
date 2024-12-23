@@ -19,7 +19,7 @@ export class User {
   isEmailVerified: boolean;
 
   @Field({ name: 'role_id' })
-  roleId: string;
+  roleId: number;
 
   @Field()
   address: string;

@@ -4,7 +4,7 @@ import { User } from './users.model';
 @ObjectType()
 export class UserRoles {
   @Field(() => ID)
-  id: string;
+  id: number;
 
   @Field()
   role: string;
