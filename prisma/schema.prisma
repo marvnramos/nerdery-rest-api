@@ -99,7 +99,7 @@ model Product {
   orderDetails   OrderDetail[]
   favorites      Favorite[]
   categories     ProductCategory[]
-  images         ProductImage[]
+  images         ProductImages[]
 
   @@index([id, is_available])
 }
