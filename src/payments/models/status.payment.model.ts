@@ -1,12 +1,12 @@
 import { Field, ObjectType, ID } from '@nestjs/graphql';
 
 @ObjectType()
-export class Cart {
+export class PaymentStatus {
   @Field(() => ID)
-  id: string;
+  id: number;
 
-  @Field({ name: 'user_id' })
-  userId: string;
+  @Field()
+  status: string;
 
   @Field({ name: 'created_at' })
   createdAt: Date;

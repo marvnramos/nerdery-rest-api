@@ -1,10 +1,9 @@
 import { Field, ObjectType, ID } from '@nestjs/graphql';
-import { User } from './users.model';
 
 @ObjectType()
 export class UserRoles {
   @Field(() => ID)
-  id: string;
+  id: number;
 
   @Field()
   role: string;
@@ -14,7 +13,4 @@ export class UserRoles {
 
   @Field({ name: 'updated_at' })
   updatedAt: Date;
-
-  @Field(() => [User], { nullable: true })
-  users?: User[];
 }
