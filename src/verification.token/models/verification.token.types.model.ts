@@ -1,5 +1,4 @@
 import { Field, ObjectType, ID } from '@nestjs/graphql';
-import { VerificationTokens } from './verification.tokens.model';
 
 @ObjectType()
 export class VerificationTokenTypes {
@@ -14,7 +13,4 @@ export class VerificationTokenTypes {
 
   @Field({ name: 'updated_at' })
   updatedAt: Date;
-
-  @Field(() => [VerificationTokens], { nullable: true })
-  verificationTokens?: VerificationTokens[];
 }
