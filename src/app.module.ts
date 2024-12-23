@@ -16,6 +16,8 @@ import { CartsModule } from './carts/carts.module';
 import { ProductsModule } from './products/products.module';
 import { VerificationTokenModule } from './verification.token/verification.token.module';
 import { CategoriesModule } from './categories/categories.module';
+import { ProductImagesModule } from './product.images/product.images.module';
+import { ProductImageService } from './product.image/product.image.service';
 
 @Module({
   imports: [
@@ -34,8 +36,9 @@ import { CategoriesModule } from './categories/categories.module';
     ProductsModule,
     VerificationTokenModule,
     CategoriesModule,
+    ProductImagesModule,
   ],
   controllers: [AuthController, UsersController],
-  providers: [PrismaService, MailService],
+  providers: [PrismaService, MailService, ProductImageService],
 })
 export class AppModule {}
