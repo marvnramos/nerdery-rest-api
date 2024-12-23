@@ -1,5 +1,4 @@
 import { Field, ObjectType, ID } from '@nestjs/graphql';
-import { CartItems } from './cart.items.model';
 
 @ObjectType()
 export class Cart {
@@ -14,7 +13,4 @@ export class Cart {
 
   @Field({ name: 'updated_at' })
   updatedAt: Date;
-
-  @Field(() => [CartItems], { nullable: true })
-  cartItems?: CartItems[];
 }
