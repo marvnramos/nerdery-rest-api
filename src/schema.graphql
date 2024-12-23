@@ -18,13 +18,21 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type Categories {
+  id: ID!
+  category_name: String!
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
 type Query {
   Orders: String!
   publicResource: String!
 }
 
 type Mutation {
-  createProduct(data: AddProductReq!): Product!
+  addProduct(data: AddProductReq!): Product!
+  addCategory(data: AddCategoryReq!): Categories!
 }
 
 input AddProductReq {
@@ -35,4 +43,8 @@ input AddProductReq {
   is_available: Boolean!
   image_base64: String!
   unit_price: Float!
+}
+
+input AddCategoryReq {
+  category_name: String!
 }
