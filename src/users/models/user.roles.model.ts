@@ -1,5 +1,4 @@
 import { Field, ObjectType, ID } from '@nestjs/graphql';
-import { User } from './users.model';
 
 @ObjectType()
 export class UserRoles {
@@ -14,7 +13,4 @@ export class UserRoles {
 
   @Field({ name: 'updated_at' })
   updatedAt: Date;
-
-  @Field(() => [User], { nullable: true })
-  users?: User[];
 }

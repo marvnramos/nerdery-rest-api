@@ -1,8 +1,4 @@
 import { Field, ObjectType, ID } from '@nestjs/graphql';
-import { Order } from '../../orders/models/orders.model';
-import { VerificationTokens } from '../../verification.token/models/verification.tokens.model';
-import { Cart } from '../../carts/models/carts.model';
-import { Favorite } from '../../favorites/models/favorites.models';
 
 @ObjectType()
 export class User {
@@ -35,16 +31,4 @@ export class User {
 
   @Field({ name: 'updated_at' })
   updatedAt: Date;
-
-  @Field(() => [VerificationTokens], { nullable: true })
-  verificationTokens?: VerificationTokens[];
-
-  @Field(() => [Cart], { nullable: true })
-  carts?: Cart[];
-
-  @Field(() => [Order], { nullable: true })
-  orders?: Order[];
-
-  @Field(() => [Favorite], { nullable: true })
-  favorites?: Favorite[];
 }
