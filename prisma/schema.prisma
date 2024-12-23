@@ -90,7 +90,7 @@ model Product {
   product_name   String
   description    String
   stock          Int
-  is_available   Boolean
+  is_available   Boolean            @default(true)
   unit_price     Float
   created_at     DateTime           @default(now())
   updated_at     DateTime           @default(now()) @updatedAt
