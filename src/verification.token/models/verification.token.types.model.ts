@@ -6,8 +6,8 @@ export class VerificationTokenTypes {
   @Field(() => ID)
   id: number;
 
-  @Field()
-  token_type: string;
+  @Field({ name: 'token_type' })
+  tokenType: string;
 
   @Field({ name: 'created_at' })
   createdAt: Date;
