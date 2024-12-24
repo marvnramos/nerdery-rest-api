@@ -188,9 +188,9 @@ model ProductCategory {
 
 model Category {
   id           Int          @id @default(autoincrement())
-  category_name String
-  created_at   DateTime     @default(now())
-  updated_at   DateTime     @default(now())                @updatedAt
+  category_name String       @unique
+  created_at   DateTime      @default(now())
+  updated_at   DateTime      @default(now()) @updatedAt
 
   products     ProductCategory[]
 }

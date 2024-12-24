@@ -17,6 +17,8 @@ import { ProductsModule } from './products/products.module';
 import { VerificationTokenModule } from './verification.token/verification.token.module';
 import { CategoriesModule } from './categories/categories.module';
 import { ProductImagesModule } from './product.images/product.images.module';
+import { APP_FILTER } from '@nestjs/core';
+import { GlobalExceptionFilter } from './utils/GlobalExceptionFilter';
 
 @Module({
   imports: [
@@ -38,6 +40,13 @@ import { ProductImagesModule } from './product.images/product.images.module';
     ProductImagesModule,
   ],
   controllers: [AuthController, UsersController],
-  providers: [PrismaService, MailService],
+  providers: [
+    PrismaService,
+    MailService,
+    {
+      provide: APP_FILTER,
+      useClass: GlobalExceptionFilter,
+    },
+  ],
 })
 export class AppModule {}
