@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { GqlArgumentsHost } from '@nestjs/graphql';
 import { Request, Response } from 'express';
+import { GraphQLError } from 'graphql';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
@@ -26,7 +27,23 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         exception.stack,
       );
 
-      throw exception;
+      const status =
+        exception instanceof HttpException
+          ? exception.getStatus()
+          : HttpStatus.INTERNAL_SERVER_ERROR;
+
+      const code =
+        exception instanceof HttpException
+          ? exception.getResponse()
+          : 'Internal server error';
+
+      throw new GraphQLError(exception.message, {
+        extensions: {
+          code: code['error'],
+          date: new Date().toISOString(),
+          status,
+        },
+      });
     } else if (contextType === 'http') {
       const ctx = host.switchToHttp();
       const response = ctx.getResponse<Response>();
