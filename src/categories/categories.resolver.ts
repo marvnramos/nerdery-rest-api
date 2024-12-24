@@ -1,16 +1,16 @@
 import { Resolver, Mutation, Args } from '@nestjs/graphql';
 import { Categories } from './models/categories.model';
 import { UseGuards } from '@nestjs/common';
-import { GqlJwtAuthGuard } from '../auth/guards/gql.jwt.guard';
 import { AddCategoryReq } from './dto/requests/create.category.req';
 import { CategoriesService } from './categories.service';
 import { plainToInstance } from 'class-transformer';
+import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 
 @Resolver()
 export class CategoriesResolver {
   constructor(private readonly categoriesService: CategoriesService) {}
   @Mutation(() => Categories)
-  @UseGuards(GqlJwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   /**
    * TODO: Add Roles Guard
    */
