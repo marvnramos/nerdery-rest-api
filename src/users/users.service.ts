@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from '../utils/prisma/prisma.service';
-import { Prisma, User } from '@prisma/client';
+import { Prisma, User, UserRole } from '@prisma/client';
 import { VerificationTokenService } from '../verification.token/verification.token.service';
 import * as bcrypt from 'bcrypt';
 
@@ -45,6 +45,18 @@ export class UsersService {
     } catch (error) {
       console.error(`Error finding user with id ${id}:`, error);
       throw new InternalServerErrorException('Failed to find user by id');
+    }
+  }
+
+  async getUserRole(userId: string): Promise<UserRole | null> {
+    try {
+      const user = await this.findById(userId);
+      return this.prismaService.userRole.findUnique({
+        where: { id: user.role_id },
+      });
+    } catch (error) {
+      console.error(`Error finding user with id ${userId}:`, error);
+      throw new InternalServerErrorException('Failed to find user by user');
     }
   }
 

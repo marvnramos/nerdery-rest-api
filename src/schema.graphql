@@ -2,6 +2,49 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Product {
+  id: ID!
+  product_name: String!
+  description: String!
+  stock: Float!
+  is_available: Boolean!
+  unit_price: Float!
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Categories {
+  id: ID!
+  category_name: String!
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
 type Query {
   Orders: String!
+  publicResource: String!
+}
+
+type Mutation {
+  addProduct(data: AddProductReq!): Product!
+  addCategory(data: AddCategoryReq!): Categories!
+}
+
+input AddProductReq {
+  product_name: String!
+  description: String!
+  stock: Float!
+  categories: [ID!]!
+  is_available: Boolean!
+  image_base64: String!
+  unit_price: Float!
+}
+
+input AddCategoryReq {
+  category_name: String!
 }

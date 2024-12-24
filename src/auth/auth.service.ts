@@ -31,7 +31,11 @@ export class AuthService {
   }
 
   async login(user: User): Promise<SignInResDto> {
-    const payload = { sub: user.id };
+    const userRole = await this.usersService.getUserRole(user.id);
+    const payload = {
+      sub: user.id,
+      role: userRole.role,
+    };
     return {
       accessToken: this.jwtService.sign(payload),
     };
