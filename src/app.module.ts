@@ -16,7 +16,7 @@ import { CartsModule } from './carts/carts.module';
 import { ProductsModule } from './products/products.module';
 import { VerificationTokenModule } from './verification.token/verification.token.module';
 import { CategoriesModule } from './categories/categories.module';
-import { ProductImagesModule } from './product.images/product.images.module';
+import { CloudinaryModule } from './utils/cloudinary/cloudinary.module';
 import { APP_FILTER } from '@nestjs/core';
 import { GlobalExceptionFilter } from './utils/GlobalExceptionFilter';
 
@@ -37,7 +37,7 @@ import { GlobalExceptionFilter } from './utils/GlobalExceptionFilter';
     ProductsModule,
     VerificationTokenModule,
     CategoriesModule,
-    ProductImagesModule,
+    CloudinaryModule,
   ],
   controllers: [AuthController, UsersController],
   providers: [
