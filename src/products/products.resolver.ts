@@ -1,13 +1,13 @@
 import { UseGuards } from '@nestjs/common';
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
-import { GqlJwtAuthGuard } from '../auth/guards/gql.jwt.guard';
 import { Product } from './models/products.model';
 import { AddProductReq } from './dto/create.input';
+import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 
 @Resolver()
 export class ProductsResolver {
   @Mutation(() => Product)
-  @UseGuards(GqlJwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async addProduct(@Args('data') data: AddProductReq): Promise<Product> {
     return {
       id: '1',
