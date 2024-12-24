@@ -14,9 +14,9 @@ import { UseFilters } from '@nestjs/common';
 export class CategoriesResolver {
   constructor(private readonly categoriesService: CategoriesService) {}
 
+  @Auth('MANAGER')
   @UseFilters(new GlobalExceptionFilter())
   @Mutation(() => AddCategoryRes)
-  @Auth('MANAGER')
   async addCategory(
     @Args('data') data: AddCategoryReq,
   ): Promise<AddCategoryRes> {
@@ -27,8 +27,9 @@ export class CategoriesResolver {
     return plainToInstance(AddCategoryRes, category);
   }
 
-  @Mutation(() => DeleteCategoryRes)
   @Auth('MANAGER')
+  @UseFilters(new GlobalExceptionFilter())
+  @Mutation(() => DeleteCategoryRes)
   async deleteCategory(
     @Args('data') data: DeleteCategoryReq,
   ): Promise<DeleteCategoryRes> {
@@ -39,8 +40,9 @@ export class CategoriesResolver {
     return response;
   }
 
-  @Query(() => [Categories])
   @Auth('MANAGER')
+  @UseFilters(new GlobalExceptionFilter())
+  @Query(() => [Categories])
   async getCategories(): Promise<Categories[]> {
     const categories = await this.categoriesService.getAllCategories();
     return plainToInstance(Categories, categories);
