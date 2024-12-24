@@ -199,11 +199,12 @@ model ProductImages {
   id         String    @id @default(uuid())
   product_id String
   image_url  String
+  public_id  String    @unique
   created_at DateTime  @default(now())
   updated_at DateTime  @default(now()) @updatedAt
 
   product    Product   @relation(fields: [product_id], references: [id])
-  @@index([product_id, id])
+  @@index([product_id, id, public_id])
 }
 
 model PaymentDetail {
