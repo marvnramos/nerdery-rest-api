@@ -7,11 +7,14 @@ import { Auth } from '../auth/decorators/auth.role.decorator';
 import { DeleteCategoryReq } from './dto/requests/delete.category.req';
 import { DeleteCategoryRes } from './dto/responses/delete.category.res';
 import { AddCategoryRes } from './dto/responses/create.category.res';
+import { GlobalExceptionFilter } from '../utils/GlobalExceptionFilter';
+import { UseFilters } from '@nestjs/common';
 
 @Resolver()
 export class CategoriesResolver {
   constructor(private readonly categoriesService: CategoriesService) {}
 
+  @UseFilters(new GlobalExceptionFilter())
   @Mutation(() => AddCategoryRes)
   @Auth('MANAGER')
   async addCategory(
