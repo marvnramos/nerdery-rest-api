@@ -4,6 +4,7 @@ import { UseGuards } from '@nestjs/common';
 import { GqlJwtAuthGuard } from '../auth/guards/gql.jwt.guard';
 import { AddCategoryReq } from './dto/requests/create.category.req';
 import { CategoriesService } from './categories.service';
+import { plainToInstance } from 'class-transformer';
 
 @Resolver()
 export class CategoriesResolver {
@@ -15,16 +16,10 @@ export class CategoriesResolver {
    */
   async addCategory(@Args('data') data: AddCategoryReq): Promise<Categories> {
     const { categoryName } = data;
-    const { id, category_name, created_at, updated_at } =
-      await this.categoriesService.createCategory({
-        category_name: categoryName,
-      });
+    const category = await this.categoriesService.createCategory({
+      category_name: categoryName,
+    });
 
-    return {
-      id,
-      categoryName: category_name,
-      createdAt: created_at,
-      updatedAt: updated_at,
-    };
+    return plainToInstance(Categories, category);
   }
 }
