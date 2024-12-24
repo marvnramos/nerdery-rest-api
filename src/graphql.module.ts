@@ -12,6 +12,17 @@ import { OrdersResolver } from './orders/orders.resolver';
       playground: true,
       debug: true,
       context: ({ req }) => ({ request: req }),
+      formatError: (error) => {
+        const { message, extensions } = error;
+
+        return {
+          message,
+          extensions: {
+            ...extensions,
+            stacktrace: undefined,
+          },
+        };
+      },
     }),
   ],
   providers: [OrdersResolver],
