@@ -4,7 +4,6 @@ import { UseGuards } from '@nestjs/common';
 import { GqlJwtAuthGuard } from '../auth/guards/gql.jwt.guard';
 import { AddCategoryReq } from './dto/requests/create.category.req';
 import { CategoriesService } from './categories.service';
-import { Prisma } from '@prisma/client';
 
 @Resolver()
 export class CategoriesResolver {
@@ -15,31 +14,17 @@ export class CategoriesResolver {
    * TODO: Add Roles Guard
    */
   async addCategory(@Args('data') data: AddCategoryReq): Promise<Categories> {
-    const datas: Prisma.CategoryCreateInput = {
-      category_name: data.categoryName,
+    const { categoryName } = data;
+    const { id, category_name, created_at, updated_at } =
+      await this.categoriesService.createCategory({
+        category_name: categoryName,
+      });
+
+    return {
+      id,
+      categoryName: category_name,
+      createdAt: created_at,
+      updatedAt: updated_at,
     };
-    return await this.categoriesService.createCategory(datas);
   }
 }
-
-// @ObjectType()
-// export class Categories {
-//   @Field(() => ID)
-//   id: string;
-
-//   @Field({ name: 'category_name' })
-//   categoryName: string;
-
-//   @Field({ name: 'created_at' })
-//   createdAt: Date;
-
-//   @Field({ name: 'updated_at' })
-//   updatedAt: Date;
-// }
-
-// (alias) type Category = {
-//     id: number;
-//     category_name: string;
-//     created_at: Date;
-//     updated_at: Date;
-// }
