@@ -1,11 +1,11 @@
-import { Body, Controller, Post, Res, UseGuards } from '@nestjs/common';
-import { LocalAuthGuard } from './guards/local.guard';
+import { Body, Controller, Post, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
 import { SignInResDto } from './dto/response/sign.in.res.dto';
-import { JwtAuthGuard } from './guards/jwt.guard';
 import { UsersService } from 'src/users/users.service';
 import { SignInReqDto } from './dto/request/sign.in.req.dto';
+import { AuthLocal } from './decorators/auth.local.decorator';
+import { Auth } from './decorators/auth.role.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -14,8 +14,8 @@ export class AuthController {
     private readonly userService: UsersService,
   ) {}
 
-  @UseGuards(LocalAuthGuard)
   @Post('login')
+  @AuthLocal()
   async login(@Body() req: SignInReqDto, @Res() res: Response): Promise<void> {
     const user = await this.userService.findByEmail(req.email);
     const response: SignInResDto = await this.authService.login(user);
@@ -30,8 +30,8 @@ export class AuthController {
     res.json(response);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Post('logout')
+  @Auth('CLIENT', 'MANAGER')
   async logout(@Res() res: Response): Promise<void> {
     res.clearCookie('access_token');
     res.json({ message: 'Logged out successfully' });
