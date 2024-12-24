@@ -1,5 +1,11 @@
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { extractRequestFromContext } from '../../utils/HandleContext';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -10,14 +16,17 @@ export class RolesGuard implements CanActivate {
       'roles',
       context.getHandler(),
     );
-
     if (!requiredRoles) {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest();
+    const request = extractRequestFromContext(context);
     const user = request.user;
 
-    return requiredRoles.includes(user?.role);
+    if (!user || !user.role) {
+      throw new UnauthorizedException('User not authenticated or role missing');
+    }
+
+    return requiredRoles.includes(user.role);
   }
 }
