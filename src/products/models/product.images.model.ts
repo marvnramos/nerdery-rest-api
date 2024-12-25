@@ -1,6 +1,6 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 
-ObjectType();
+@ObjectType()
 export class ProductImages {
   @Field(() => ID)
   id: string;
