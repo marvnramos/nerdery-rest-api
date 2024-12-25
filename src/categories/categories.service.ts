@@ -38,14 +38,9 @@ export class CategoriesService {
     return categories;
   }
 
-  async findCategoryByName(name: string): Promise<Category> {
-    const category = await this.prismaService.category.findFirst({
+  async findCategoryByName(name: string): Promise<Category | null> {
+    return this.prismaService.category.findUnique({
       where: { category_name: name },
     });
-
-    if (!category) {
-      throw new NotFoundException(`Category with name ${name} not found`);
-    }
-    return category;
   }
 }
