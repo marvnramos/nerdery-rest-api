@@ -9,7 +9,7 @@ import { OrdersResolver } from './orders/orders.resolver';
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.graphql'),
-      playground: true,
+      playground: false,
       debug: true,
       context: ({ req }) => ({ request: req }),
       formatError: (error) => {
