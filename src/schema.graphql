@@ -25,21 +25,32 @@ type Categories {
   updated_at: DateTime!
 }
 
+type DeleteCategoryRes {
+  deleted_at: DateTime!
+}
+
+type AddCategoryRes {
+  id: Int!
+  created_at: DateTime!
+}
+
 type Query {
   Orders: String!
   publicResource: String!
+  getCategories: [Categories!]!
 }
 
 type Mutation {
   addProduct(data: AddProductReq!): Product!
-  addCategory(data: AddCategoryReq!): Categories!
+  addCategory(data: AddCategoryReq!): AddCategoryRes!
+  deleteCategory(data: DeleteCategoryReq!): DeleteCategoryRes!
 }
 
 input AddProductReq {
   product_name: String!
   description: String!
   stock: Float!
-  categories: [ID!]!
+  categories: [Int!]!
   is_available: Boolean!
   image_base64: String!
   unit_price: Float!
@@ -47,4 +58,8 @@ input AddProductReq {
 
 input AddCategoryReq {
   category_name: String!
+}
+
+input DeleteCategoryReq {
+  id: Int!
 }
