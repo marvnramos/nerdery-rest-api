@@ -37,12 +37,6 @@ export class AddProductReq {
   @IsBoolean()
   isAvailable: boolean;
 
-  @Field(() => String!, { name: 'image_base64' })
-  @Expose({ name: 'image_base64' })
-  @IsString()
-  @IsNotEmpty()
-  imageBase64: string;
-
   @Field(() => Number!, { name: 'unit_price' })
   @Expose({ name: 'unit_price' })
   @IsNumber()
