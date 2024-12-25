@@ -1,4 +1,4 @@
-import { Field, InputType, ID } from '@nestjs/graphql';
+import { Field, InputType, Int } from '@nestjs/graphql';
 import { Expose } from 'class-transformer';
 import {
   IsString,
@@ -28,9 +28,9 @@ export class AddProductReq {
   @IsPositive()
   stock: number;
 
-  @Field(() => [ID])
+  @Field(() => [Int])
   @IsArray()
-  categories: string[];
+  categories: number[];
 
   @Field(() => Boolean, { name: 'is_available' })
   @Expose({ name: 'is_available' })
