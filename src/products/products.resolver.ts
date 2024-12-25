@@ -1,24 +1,23 @@
-import { UseGuards } from '@nestjs/common';
+import { UseFilters } from '@nestjs/common';
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 import { Product } from './models/products.model';
-import { AddProductReq } from './dto/create.input';
-import { JwtAuthGuard } from '../auth/guards/jwt.guard';
+import { AddProductReq } from './dto/requests/create.product.req';
+import { GlobalExceptionFilter } from '../utils/GlobalExceptionFilter';
+import { ProductsService } from './products.service';
+import { plainToInstance } from 'class-transformer';
+import { Auth } from 'src/auth/decorators/auth.role.decorator';
 
 @Resolver()
 export class ProductsResolver {
+  constructor(private readonly productService: ProductsService) {}
+
+  @Auth('MANAGER')
   @Mutation(() => Product)
-  @UseGuards(JwtAuthGuard)
+  @UseFilters(new GlobalExceptionFilter())
   async addProduct(@Args('data') data: AddProductReq): Promise<Product> {
-    return {
-      id: '1',
-      productName: data.productName,
-      description: data.description,
-      stock: data.stock,
-      isAvailable: data.isAvailable,
-      unitPrice: data.unitPrice,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    const product = await this.productService.createProduct(data);
+    console.log('done ✅');
+    return plainToInstance(Product, product);
   }
 
   @Query(() => String)
