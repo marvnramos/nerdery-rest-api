@@ -172,4 +172,11 @@ export class ProductsService {
 
     return { result: response.result };
   }
+
+  async removeProduct(id: string): Promise<Product> {
+    await this.findProductById(id);
+    return this.prismaService.product.delete({
+      where: { id },
+    });
+  }
 }
