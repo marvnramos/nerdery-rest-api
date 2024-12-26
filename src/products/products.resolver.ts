@@ -9,6 +9,7 @@ import { AddProductRes } from './dto/responses/create.product.res';
 import { UpdateProductRes } from './dto/responses/update.product.images.req';
 import { UpdateProductReq } from './dto/requests/update.product.req';
 import { RemoveProductRes } from './dto/responses/remove.product.res';
+import { UpdateProductCategoriesReq } from './dto/requests/update.product.categories.req';
 
 @Resolver()
 export class ProductsResolver {
@@ -41,5 +42,15 @@ export class ProductsResolver {
     const response = new RemoveProductRes();
     response.deletedAt = new Date();
     return response;
+  }
+
+  @Auth('MANAGER')
+  @Mutation(() => UpdateProductRes)
+  @UseFilters(new GlobalExceptionFilter())
+  async updateProductCategories(
+    @Args('data') data: UpdateProductCategoriesReq,
+  ): Promise<UpdateProductRes> {
+    const product = await this.productService.updateProductCategories(data);
+    return product;
   }
 }
