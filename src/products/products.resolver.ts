@@ -8,6 +8,7 @@ import { Auth } from 'src/auth/decorators/auth.role.decorator';
 import { AddProductRes } from './dto/responses/create.product.res';
 import { UpdateProductRes } from './dto/responses/update.product.images.req';
 import { UpdateProductReq } from './dto/requests/update.product.req';
+import { RemoveProductRes } from './dto/responses/remove.product.res';
 
 @Resolver()
 export class ProductsResolver {
@@ -30,5 +31,15 @@ export class ProductsResolver {
   ): Promise<UpdateProductRes> {
     const product = await this.productService.editProductData(id, data);
     return plainToInstance(UpdateProductRes, product);
+  }
+
+  @Auth('MANAGER')
+  @Mutation(() => RemoveProductRes)
+  @UseFilters(new GlobalExceptionFilter())
+  async removeProduct(@Args('id') id: string): Promise<RemoveProductRes> {
+    await this.productService.removeProduct(id);
+    const response = new RemoveProductRes();
+    response.deletedAt = new Date();
+    return response;
   }
 }
