@@ -2,6 +2,19 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type UpdateProductRes implements IUpdateRecordRes {
+  updated_at: DateTime!
+}
+
+interface IUpdateRecordRes {
+  updated_at: DateTime!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
 type AddProductRes implements IAddRecordRes {
   id: ID!
   created_at: DateTime!
@@ -10,19 +23,6 @@ type AddProductRes implements IAddRecordRes {
 interface IAddRecordRes {
   id: ID!
   created_at: DateTime!
-}
-
-"""
-A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-"""
-scalar DateTime
-
-type UpdateProductRes implements IUpdateRecordRes {
-  updated_at: DateTime!
-}
-
-interface IUpdateRecordRes {
-  updated_at: DateTime!
 }
 
 type RemoveProductRes implements IRemoveRecordRes {
@@ -58,6 +58,7 @@ type Mutation {
   addProduct(data: AddProductReq!): AddProductRes!
   updateProduct(id: String!, data: UpdateProductReq!): UpdateProductRes!
   removeProduct(id: String!): RemoveProductRes!
+  updateProductCategories(data: UpdateProductCategoriesReq!): UpdateProductRes!
   addCategory(data: AddCategoryReq!): AddCategoryRes!
   deleteCategory(data: DeleteCategoryReq!): DeleteCategoryRes!
 }
@@ -77,6 +78,12 @@ input UpdateProductReq {
   stock: Int
   is_available: Boolean
   unit_price: Int
+}
+
+input UpdateProductCategoriesReq {
+  id: ID!
+  op: String!
+  categories: [Int!]!
 }
 
 input AddCategoryReq {
