@@ -10,6 +10,9 @@ import { ConfigOptions, v2 as CloudinaryV2 } from 'cloudinary';
 import * as streamHelper from 'streamifier';
 import { UpdateProductReq } from './dto/requests/update.product.req';
 import { filterNullEntries } from '../utils/tools';
+import { UpdateProductCategoriesReq } from './dto/requests/update.product.categories.req';
+import { OperationType } from '../utils/enums/operation.enum';
+import { UpdateProductRes } from './dto/responses/update.product.images.req';
 
 @Injectable()
 export class ProductsService {
@@ -155,6 +158,47 @@ export class ProductsService {
         },
       },
     });
+  }
+
+  async updateProductCategories(
+    data: UpdateProductCategoriesReq,
+  ): Promise<UpdateProductRes> {
+    await this.findProductById(data.id);
+    const response = new UpdateProductRes();
+    if (data.op === OperationType.ADD) {
+      const categoryToAdd = data.categories.map((category) => ({
+        product_id: data.id,
+        category_id: category,
+      }));
+
+      try {
+        await this.prismaService.productCategory.createMany({
+          data: categoryToAdd,
+          skipDuplicates: true,
+        });
+        response.updatedAt = new Date();
+        return response;
+      } catch {
+        throw new InternalServerErrorException(
+          'Failed to add product categories',
+        );
+      }
+    } else if (data.op === OperationType.REMOVE) {
+      try {
+        await this.prismaService.productCategory.deleteMany({
+          where: {
+            product_id: data.id,
+            category_id: { in: data.categories },
+          },
+        });
+        response.updatedAt = new Date();
+        return response;
+      } catch {
+        throw new InternalServerErrorException(
+          'Failed to remove product categories',
+        );
+      }
+    }
   }
 
   async removeProductImages(publicId: string): Promise<{ result: string }> {
