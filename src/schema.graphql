@@ -25,6 +25,14 @@ interface IUpdateRecordRes {
   updated_at: DateTime!
 }
 
+type RemoveProductRes implements IRemoveRecordRes {
+  deleted_at: DateTime!
+}
+
+interface IRemoveRecordRes {
+  deleted_at: DateTime!
+}
+
 type Categories {
   id: ID!
   category_name: String!
@@ -49,6 +57,7 @@ type Query {
 type Mutation {
   addProduct(data: AddProductReq!): AddProductRes!
   updateProduct(id: String!, data: UpdateProductReq!): UpdateProductRes!
+  removeProduct(id: String!): RemoveProductRes!
   addCategory(data: AddCategoryReq!): AddCategoryRes!
   deleteCategory(data: DeleteCategoryReq!): DeleteCategoryRes!
 }
