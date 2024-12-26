@@ -177,9 +177,9 @@ model ProductCategory {
   product_id  String
   category_id Int
   created_at  DateTime  @default(now())
-  updated_at  DateTime  @default(now())   @updatedAt
+  updated_at  DateTime  @default(now()) @updatedAt
 
-  product     Product   @relation(fields: [product_id], references: [id])
+  product     Product   @relation(fields: [product_id], references: [id], onDelete: Cascade)
   category    Category  @relation(fields: [category_id], references: [id])
 
   @@id([product_id, category_id])
