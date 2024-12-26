@@ -8,6 +8,8 @@ import { PrismaService } from 'src/utils/prisma/prisma.service';
 import { AddProductReq } from './dto/requests/create.product.req';
 import { ConfigOptions, v2 as CloudinaryV2 } from 'cloudinary';
 import * as streamHelper from 'streamifier';
+import { UpdateProductReq } from './dto/requests/update.product.req';
+import { filterNullEntries } from '../utils/tools';
 
 @Injectable()
 export class ProductsService {
@@ -60,6 +62,27 @@ export class ProductsService {
         product_id: productId,
       })),
       skipDuplicates: true,
+    });
+  }
+
+  async editProductData(id: string, data: UpdateProductReq): Promise<Product> {
+    if (data.stock !== undefined) {
+      if (data.stock === 0) {
+        data.isAvailable = false;
+      }
+    }
+
+    const toUpdateData = filterNullEntries({
+      product_name: data.productName,
+      description: data.description,
+      stock: data.stock,
+      is_available: data.isAvailable,
+      unit_price: data.unitPrice,
+    });
+
+    return this.prismaService.product.update({
+      where: { id },
+      data: toUpdateData,
     });
   }
 
