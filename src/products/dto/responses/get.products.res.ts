@@ -10,11 +10,11 @@ export class GetProductsRes {
   @Expose({ name: 'total_count' })
   totalCount: number;
 
-  @Field(() => [ProductEdge!]!)
-  edges: ProductEdge;
+  @Field(() => [ProductEdge], { nullable: true })
+  edges?: ProductEdge[];
 
-  @Field(() => [Product!]!)
-  nodes: Product[];
+  @Field(() => [Product], { nullable: true })
+  nodes?: Product[];
 
   @Field(() => PageInfo!)
   pageInfo: PageInfo;
