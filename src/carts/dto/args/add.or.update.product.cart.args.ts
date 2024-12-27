@@ -3,7 +3,7 @@ import { Expose } from 'class-transformer';
 import { IsInt, IsOptional, IsString, IsUUID, Min } from 'class-validator';
 
 @InputType()
-export class AddProductCartArg {
+export class AddOrUpdateProductCartArgs {
   @Field(() => String!, { name: 'product_id' })
   @Expose({ name: 'product_id' })
   @IsString({ message: 'Product id must be a string' })
