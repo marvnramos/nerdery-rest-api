@@ -1,5 +1,12 @@
 import { UseFilters } from '@nestjs/common';
-import { Resolver, Mutation, Args, Query } from '@nestjs/graphql';
+import {
+  Resolver,
+  Mutation,
+  Args,
+  Query,
+  ResolveField,
+  Parent,
+} from '@nestjs/graphql';
 import { AddProductReq } from './dto/requests/create.product.req';
 import { GlobalExceptionFilter } from '../utils/GlobalExceptionFilter';
 import { ProductsService } from './products.service';
@@ -12,8 +19,11 @@ import { RemoveProductRes } from './dto/responses/remove.product.res';
 import { UpdateProductCategoriesReq } from './dto/requests/update.product.categories.req';
 import { GetProductsArgs } from './dto/args/get.products.args';
 import { GetProductsRes } from './dto/responses/get.products.res';
+import { Product } from './models/products.model';
+import { Categories } from 'src/categories/models/categories.model';
+import { ProductImages } from './models/product.images.model';
 
-@Resolver()
+@Resolver(() => Product)
 export class ProductsResolver {
   constructor(private readonly productService: ProductsService) {}
 
@@ -63,5 +73,21 @@ export class ProductsResolver {
     @Args('data') data: GetProductsArgs,
   ): Promise<GetProductsRes> {
     return this.productService.getProducts(data);
+  }
+
+  @ResolveField(() => [Categories])
+  async categories(@Parent() product: Product): Promise<Categories[]> {
+    const productCategories = await this.productService.getProductCategories(
+      product.id,
+    );
+    return productCategories;
+  }
+
+  @ResolveField(() => [ProductImages])
+  async images(@Parent() product: Product): Promise<ProductImages[]> {
+    const productImages = await this.productService.getProductImages(
+      product.id,
+    );
+    return productImages;
   }
 }
