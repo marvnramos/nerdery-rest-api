@@ -1,4 +1,6 @@
 import { Field, ObjectType, ID } from '@nestjs/graphql';
+import { Categories } from 'src/categories/models/categories.model';
+import { ProductImages } from './product.images.model';
 
 @ObjectType()
 export class Product {
@@ -19,6 +21,12 @@ export class Product {
 
   @Field({ name: 'unit_price' })
   unitPrice: number;
+
+  @Field(() => [Categories])
+  categories: Categories[];
+
+  @Field(() => [ProductImages])
+  images: ProductImages[];
 
   @Field({ name: 'created_at' })
   createdAt: Date;
