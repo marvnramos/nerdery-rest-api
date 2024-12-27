@@ -110,34 +110,31 @@ export class ProductsService {
     image: Express.Multer.File,
     productId: string,
   ): Promise<ProductImages> {
-    try {
-      const uploadResult = await new Promise<any>((resolve, reject) => {
-        const uploadStream = this.cloudinaryService.uploader.upload_stream(
-          { resource_type: 'image' },
-          (error, result) => {
-            if (error) {
-              return reject(error);
-            }
-            resolve(result);
-          },
-        );
+    await this.findProductById(productId);
 
-        streamHelper.createReadStream(image.buffer).pipe(uploadStream);
-      });
-
-      const imageData: Prisma.ProductImagesCreateInput = {
-        image_url: uploadResult.secure_url,
-        public_id: uploadResult.public_id,
-        product: {
-          connect: { id: productId },
+    const uploadResult = await new Promise<any>((resolve, reject) => {
+      const uploadStream = this.cloudinaryService.uploader.upload_stream(
+        { resource_type: 'image' },
+        (error, result) => {
+          if (error) {
+            return reject(error);
+          }
+          resolve(result);
         },
-      };
+      );
 
-      return await this.addProductImage(imageData);
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      throw new InternalServerErrorException('Failed to upload image');
-    }
+      streamHelper.createReadStream(image.buffer).pipe(uploadStream);
+    });
+
+    const imageData: Prisma.ProductImagesCreateInput = {
+      image_url: uploadResult.secure_url,
+      public_id: uploadResult.public_id,
+      product: {
+        connect: { id: productId },
+      },
+    };
+
+    return await this.addProductImage(imageData);
   }
 
   async addProductImage(
@@ -145,15 +142,7 @@ export class ProductsService {
   ): Promise<ProductImages> {
     const productId = data.product.connect?.id;
 
-    await this.prismaService.product
-      .findUnique({
-        where: { id: productId },
-      })
-      .catch((error) => {
-        if (error) {
-          throw new InternalServerErrorException('Failed to add product');
-        }
-      });
+    await this.findProductById(productId);
 
     return this.prismaService.productImages.create({
       data: {
