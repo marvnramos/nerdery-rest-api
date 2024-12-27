@@ -9,6 +9,8 @@ import { UpdateProductCartRes } from './dto/response/update.product.cart.res';
 import { ProductsService } from 'src/products/products.service';
 import { Cart, CartItem } from '@prisma/client';
 import { plainToInstance } from 'class-transformer';
+import { RemoveProductFromCartArgs } from './dto/args/remove.product.from.cart.args';
+import { RemoveProductFromCartRes } from './dto/response/remove.product.from.cart.res';
 
 @Injectable()
 export class CartsService {
@@ -76,4 +78,42 @@ export class CartsService {
     return plainToInstance(UpdateProductCartRes, cartItem);
   }
 
+  async deleteProductFromCart(
+    userId: string,
+    data: RemoveProductFromCartArgs,
+  ): Promise<RemoveProductFromCartRes> {
+    await this.productService.findProductById(data.productId);
+    const cart = await this.findCartById(data.cartId);
+
+    if (cart.user_id !== userId) {
+      throw new NotAcceptableException('Cart not belongs to user');
+    }
+
+    await this.prismaService.cartItem
+      .delete({
+        where: {
+          cart_id_product_id: {
+            cart_id: data.cartId,
+            product_id: data.productId,
+          },
+        },
+      })
+      .catch(() => {
+        throw new NotFoundException('Product not found in cart');
+      });
+
+    const response = new RemoveProductFromCartRes();
+    response.deletedAt = new Date();
+    return response;
+  }
+
+  async findCartById(cartId: string): Promise<Cart> {
+    const cart = await this.prismaService.cart.findUnique({
+      where: { id: cartId },
+    });
+    if (!cart) {
+      throw new NotFoundException('Cart not found');
+    }
+    return cart;
+  }
 }
