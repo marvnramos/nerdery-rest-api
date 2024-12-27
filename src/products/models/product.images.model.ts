@@ -11,6 +11,9 @@ export class ProductImages {
   @Field({ name: 'image_url' })
   imageUrl: string;
 
+  @Field({ name: 'public_id' })
+  publicId: string;
+
   @Field({ name: 'created_at' })
   createdAt: Date;
 
