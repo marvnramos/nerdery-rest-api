@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/utils/prisma/prisma.service';
-import { AddProductCartArg } from './dto/args/add.product.cart.arg';
+import { AddOrUpdateProductCartArgs } from './dto/args/add.or.update.product.cart.args';
 import { UpdateProductCartRes } from './dto/response/update.product.cart.res';
 import { ProductsService } from 'src/products/products.service';
 import { Cart, CartItem } from '@prisma/client';
@@ -19,12 +19,10 @@ export class CartsService {
 
   async addProductToCart(
     userId: string,
-    data: AddProductCartArg,
+    data: AddOrUpdateProductCartArgs,
   ): Promise<UpdateProductCartRes> {
     const product = await this.productService.findProductById(data.productId);
-    if (!product) {
-      throw new NotFoundException('Product not found');
-    }
+
     if (data.quantity > product.stock) {
       throw new NotAcceptableException('Insufficient product stock');
     }
@@ -39,12 +37,7 @@ export class CartsService {
         },
       });
     } else {
-      cart = await this.prismaService.cart.findUnique({
-        where: { id: data.cartId },
-      });
-      if (!cart) {
-        throw new NotFoundException('Cart not found');
-      }
+      cart = await this.findCartById(data.cartId);
 
       if (cart.user_id !== userId) {
         throw new NotAcceptableException('Cart not belongs to user');
