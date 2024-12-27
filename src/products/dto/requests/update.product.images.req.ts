@@ -6,12 +6,11 @@ import {
   IsString,
 } from 'class-validator';
 import { Expose } from 'class-transformer';
+import { OperationType } from '../../../utils/enums/operation.enum';
 
 export class UpdateProductImagesReq {
-  @IsEnum(['add', 'remove'], {
-    message: 'Operation must be "add" or "remove".',
-  })
-  op: 'add' | 'remove';
+  @IsEnum(OperationType)
+  op: OperationType;
 
   @IsString()
   @IsNotEmpty()

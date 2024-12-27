@@ -153,11 +153,10 @@ type UpdateProductSuccessRes implements IUpdateResponse{
 }
 
 type GetProductsSuccessRes {
-    page: Int!
-    limit: Int!
-    total_pages: Int!
-    total_items: Int!
-    products: [Product!]!
+  totalCount: Int!
+  edges: [ProductEdge!]!
+  nodes: [Product!]!
+  pageInfo: PageInfo!
 }
 
 type GetProductSuccessRes {
@@ -201,16 +200,6 @@ type GetProductsData {
     total_pages: Int!
     total_items: Int!
     products: [Product!]!
-}
-
-type Product {
-    id: ID!
-    name: String!
-    categories: [ID!]!
-    unit_price: Float!
-    currency: String!
-    image_url: String!
-    uri: String!
 }
 
 """
@@ -331,6 +320,43 @@ input GetProductsReq {
     after: Int!
     category_id: ID!
 }
+
+type ProductEdge {
+  cursor: String!
+  node: Product!
+}
+
+type PageInfo {
+  startCursor: String
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+}
+
+type Product {
+  id: ID!
+  product_name: String!
+  description: String
+  stock: Int!
+  is_available: Boolean!
+  unit_price: Int!
+  created_at: String!
+  updated_at: String!
+  categories: [Category!]!
+  images: [ProductImage!]!
+}
+
+type Category {
+  id: ID!
+  categoryName: String!
+}
+
+type ProductImage {
+  id: ID!
+  imageUrl: String!
+  publicId: String!
+}
+
 
 input UpdateProductCategoriesReq {
     op: Operation!

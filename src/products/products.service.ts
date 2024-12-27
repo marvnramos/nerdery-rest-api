@@ -1,6 +1,7 @@
 import {
   Injectable,
   InternalServerErrorException,
+  BadRequestException,
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma, Product, ProductImages } from '@prisma/client';
@@ -8,6 +9,17 @@ import { PrismaService } from 'src/utils/prisma/prisma.service';
 import { AddProductReq } from './dto/requests/create.product.req';
 import { ConfigOptions, v2 as CloudinaryV2 } from 'cloudinary';
 import * as streamHelper from 'streamifier';
+import { UpdateProductReq } from './dto/requests/update.product.req';
+import { decodeBase64, encodeBase64, filterNullEntries } from '../utils/tools';
+import { UpdateProductCategoriesReq } from './dto/requests/update.product.categories.req';
+import { OperationType } from '../utils/enums/operation.enum';
+import { UpdateProductRes } from './dto/responses/update.product.images.res';
+import { Product as ProductModel } from './models/products.model';
+import { GetProductsRes } from './dto/responses/get.products.res';
+import { GetProductsArgs } from './dto/args/get.products.args';
+import { plainToInstance } from 'class-transformer';
+import { Categories } from 'src/categories/models/categories.model';
+import { ProductImages as ProductImagesModel } from './models/product.images.model';
 
 @Injectable()
 export class ProductsService {
@@ -63,6 +75,27 @@ export class ProductsService {
     });
   }
 
+  async editProductData(id: string, data: UpdateProductReq): Promise<Product> {
+    if (data.stock !== undefined) {
+      if (data.stock === 0) {
+        data.isAvailable = false;
+      }
+    }
+
+    const toUpdateData = filterNullEntries({
+      product_name: data.productName,
+      description: data.description,
+      stock: data.stock,
+      is_available: data.isAvailable,
+      unit_price: data.unitPrice,
+    });
+
+    return this.prismaService.product.update({
+      where: { id },
+      data: toUpdateData,
+    });
+  }
+
   async findProductById(id: string): Promise<Product> {
     const product = await this.prismaService.product.findUnique({
       where: { id },
@@ -78,34 +111,31 @@ export class ProductsService {
     image: Express.Multer.File,
     productId: string,
   ): Promise<ProductImages> {
-    try {
-      const uploadResult = await new Promise<any>((resolve, reject) => {
-        const uploadStream = this.cloudinaryService.uploader.upload_stream(
-          { resource_type: 'image' },
-          (error, result) => {
-            if (error) {
-              return reject(error);
-            }
-            resolve(result);
-          },
-        );
+    await this.findProductById(productId);
 
-        streamHelper.createReadStream(image.buffer).pipe(uploadStream);
-      });
-
-      const imageData: Prisma.ProductImagesCreateInput = {
-        image_url: uploadResult.secure_url,
-        public_id: uploadResult.public_id,
-        product: {
-          connect: { id: productId },
+    const uploadResult = await new Promise<any>((resolve, reject) => {
+      const uploadStream = this.cloudinaryService.uploader.upload_stream(
+        { resource_type: 'image' },
+        (error, result) => {
+          if (error) {
+            return reject(error);
+          }
+          resolve(result);
         },
-      };
+      );
 
-      return await this.addProductImage(imageData);
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      throw new InternalServerErrorException('Failed to upload image');
-    }
+      streamHelper.createReadStream(image.buffer).pipe(uploadStream);
+    });
+
+    const imageData: Prisma.ProductImagesCreateInput = {
+      image_url: uploadResult.secure_url,
+      public_id: uploadResult.public_id,
+      product: {
+        connect: { id: productId },
+      },
+    };
+
+    return await this.addProductImage(imageData);
   }
 
   async addProductImage(
@@ -113,15 +143,7 @@ export class ProductsService {
   ): Promise<ProductImages> {
     const productId = data.product.connect?.id;
 
-    await this.prismaService.product
-      .findUnique({
-        where: { id: productId },
-      })
-      .catch((error) => {
-        if (error) {
-          throw new InternalServerErrorException('Failed to add product');
-        }
-      });
+    await this.findProductById(productId);
 
     return this.prismaService.productImages.create({
       data: {
@@ -132,6 +154,208 @@ export class ProductsService {
         },
       },
     });
+  }
+
+  async getProducts(data: GetProductsArgs): Promise<GetProductsRes> {
+    const query: any = {};
+    let products: Product[] = [];
+    let totalCount = 0;
+    const response = new GetProductsRes();
+
+    const { first, after, categoriesIds } = data;
+
+    if (after) {
+      const decodedCursor = decodeBase64(after);
+      const recordExists = await this.prismaService.product.findUnique({
+        where: { id: decodedCursor },
+      });
+
+      if (!recordExists) {
+        throw new BadRequestException(
+          `Invalid cursor: No record found for cursor ${after}`,
+        );
+      }
+
+      query.id = decodedCursor;
+    }
+
+    if (categoriesIds?.length) {
+      const productCategories =
+        await this.prismaService.productCategory.findMany({
+          where: { category_id: { in: categoriesIds } },
+          select: { product_id: true },
+        });
+
+      const productIds = productCategories.map(
+        (category) => category.product_id,
+      );
+      totalCount = productIds.length;
+      products = await this.prismaService.product.findMany({
+        where: {
+          AND: [
+            { id: { in: productIds } },
+            after ? { id: { gt: query.id } } : {},
+          ],
+        },
+        take: first,
+        orderBy: { id: 'asc' },
+        include: {
+          categories: {
+            select: {
+              category: {
+                select: {
+                  id: true,
+                  category_name: true,
+                  created_at: true,
+                  updated_at: true,
+                },
+              },
+            },
+          },
+          images: {
+            select: {
+              id: true,
+              image_url: true,
+              public_id: true,
+              created_at: true,
+              updated_at: true,
+            },
+          },
+        },
+      });
+    } else {
+      totalCount = await this.prismaService.product.count();
+
+      products = await this.prismaService.product.findMany({
+        where: {},
+        skip: after ? 1 : 0,
+        cursor: after ? { id: query.id } : undefined,
+        take: first,
+        orderBy: { id: 'asc' },
+        include: {
+          categories: {
+            select: {
+              category: {
+                select: {
+                  id: true,
+                  category_name: true,
+                  created_at: true,
+                  updated_at: true,
+                },
+              },
+            },
+          },
+          images: {
+            select: {
+              id: true,
+              image_url: true,
+              public_id: true,
+              created_at: true,
+              updated_at: true,
+            },
+          },
+        },
+      });
+    }
+
+    response.edges = products.map((product) => ({
+      node: plainToInstance(ProductModel, product),
+      cursor: encodeBase64(product.id),
+    }));
+
+    response.nodes = plainToInstance(ProductModel, products);
+    response.pageInfo = {
+      startCursor: products.length > 0 ? encodeBase64(products[0].id) : null,
+      endCursor:
+        products.length > 0
+          ? encodeBase64(products[products.length - 1].id)
+          : null,
+      hasNextPage: totalCount > (after ? 1 : 0) + first,
+      hasPreviousPage: !!after,
+    };
+
+    response.totalCount = totalCount;
+
+    return response;
+  }
+
+  async getProductCategories(productId: string): Promise<Categories[]> {
+    const productCategories = await this.prismaService.productCategory.findMany(
+      {
+        where: { product_id: productId },
+        include: {
+          category: true,
+        },
+      },
+    );
+
+    return productCategories.map((relation) => ({
+      id: relation.category.id,
+      categoryName: relation.category.category_name,
+      createdAt: relation.category.created_at,
+      updatedAt: relation.category.updated_at,
+    }));
+  }
+
+  async getProductImages(productId: string): Promise<ProductImagesModel[]> {
+    const productImages = await this.prismaService.productImages.findMany({
+      where: {
+        product_id: productId,
+      },
+      // include: {
+      //   : true,
+      // },
+    });
+
+    return productImages.map((productImage) => ({
+      id: productImage.id,
+      productId: productImage.product_id,
+      imageUrl: productImage.image_url,
+      publicId: productImage.public_id,
+      createdAt: productImage.created_at,
+      updatedAt: productImage.updated_at,
+    }));
+  }
+
+  async updateProductCategories(
+    data: UpdateProductCategoriesReq,
+  ): Promise<UpdateProductRes> {
+    await this.findProductById(data.id);
+    const response = new UpdateProductRes();
+    if (data.op === OperationType.ADD) {
+      const categoryToAdd = data.categories.map((category) => ({
+        product_id: data.id,
+        category_id: category,
+      }));
+
+      try {
+        await this.prismaService.productCategory.createMany({
+          data: categoryToAdd,
+          skipDuplicates: true,
+        });
+        response.updatedAt = new Date();
+        return response;
+      } catch {
+        throw new InternalServerErrorException(
+          'Failed to add product categories',
+        );
+      }
+    } else if (data.op === OperationType.REMOVE) {
+      try {
+        await this.prismaService.productCategory.deleteMany({
+          where: {
+            product_id: data.id,
+            category_id: { in: data.categories },
+          },
+        });
+        response.updatedAt = new Date();
+        return response;
+      } catch {
+        throw new InternalServerErrorException(
+          'Failed to remove product categories',
+        );
+      }
+    }
   }
 
   async removeProductImages(publicId: string): Promise<{ result: string }> {
@@ -148,5 +372,12 @@ export class ProductsService {
     });
 
     return { result: response.result };
+  }
+
+  async removeProduct(id: string): Promise<Product> {
+    await this.findProductById(id);
+    return this.prismaService.product.delete({
+      where: { id },
+    });
   }
 }

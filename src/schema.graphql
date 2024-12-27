@@ -2,14 +2,11 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type Product {
-  id: ID!
-  product_name: String!
-  description: String!
-  stock: Float!
-  is_available: Boolean!
-  unit_price: Float!
-  created_at: DateTime!
+type UpdateProductRes implements IUpdateRecordRes {
+  updated_at: DateTime!
+}
+
+interface IUpdateRecordRes {
   updated_at: DateTime!
 }
 
@@ -25,6 +22,65 @@ type Categories {
   updated_at: DateTime!
 }
 
+type ProductImages {
+  id: ID!
+  product_id: String!
+  image_url: String!
+  public_id: String!
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
+type Product {
+  id: ID!
+  product_name: String!
+  description: String!
+  stock: Float!
+  is_available: Boolean!
+  unit_price: Float!
+  categories: [Categories!]!
+  images: [ProductImages!]!
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
+type PageInfo {
+  start_cursor: String!
+  end_cursor: String!
+  has_next_page: Boolean!
+  has_previous_page: Boolean!
+}
+
+type ProductEdge {
+  cursor: String!
+  node: Product!
+}
+
+type GetProductsRes {
+  total_count: Int!
+  edges: [ProductEdge!]
+  nodes: [Product!]
+  pageInfo: PageInfo!
+}
+
+type AddProductRes implements IAddRecordRes {
+  id: ID!
+  created_at: DateTime!
+}
+
+interface IAddRecordRes {
+  id: ID!
+  created_at: DateTime!
+}
+
+type RemoveProductRes implements IRemoveRecordRes {
+  deleted_at: DateTime!
+}
+
+interface IRemoveRecordRes {
+  deleted_at: DateTime!
+}
+
 type DeleteCategoryRes {
   deleted_at: DateTime!
 }
@@ -36,12 +92,21 @@ type AddCategoryRes {
 
 type Query {
   Orders: String!
-  publicResource: String!
+  getProducts(data: GetProductsArgs!): GetProductsRes!
   getCategories: [Categories!]!
 }
 
+input GetProductsArgs {
+  first: Int!
+  after: String
+  category_ids: [Int!]
+}
+
 type Mutation {
-  addProduct(data: AddProductReq!): Product!
+  addProduct(data: AddProductReq!): AddProductRes!
+  updateProduct(id: String!, data: UpdateProductReq!): UpdateProductRes!
+  removeProduct(id: String!): RemoveProductRes!
+  updateProductCategories(data: UpdateProductCategoriesReq!): UpdateProductRes!
   addCategory(data: AddCategoryReq!): AddCategoryRes!
   deleteCategory(data: DeleteCategoryReq!): DeleteCategoryRes!
 }
@@ -52,8 +117,21 @@ input AddProductReq {
   stock: Float!
   categories: [Int!]!
   is_available: Boolean!
-  image_base64: String!
   unit_price: Float!
+}
+
+input UpdateProductReq {
+  product_name: String
+  description: String
+  stock: Int
+  is_available: Boolean
+  unit_price: Int
+}
+
+input UpdateProductCategoriesReq {
+  id: ID!
+  op: String!
+  categories: [Int!]!
 }
 
 input AddCategoryReq {
