@@ -58,8 +58,8 @@ type ProductEdge {
 
 type GetProductsRes {
   total_count: Int!
-  edges: [ProductEdge!]!
-  nodes: [Product!]!
+  edges: [ProductEdge!]
+  nodes: [Product!]
   pageInfo: PageInfo!
 }
 
