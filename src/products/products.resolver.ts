@@ -1,15 +1,17 @@
 import { UseFilters } from '@nestjs/common';
-import { Resolver, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Mutation, Args, Query } from '@nestjs/graphql';
 import { AddProductReq } from './dto/requests/create.product.req';
 import { GlobalExceptionFilter } from '../utils/GlobalExceptionFilter';
 import { ProductsService } from './products.service';
 import { plainToInstance } from 'class-transformer';
 import { Auth } from 'src/auth/decorators/auth.role.decorator';
 import { AddProductRes } from './dto/responses/create.product.res';
-import { UpdateProductRes } from './dto/responses/update.product.images.req';
+import { UpdateProductRes } from './dto/responses/update.product.images.res';
 import { UpdateProductReq } from './dto/requests/update.product.req';
 import { RemoveProductRes } from './dto/responses/remove.product.res';
 import { UpdateProductCategoriesReq } from './dto/requests/update.product.categories.req';
+import { GetProductsArgs } from './dto/args/get.products.args';
+import { GetProductsRes } from './dto/responses/get.products.res';
 
 @Resolver()
 export class ProductsResolver {
@@ -52,5 +54,14 @@ export class ProductsResolver {
   ): Promise<UpdateProductRes> {
     const product = await this.productService.updateProductCategories(data);
     return product;
+  }
+
+  @Auth('MANAGER')
+  @Query(() => GetProductsRes)
+  @UseFilters(new GlobalExceptionFilter())
+  async getProducts(
+    @Args('data') data: GetProductsArgs,
+  ): Promise<GetProductsRes> {
+    return this.productService.getProducts(data);
   }
 }
