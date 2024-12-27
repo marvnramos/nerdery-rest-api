@@ -5,6 +5,8 @@ import { UseFilters } from '@nestjs/common';
 import { GlobalExceptionFilter } from '../utils/GlobalExceptionFilter';
 import { AddOrUpdateProductCartArgs } from './dto/args/add.or.update.product.cart.args';
 import { UpdateProductCartRes } from './dto/response/update.product.cart.res';
+import { RemoveProductFromCartArgs } from './dto/args/remove.product.from.cart.args';
+import { RemoveProductFromCartRes } from './dto/response/remove.product.from.cart.res';
 
 @Resolver()
 export class CartsResolver {
@@ -21,6 +23,20 @@ export class CartsResolver {
     return this.cartsService.addProductToCart(
       req.user.id,
       addOrRemoveProductQuantityCartArg,
+    );
+  }
+
+  @Auth('CLIENT')
+  @Mutation(() => RemoveProductFromCartRes)
+  @UseFilters(new GlobalExceptionFilter())
+  async removeProductFromCart(
+    @Args('data')
+    removeProductFromCartArg: RemoveProductFromCartArgs,
+    @Context('request') req: any,
+  ): Promise<RemoveProductFromCartRes> {
+    return this.cartsService.deleteProductFromCart(
+      req.user.id,
+      removeProductFromCartArg,
     );
   }
 }
