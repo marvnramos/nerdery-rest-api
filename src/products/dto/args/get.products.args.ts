@@ -1,6 +1,6 @@
 import { InputType, Field, Int } from '@nestjs/graphql';
 import { Expose } from 'class-transformer';
-import { IsInt, IsOptional } from 'class-validator';
+import { IsInt, IsOptional, IsString } from 'class-validator';
 
 @InputType()
 export class GetProductsArgs {
@@ -10,7 +10,7 @@ export class GetProductsArgs {
 
   @Field(() => String!, { nullable: true })
   @IsOptional()
-  @IsInt()
+  @IsString()
   after?: string;
 
   @Field(() => [Int], { name: 'category_ids', nullable: true })
