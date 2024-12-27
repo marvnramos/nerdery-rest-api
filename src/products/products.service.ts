@@ -1,6 +1,7 @@
 import {
   Injectable,
   InternalServerErrorException,
+  BadRequestException,
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma, Product, ProductImages } from '@prisma/client';
@@ -165,7 +166,17 @@ export class ProductsService {
 
     if (after) {
       const decodedCursor = decodeBase64(after);
-      query.id = { gt: decodedCursor };
+      const recordExists = await this.prismaService.product.findUnique({
+        where: { id: decodedCursor },
+      });
+
+      if (!recordExists) {
+        throw new BadRequestException(
+          `Invalid cursor: No record found for cursor ${after}`,
+        );
+      }
+
+      query.id = decodedCursor;
     }
 
     if (categoriesIds?.length) {
@@ -179,10 +190,13 @@ export class ProductsService {
         (category) => category.product_id,
       );
       totalCount = productIds.length;
-
-      products = products = await this.prismaService.product.findMany({
-        where: { id: { in: productIds } },
-        cursor: after ? { id: query.id } : undefined,
+      products = await this.prismaService.product.findMany({
+        where: {
+          AND: [
+            { id: { in: productIds } },
+            after ? { id: { gt: query.id } } : {},
+          ],
+        },
         take: first,
         orderBy: { id: 'asc' },
         include: {
@@ -213,6 +227,7 @@ export class ProductsService {
       totalCount = await this.prismaService.product.count();
 
       products = await this.prismaService.product.findMany({
+        where: {},
         skip: after ? 1 : 0,
         cursor: after ? { id: query.id } : undefined,
         take: first,
@@ -242,13 +257,13 @@ export class ProductsService {
         },
       });
     }
+
     response.edges = products.map((product) => ({
       node: plainToInstance(ProductModel, product),
       cursor: encodeBase64(product.id),
     }));
 
     response.nodes = plainToInstance(ProductModel, products);
-    console.log(response.nodes);
     response.pageInfo = {
       startCursor: products.length > 0 ? encodeBase64(products[0].id) : null,
       endCursor:
