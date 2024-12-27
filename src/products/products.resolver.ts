@@ -66,7 +66,6 @@ export class ProductsResolver {
     return product;
   }
 
-  @Auth('MANAGER')
   @Query(() => GetProductsRes)
   @UseFilters(new GlobalExceptionFilter())
   async getProducts(
