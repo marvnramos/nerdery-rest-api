@@ -16,8 +16,9 @@ import { UpdateProductRes } from './dto/responses/update.product.images.res';
 import { Product as ProductModel } from './models/products.model';
 import { GetProductsRes } from './dto/responses/get.products.res';
 import { GetProductsArgs } from './dto/args/get.products.args';
-import { PageInfo } from './models/types/pageinfo.type';
 import { plainToInstance } from 'class-transformer';
+import { Categories } from 'src/categories/models/categories.model';
+import { ProductImages as ProductImagesModel } from './models/product.images.model';
 
 @Injectable()
 export class ProductsService {
@@ -167,10 +168,10 @@ export class ProductsService {
 
   async getProducts(data: GetProductsArgs): Promise<GetProductsRes> {
     const query: any = {};
-    let products;
-    let productImages;
+    let products: Product[] = [];
     let totalCount = 0;
     const response = new GetProductsRes();
+
     const { first, after, categoriesIds } = data;
 
     if (after) {
@@ -184,62 +185,132 @@ export class ProductsService {
           where: { category_id: { in: categoriesIds } },
           select: { product_id: true },
         });
-      totalCount = productCategories.length;
 
       const productIds = productCategories.map(
         (category) => category.product_id,
       );
+      totalCount = productIds.length;
 
-      // productImages = await this.getProductImages(productIds);
-
-      totalCount = productCategories.length;
-      products = await this.prismaService.product
-        .findMany({
-          where: { id: { in: productIds } },
-          cursor: { id: query.id },
-          take: first,
-          orderBy: { id: 'asc' },
-        })
-        .catch(() => {
-          throw new InternalServerErrorException('Failed to get products');
-        });
-
-      response.totalCount = totalCount;
-      response.edges = products.map((product) => {
-        return plainToInstance(ProductModel, {
-          node: product,
-          cursor: encodeBase64(product.id),
-        });
+      products = products = await this.prismaService.product.findMany({
+        where: { id: { in: productIds } },
+        cursor: after ? { id: query.id } : undefined,
+        take: first,
+        orderBy: { id: 'asc' },
+        include: {
+          categories: {
+            select: {
+              category: {
+                select: {
+                  id: true,
+                  category_name: true,
+                  created_at: true,
+                  updated_at: true,
+                },
+              },
+            },
+          },
+          images: {
+            select: {
+              id: true,
+              image_url: true,
+              public_id: true,
+              created_at: true,
+              updated_at: true,
+            },
+          },
+        },
       });
     } else {
       totalCount = await this.prismaService.product.count();
 
-      await this.prismaService.product.findMany({
-        take: first,
+      products = await this.prismaService.product.findMany({
         skip: after ? 1 : 0,
+        cursor: after ? { id: query.id } : undefined,
+        take: first,
+        orderBy: { id: 'asc' },
+        include: {
+          categories: {
+            select: {
+              category: {
+                select: {
+                  id: true,
+                  category_name: true,
+                  created_at: true,
+                  updated_at: true,
+                },
+              },
+            },
+          },
+          images: {
+            select: {
+              id: true,
+              image_url: true,
+              public_id: true,
+              created_at: true,
+              updated_at: true,
+            },
+          },
+        },
       });
-
-      response.nodes = products;
-      response.pageInfo = {
-        startCursor:
-          response.nodes.length > 0 ? encodeBase64(response.nodes[0].id) : null,
-        endCursor:
-          response.nodes.length > 0
-            ? encodeBase64(response.nodes[response.nodes.length - 1].id)
-            : null,
-        hasNextPage: totalCount > (after ? 1 : 0) + first,
-        hasPreviousPage: after ? true : false,
-      };
-
-      console.log(response);
-      return response;
     }
+    response.edges = products.map((product) => ({
+      node: plainToInstance(ProductModel, product),
+      cursor: encodeBase64(product.id),
+    }));
+
+    response.nodes = plainToInstance(ProductModel, products);
+    console.log(response.nodes);
+    response.pageInfo = {
+      startCursor: products.length > 0 ? encodeBase64(products[0].id) : null,
+      endCursor:
+        products.length > 0
+          ? encodeBase64(products[products.length - 1].id)
+          : null,
+      hasNextPage: totalCount > (after ? 1 : 0) + first,
+      hasPreviousPage: !!after,
+    };
+
+    response.totalCount = totalCount;
+
+    return response;
   }
 
-  async getProductImages(productIds: string[]): Promise<ProductImages[]> {
-    return this.prismaService.productImages.findMany({
-      where: { product_id: { in: productIds } },
+  async getProductCategories(productId: string): Promise<Categories[]> {
+    const productCategories = await this.prismaService.productCategory.findMany(
+      {
+        where: { product_id: productId },
+        include: {
+          category: true,
+        },
+      },
+    );
+
+    return productCategories.map((relation) => ({
+      id: relation.category.id,
+      categoryName: relation.category.category_name,
+      createdAt: relation.category.created_at,
+      updatedAt: relation.category.updated_at,
+    }));
+  }
+
+  async getProductImages(productId: string): Promise<ProductImagesModel[]> {
+    const productImages = await this.prismaService.productImages.findMany({
+      where: {
+        product_id: productId,
+      },
+      // include: {
+      //   : true,
+      // },
     });
+
+    return productImages.map((productImage) => ({
+      id: productImage.id,
+      productId: productImage.product_id,
+      imageUrl: productImage.image_url,
+      publicId: productImage.public_id,
+      createdAt: productImage.created_at,
+      updatedAt: productImage.updated_at,
+    }));
   }
 
   async updateProductCategories(
