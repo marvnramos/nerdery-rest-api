@@ -9,10 +9,15 @@ import { AddProductReq } from './dto/requests/create.product.req';
 import { ConfigOptions, v2 as CloudinaryV2 } from 'cloudinary';
 import * as streamHelper from 'streamifier';
 import { UpdateProductReq } from './dto/requests/update.product.req';
-import { filterNullEntries } from '../utils/tools';
+import { decodeBase64, encodeBase64, filterNullEntries } from '../utils/tools';
 import { UpdateProductCategoriesReq } from './dto/requests/update.product.categories.req';
 import { OperationType } from '../utils/enums/operation.enum';
-import { UpdateProductRes } from './dto/responses/update.product.images.req';
+import { UpdateProductRes } from './dto/responses/update.product.images.res';
+import { Product as ProductModel } from './models/products.model';
+import { GetProductsRes } from './dto/responses/get.products.res';
+import { GetProductsArgs } from './dto/args/get.products.args';
+import { PageInfo } from './models/types/pageinfo.type';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class ProductsService {
@@ -157,6 +162,83 @@ export class ProductsService {
           connect: { id: productId },
         },
       },
+    });
+  }
+
+  async getProducts(data: GetProductsArgs): Promise<GetProductsRes> {
+    const query: any = {};
+    let products;
+    let productImages;
+    let totalCount = 0;
+    const response = new GetProductsRes();
+    const { first, after, categoriesIds } = data;
+
+    if (after) {
+      const decodedCursor = decodeBase64(after);
+      query.id = { gt: decodedCursor };
+    }
+
+    if (categoriesIds?.length) {
+      const productCategories =
+        await this.prismaService.productCategory.findMany({
+          where: { category_id: { in: categoriesIds } },
+          select: { product_id: true },
+        });
+      totalCount = productCategories.length;
+
+      const productIds = productCategories.map(
+        (category) => category.product_id,
+      );
+
+      // productImages = await this.getProductImages(productIds);
+
+      totalCount = productCategories.length;
+      products = await this.prismaService.product
+        .findMany({
+          where: { id: { in: productIds } },
+          cursor: { id: query.id },
+          take: first,
+          orderBy: { id: 'asc' },
+        })
+        .catch(() => {
+          throw new InternalServerErrorException('Failed to get products');
+        });
+
+      response.totalCount = totalCount;
+      response.edges = products.map((product) => {
+        return plainToInstance(ProductModel, {
+          node: product,
+          cursor: encodeBase64(product.id),
+        });
+      });
+    } else {
+      totalCount = await this.prismaService.product.count();
+
+      await this.prismaService.product.findMany({
+        take: first,
+        skip: after ? 1 : 0,
+      });
+
+      response.nodes = products;
+      response.pageInfo = {
+        startCursor:
+          response.nodes.length > 0 ? encodeBase64(response.nodes[0].id) : null,
+        endCursor:
+          response.nodes.length > 0
+            ? encodeBase64(response.nodes[response.nodes.length - 1].id)
+            : null,
+        hasNextPage: totalCount > (after ? 1 : 0) + first,
+        hasPreviousPage: after ? true : false,
+      };
+
+      console.log(response);
+      return response;
+    }
+  }
+
+  async getProductImages(productIds: string[]): Promise<ProductImages[]> {
+    return this.prismaService.productImages.findMany({
+      where: { product_id: { in: productIds } },
     });
   }
 
