@@ -88,6 +88,8 @@ export class CartsService {
   }
 
   async getCartItemsByCartId(cartId: string): Promise<CartItemType[]> {
+    await this.findCartById(cartId);
+
     const cartItems = await this.prismaService.cartItem.findMany({
       where: { cart_id: cartId },
       include: this.getCartItemIncludeRelations(),
