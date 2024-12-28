@@ -1,7 +1,7 @@
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
-  BadRequestException,
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma, Product, ProductImages } from '@prisma/client';
@@ -297,14 +297,101 @@ export class ProductsService {
     }));
   }
 
+  async getProductsFilteredByIds(
+    productsId?: string[],
+  ): Promise<ProductModel[]> {
+    const products = await this.prismaService.product.findMany({
+      where:
+        productsId && productsId.length > 0 ? { id: { in: productsId } } : {},
+      include: {
+        categories: {
+          select: {
+            category: {
+              select: {
+                id: true,
+                category_name: true,
+                created_at: true,
+                updated_at: true,
+              },
+            },
+          },
+        },
+        images: {
+          select: {
+            id: true,
+            image_url: true,
+            public_id: true,
+            created_at: true,
+            updated_at: true,
+          },
+        },
+      },
+    });
+
+    return products.map((product) => {
+      const productModel = new ProductModel();
+      productModel.id = product.id;
+      productModel.productName = product.product_name;
+      productModel.description = product.description;
+      productModel.stock = product.stock;
+      productModel.isAvailable = product.is_available;
+      productModel.unitPrice = product.unit_price;
+      productModel.createdAt = product.created_at;
+      productModel.updatedAt = product.updated_at;
+      return productModel;
+    });
+  }
+
+  async getProductById(id: string): Promise<ProductModel> {
+    const product = await this.prismaService.product.findUnique({
+      where: { id },
+      include: {
+        categories: {
+          select: {
+            category: {
+              select: {
+                id: true,
+                category_name: true,
+                created_at: true,
+                updated_at: true,
+              },
+            },
+          },
+        },
+        images: {
+          select: {
+            id: true,
+            image_url: true,
+            public_id: true,
+            created_at: true,
+            updated_at: true,
+          },
+        },
+      },
+    });
+
+    if (!product) {
+      throw new NotFoundException('Failed to find product');
+    }
+
+    const productModel = new ProductModel();
+    productModel.id = product.id;
+    productModel.productName = product.product_name;
+    productModel.description = product.description;
+    productModel.stock = product.stock;
+    productModel.isAvailable = product.is_available;
+    productModel.unitPrice = product.unit_price;
+    productModel.createdAt = product.created_at;
+    productModel.updatedAt = product.updated_at;
+
+    return productModel;
+  }
+
   async getProductImages(productId: string): Promise<ProductImagesModel[]> {
     const productImages = await this.prismaService.productImages.findMany({
       where: {
         product_id: productId,
       },
-      // include: {
-      //   : true,
-      // },
     });
 
     return productImages.map((productImage) => ({
