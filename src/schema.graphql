@@ -26,7 +26,7 @@ type Categories {
   updated_at: DateTime!
 }
 
-type ProductImages {
+type ProductImagesType {
   id: ID!
   product_id: String!
   image_url: String!
@@ -35,7 +35,7 @@ type ProductImages {
   updated_at: DateTime!
 }
 
-type Product {
+type ProductType {
   id: ID!
   product_name: String!
   description: String!
@@ -43,28 +43,28 @@ type Product {
   is_available: Boolean!
   unit_price: Float!
   categories: [Categories!]!
-  images: [ProductImages!]!
+  images: [ProductImagesType!]!
   created_at: DateTime!
   updated_at: DateTime!
 }
 
-type PageInfo {
+type PageInfoType {
   start_cursor: String!
   end_cursor: String!
   has_next_page: Boolean!
   has_previous_page: Boolean!
 }
 
-type ProductEdge {
+type ProductEdgeType {
   cursor: String!
-  node: Product!
+  node: ProductType!
 }
 
 type GetProductsRes {
   total_count: Int!
-  edges: [ProductEdge!]
-  nodes: [Product!]
-  pageInfo: PageInfo!
+  edges: [ProductEdgeType!]
+  nodes: [ProductType!]
+  pageInfo: PageInfoType!
 }
 
 type RemoveProductFromCartRes implements IRemoveRecordRes {
@@ -75,17 +75,17 @@ interface IRemoveRecordRes {
   deleted_at: DateTime!
 }
 
-type CartItem {
+type CartItemType {
   id: ID!
-  product: Product!
+  product: ProductType!
   quantity: Float!
   created_at: DateTime!
   updated_at: DateTime!
 }
 
-type Cart {
+type CartType {
   id: ID!
-  cartItems: [CartItem!]!
+  cartItems: [CartItemType!]!
   created_at: DateTime!
   updated_at: DateTime!
 }
@@ -115,7 +115,7 @@ type AddCategoryRes {
 
 type Query {
   Orders: String!
-  getCarts: Cart!
+  getCarts: CartType!
   getProducts(data: GetProductsArgs!): GetProductsRes!
   getCategories: [Categories!]!
 }
@@ -129,10 +129,10 @@ input GetProductsArgs {
 type Mutation {
   addOrUpdateCartProduct(data: AddOrUpdateProductCartArgs!): UpdateProductCartRes!
   removeProductFromCart(data: RemoveProductFromCartArgs!): RemoveProductFromCartRes!
-  addProduct(data: AddProductReq!): AddProductRes!
-  updateProduct(id: String!, data: UpdateProductReq!): UpdateProductRes!
+  addProduct(data: AddProductArgs!): AddProductRes!
+  updateProduct(id: String!, data: UpdateProductArgs!): UpdateProductRes!
   removeProduct(id: String!): RemoveProductRes!
-  updateProductCategories(data: UpdateProductCategoriesReq!): UpdateProductRes!
+  updateProductCategories(data: UpdateProductCategoriesArgs!): UpdateProductRes!
   addCategory(data: AddCategoryReq!): AddCategoryRes!
   deleteCategory(data: DeleteCategoryReq!): DeleteCategoryRes!
 }
@@ -148,7 +148,7 @@ input RemoveProductFromCartArgs {
   cart_id: String!
 }
 
-input AddProductReq {
+input AddProductArgs {
   product_name: String!
   description: String!
   stock: Float!
@@ -157,7 +157,7 @@ input AddProductReq {
   unit_price: Float!
 }
 
-input UpdateProductReq {
+input UpdateProductArgs {
   product_name: String
   description: String
   stock: Int
@@ -165,7 +165,7 @@ input UpdateProductReq {
   unit_price: Int
 }
 
-input UpdateProductCategoriesReq {
+input UpdateProductCategoriesArgs {
   id: ID!
   op: String!
   categories: [Int!]!
