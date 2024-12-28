@@ -37,13 +37,16 @@ export class GlobalExceptionFilter implements ExceptionFilter {
           ? exception.getResponse()
           : 'Internal server error';
 
-      throw new GraphQLError(exception.message, {
-        extensions: {
-          code: code['error'],
-          date: new Date().toISOString(),
-          status,
+      throw new GraphQLError(
+        code['message'] !== undefined ? code['message'] : exception.message,
+        {
+          extensions: {
+            code: code['error'],
+            date: new Date().toISOString(),
+            status,
+          },
         },
-      });
+      );
     } else if (contextType === 'http') {
       const ctx = host.switchToHttp();
       const response = ctx.getResponse<Response>();
