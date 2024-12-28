@@ -1,11 +1,11 @@
 import { UseFilters } from '@nestjs/common';
 import {
-  Resolver,
-  Mutation,
   Args,
+  Mutation,
+  Parent,
   Query,
   ResolveField,
-  Parent,
+  Resolver,
 } from '@nestjs/graphql';
 import { AddProductReq } from './dto/requests/create.product.req';
 import { GlobalExceptionFilter } from '../utils/GlobalExceptionFilter';
@@ -76,17 +76,11 @@ export class ProductsResolver {
 
   @ResolveField(() => [Categories])
   async categories(@Parent() product: Product): Promise<Categories[]> {
-    const productCategories = await this.productService.getProductCategories(
-      product.id,
-    );
-    return productCategories;
+    return await this.productService.getProductCategories(product.id);
   }
 
   @ResolveField(() => [ProductImages])
   async images(@Parent() product: Product): Promise<ProductImages[]> {
-    const productImages = await this.productService.getProductImages(
-      product.id,
-    );
-    return productImages;
+    return await this.productService.getProductImages(product.id);
   }
 }
