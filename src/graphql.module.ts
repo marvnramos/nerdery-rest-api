@@ -3,6 +3,7 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { join } from 'path';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { OrdersResolver } from './orders/orders.resolver';
+import { OrdersModule } from './orders/orders.module';
 
 @Module({
   imports: [
@@ -25,6 +26,5 @@ import { OrdersResolver } from './orders/orders.resolver';
       },
     }),
   ],
-  providers: [OrdersResolver],
 })
 export class GraphqlModule {}
