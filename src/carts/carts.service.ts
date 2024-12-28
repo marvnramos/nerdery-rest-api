@@ -167,6 +167,18 @@ export class CartsService {
     }
   }
 
+  async clearCartItems(cartId: string) {
+    return this.prismaService.cartItem.deleteMany({
+      where: { cart_id: cartId },
+    });
+  }
+
+  async getCartItems(cartId: string) {
+    return this.prismaService.cartItem.findMany({
+      where: { cart_id: cartId },
+    });
+  }
+
   private transformProduct(product: any): any {
     return {
       id: product.id,
