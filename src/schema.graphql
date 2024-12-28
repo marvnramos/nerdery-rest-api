@@ -127,6 +127,7 @@ input GetProductsArgs {
 }
 
 type Mutation {
+  checkOrUncheckAsFavorite(data: CheckUncheckFavoriteArgs!): FavoriteResponse!
   addOrUpdateCartProduct(data: AddOrUpdateProductCartArgs!): UpdateProductCartRes!
   removeProductFromCart(data: RemoveProductFromCartArgs!): RemoveProductFromCartRes!
   addProduct(data: AddProductArgs!): AddProductRes!
@@ -135,6 +136,21 @@ type Mutation {
   updateProductCategories(data: UpdateProductCategoriesArgs!): UpdateProductRes!
   addCategory(data: AddCategoryReq!): AddCategoryRes!
   deleteCategory(data: DeleteCategoryReq!): DeleteCategoryRes!
+}
+
+union FavoriteResponse = AddFavoriteRes | RemoveFavoriteRes
+
+type AddFavoriteRes implements IAddRecordRes {
+  id: ID!
+  created_at: DateTime!
+}
+
+type RemoveFavoriteRes implements IRemoveRecordRes {
+  deleted_at: DateTime!
+}
+
+input CheckUncheckFavoriteArgs {
+  product_id: ID!
 }
 
 input AddOrUpdateProductCartArgs {
