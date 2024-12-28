@@ -1,7 +1,7 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
-export class PageInfo {
+export class PageInfoType {
   @Field(() => String!, { name: 'start_cursor' })
   startCursor: string;
 

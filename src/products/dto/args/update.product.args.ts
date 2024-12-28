@@ -9,7 +9,7 @@ import {
 } from 'class-validator';
 
 @InputType()
-export class UpdateProductReq {
+export class UpdateProductArgs {
   @Field(() => String, { nullable: true, name: 'product_name' })
   @Expose({ name: 'product_name' })
   @IsOptional()

@@ -1,8 +1,8 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Expose } from 'class-transformer';
-import { Product } from 'src/products/models/products.model';
-import { PageInfo } from 'src/products/models/types/pageinfo.type';
-import { ProductEdge } from 'src/products/models/types/product.edge.type';
+import { ProductType } from 'src/products/types/product.type';
+import { PageInfoType } from 'src/products/types/pageinfo.type';
+import { ProductEdgeType } from 'src/products/types/product.edge.type';
 
 @ObjectType()
 export class GetProductsRes {
@@ -10,12 +10,12 @@ export class GetProductsRes {
   @Expose({ name: 'total_count' })
   totalCount: number;
 
-  @Field(() => [ProductEdge], { nullable: true })
-  edges?: ProductEdge[];
+  @Field(() => [ProductEdgeType], { nullable: true })
+  edges?: ProductEdgeType[];
 
-  @Field(() => [Product], { nullable: true })
-  nodes?: Product[];
+  @Field(() => [ProductType], { nullable: true })
+  nodes?: ProductType[];
 
-  @Field(() => PageInfo!)
-  pageInfo: PageInfo;
+  @Field(() => PageInfoType!)
+  pageInfo: PageInfoType;
 }

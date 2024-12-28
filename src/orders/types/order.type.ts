@@ -1,24 +1,18 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql';
 
 @ObjectType()
-export class VerificationTokens {
+export class OrderType {
   @Field(() => ID)
   id: string;
-
-  @Field()
-  token: string;
 
   @Field({ name: 'user_id' })
   userId: string;
 
-  @Field({ name: 'token_type_id' })
-  tokenTypeId: number;
+  @Field()
+  address: string;
 
-  @Field({ name: 'is_used' })
-  isUsed: string;
-
-  @Field({ name: 'expired_at' })
-  expiredAt: Date;
+  @Field({ name: 'nearby_landmark' })
+  nearbyLandmark: string;
 
   @Field({ name: 'created_at' })
   createdAt: Date;

@@ -11,7 +11,7 @@ import {
 } from 'class-validator';
 
 @InputType()
-export class AddProductReq {
+export class AddProductArgs {
   @Field(() => String, { name: 'product_name' })
   @Expose({ name: 'product_name' })
   @IsString()

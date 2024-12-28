@@ -14,7 +14,7 @@ import { ProductsService } from './products.service';
 import { GlobalExceptionFilter } from '../utils/GlobalExceptionFilter';
 import { Auth } from '../auth/decorators/auth.role.decorator';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { UpdateProductImagesReq } from './dto/requests/update.product.images.req';
+import { UpdateProductImagesArgs } from './dto/args/update.product.images.args';
 
 @Controller('products')
 export class ProductsController {
@@ -28,7 +28,7 @@ export class ProductsController {
   async updateProductImages(
     @Param('productId') productId: string,
     @UploadedFiles() uploadedImages: Express.Multer.File[],
-    @Body() updateImagesDto: UpdateProductImagesReq,
+    @Body() updateImagesDto: UpdateProductImagesArgs,
   ): Promise<void> {
     this.validateUpdateImagesRequest(updateImagesDto, uploadedImages);
 
@@ -44,7 +44,7 @@ export class ProductsController {
   }
 
   private validateUpdateImagesRequest(
-    { op, path, publicImageId }: UpdateProductImagesReq,
+    { op, path, publicImageId }: UpdateProductImagesArgs,
     uploadedImages: Express.Multer.File[],
   ): void {
     if (path !== '/images') {

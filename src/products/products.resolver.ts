@@ -7,30 +7,30 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
-import { AddProductReq } from './dto/requests/create.product.req';
+import { AddProductArgs } from './dto/args/add.product.args';
 import { GlobalExceptionFilter } from '../utils/GlobalExceptionFilter';
 import { ProductsService } from './products.service';
 import { plainToInstance } from 'class-transformer';
 import { Auth } from 'src/auth/decorators/auth.role.decorator';
 import { AddProductRes } from './dto/responses/create.product.res';
 import { UpdateProductRes } from './dto/responses/update.product.images.res';
-import { UpdateProductReq } from './dto/requests/update.product.req';
+import { UpdateProductArgs } from './dto/args/update.product.args';
 import { RemoveProductRes } from './dto/responses/remove.product.res';
-import { UpdateProductCategoriesReq } from './dto/requests/update.product.categories.req';
+import { UpdateProductCategoriesArgs } from './dto/args/update.product.categories.args';
 import { GetProductsArgs } from './dto/args/get.products.args';
 import { GetProductsRes } from './dto/responses/get.products.res';
-import { Product } from './models/products.model';
+import { ProductType } from './types/product.type';
 import { Categories } from 'src/categories/models/categories.model';
-import { ProductImages } from './models/product.images.model';
+import { ProductImagesType } from './types/product.images.type';
 
-@Resolver(() => Product)
+@Resolver(() => ProductType)
 export class ProductsResolver {
   constructor(private readonly productService: ProductsService) {}
 
   @Auth('MANAGER')
   @Mutation(() => AddProductRes)
   @UseFilters(new GlobalExceptionFilter())
-  async addProduct(@Args('data') data: AddProductReq): Promise<AddProductRes> {
+  async addProduct(@Args('data') data: AddProductArgs): Promise<AddProductRes> {
     const product = await this.productService.createProduct(data);
     return plainToInstance(AddProductRes, product);
   }
@@ -40,7 +40,7 @@ export class ProductsResolver {
   @UseFilters(new GlobalExceptionFilter())
   async updateProduct(
     @Args('id') id: string,
-    @Args('data') data: UpdateProductReq,
+    @Args('data') data: UpdateProductArgs,
   ): Promise<UpdateProductRes> {
     const product = await this.productService.editProductData(id, data);
     return plainToInstance(UpdateProductRes, product);
@@ -60,7 +60,7 @@ export class ProductsResolver {
   @Mutation(() => UpdateProductRes)
   @UseFilters(new GlobalExceptionFilter())
   async updateProductCategories(
-    @Args('data') data: UpdateProductCategoriesReq,
+    @Args('data') data: UpdateProductCategoriesArgs,
   ): Promise<UpdateProductRes> {
     const product = await this.productService.updateProductCategories(data);
     return product;
@@ -75,12 +75,12 @@ export class ProductsResolver {
   }
 
   @ResolveField(() => [Categories])
-  async categories(@Parent() product: Product): Promise<Categories[]> {
+  async categories(@Parent() product: ProductType): Promise<Categories[]> {
     return await this.productService.getProductCategories(product.id);
   }
 
-  @ResolveField(() => [ProductImages])
-  async images(@Parent() product: Product): Promise<ProductImages[]> {
+  @ResolveField(() => [ProductImagesType])
+  async images(@Parent() product: ProductType): Promise<ProductImagesType[]> {
     return await this.productService.getProductImages(product.id);
   }
 }

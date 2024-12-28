@@ -6,20 +6,20 @@ import {
 } from '@nestjs/common';
 import { Prisma, Product, ProductImages } from '@prisma/client';
 import { PrismaService } from 'src/utils/prisma/prisma.service';
-import { AddProductReq } from './dto/requests/create.product.req';
+import { AddProductArgs } from './dto/args/add.product.args';
 import { ConfigOptions, v2 as CloudinaryV2 } from 'cloudinary';
 import * as streamHelper from 'streamifier';
-import { UpdateProductReq } from './dto/requests/update.product.req';
+import { UpdateProductArgs } from './dto/args/update.product.args';
 import { decodeBase64, encodeBase64, filterNullEntries } from '../utils/tools';
-import { UpdateProductCategoriesReq } from './dto/requests/update.product.categories.req';
+import { UpdateProductCategoriesArgs } from './dto/args/update.product.categories.args';
 import { OperationType } from '../utils/enums/operation.enum';
 import { UpdateProductRes } from './dto/responses/update.product.images.res';
-import { Product as ProductModel } from './models/products.model';
+import { ProductType as ProductModel } from './types/product.type';
 import { GetProductsRes } from './dto/responses/get.products.res';
 import { GetProductsArgs } from './dto/args/get.products.args';
 import { plainToInstance } from 'class-transformer';
 import { Categories } from 'src/categories/models/categories.model';
-import { ProductImages as ProductImagesModel } from './models/product.images.model';
+import { ProductImagesType as ProductImagesModel } from './types/product.images.type';
 
 @Injectable()
 export class ProductsService {
@@ -35,7 +35,7 @@ export class ProductsService {
     this.cloudinaryService.config(cloudinaryConfig);
   }
 
-  async createProduct(data: AddProductReq): Promise<Product> {
+  async createProduct(data: AddProductArgs): Promise<Product> {
     const {
       categories,
       productName,
@@ -75,7 +75,7 @@ export class ProductsService {
     });
   }
 
-  async editProductData(id: string, data: UpdateProductReq): Promise<Product> {
+  async editProductData(id: string, data: UpdateProductArgs): Promise<Product> {
     if (data.stock !== undefined) {
       if (data.stock === 0) {
         data.isAvailable = false;
@@ -405,7 +405,7 @@ export class ProductsService {
   }
 
   async updateProductCategories(
-    data: UpdateProductCategoriesReq,
+    data: UpdateProductCategoriesArgs,
   ): Promise<UpdateProductRes> {
     await this.findProductById(data.id);
     const response = new UpdateProductRes();
