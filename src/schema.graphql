@@ -75,6 +75,21 @@ interface IRemoveRecordRes {
   deleted_at: DateTime!
 }
 
+type CartItem {
+  id: ID!
+  product: Product!
+  quantity: Float!
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
+type Cart {
+  id: ID!
+  cartItems: [CartItem!]!
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
 type AddProductRes implements IAddRecordRes {
   id: ID!
   created_at: DateTime!
@@ -113,6 +128,7 @@ input GetProductsArgs {
 type Mutation {
   addOrUpdateCartProduct(data: AddOrUpdateProductCartArgs!): UpdateProductCartRes!
   removeProductFromCart(data: RemoveProductFromCartArgs!): RemoveProductFromCartRes!
+  getCartDetails: Cart!
   addProduct(data: AddProductReq!): AddProductRes!
   updateProduct(id: String!, data: UpdateProductReq!): UpdateProductRes!
   removeProduct(id: String!): RemoveProductRes!
