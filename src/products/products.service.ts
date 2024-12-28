@@ -14,12 +14,12 @@ import { decodeBase64, encodeBase64, filterNullEntries } from '../utils/tools';
 import { UpdateProductCategoriesArgs } from './dto/args/update.product.categories.args';
 import { OperationType } from '../utils/enums/operation.enum';
 import { UpdateProductRes } from './dto/responses/update.product.images.res';
-import { Product as ProductModel } from './models/products.model';
+import { ProductType as ProductModel } from './types/product.type';
 import { GetProductsRes } from './dto/responses/get.products.res';
 import { GetProductsArgs } from './dto/args/get.products.args';
 import { plainToInstance } from 'class-transformer';
 import { Categories } from 'src/categories/models/categories.model';
-import { ProductImages as ProductImagesModel } from './models/product.images.model';
+import { ProductImagesType as ProductImagesModel } from './types/product.images.type';
 
 @Injectable()
 export class ProductsService {

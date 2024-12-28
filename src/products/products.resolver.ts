@@ -19,11 +19,11 @@ import { RemoveProductRes } from './dto/responses/remove.product.res';
 import { UpdateProductCategoriesArgs } from './dto/args/update.product.categories.args';
 import { GetProductsArgs } from './dto/args/get.products.args';
 import { GetProductsRes } from './dto/responses/get.products.res';
-import { Product } from './models/products.model';
+import { ProductType } from './types/product.type';
 import { Categories } from 'src/categories/models/categories.model';
-import { ProductImages } from './models/product.images.model';
+import { ProductImagesType } from './types/product.images.type';
 
-@Resolver(() => Product)
+@Resolver(() => ProductType)
 export class ProductsResolver {
   constructor(private readonly productService: ProductsService) {}
 
@@ -75,12 +75,12 @@ export class ProductsResolver {
   }
 
   @ResolveField(() => [Categories])
-  async categories(@Parent() product: Product): Promise<Categories[]> {
+  async categories(@Parent() product: ProductType): Promise<Categories[]> {
     return await this.productService.getProductCategories(product.id);
   }
 
-  @ResolveField(() => [ProductImages])
-  async images(@Parent() product: Product): Promise<ProductImages[]> {
+  @ResolveField(() => [ProductImagesType])
+  async images(@Parent() product: ProductType): Promise<ProductImagesType[]> {
     return await this.productService.getProductImages(product.id);
   }
 }
