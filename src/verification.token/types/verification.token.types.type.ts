@@ -1,7 +1,7 @@
 import { Field, ObjectType, ID } from '@nestjs/graphql';
 
 @ObjectType()
-export class VerificationTokenTypes {
+export class VerificationTokenTypesType {
   @Field(() => ID)
   id: number;
 
