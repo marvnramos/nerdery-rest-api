@@ -1,15 +1,13 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Product } from '../../products/models/products.model';
 
 @ObjectType()
-export class CartItems {
+export class CartItem {
   @Field(() => ID)
   id: string;
 
-  @Field({ name: 'cart_id' })
-  cartId: string;
-
-  @Field({ name: 'product_id' })
-  productId: string;
+  @Field(() => Product)
+  product: Product;
 
   @Field()
   quantity: number;
