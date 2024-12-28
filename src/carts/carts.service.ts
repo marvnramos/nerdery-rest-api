@@ -150,7 +150,7 @@ export class CartsService {
     });
   }
 
-  private async findCartById(cartId: string): Promise<Cart> {
+  async findCartById(cartId: string): Promise<Cart> {
     const cart = await this.prismaService.cart.findUnique({
       where: { id: cartId },
     });
@@ -161,7 +161,7 @@ export class CartsService {
     return cart;
   }
 
-  private validateCartOwnership(cart: Cart, userId: string): void {
+  validateCartOwnership(cart: Cart, userId: string): void {
     if (cart.user_id !== userId) {
       throw new NotAcceptableException('Cart does not belong to the user');
     }
