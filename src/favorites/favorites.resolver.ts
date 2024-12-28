@@ -1,4 +1,4 @@
-import { Args, Context, Mutation, Resolver } from '@nestjs/graphql';
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UseFilters } from '@nestjs/common';
 import { GlobalExceptionFilter } from '../utils/GlobalExceptionFilter';
 import { FavoritesService } from './favorites.service';
@@ -24,9 +24,11 @@ export class FavoritesResolver {
     );
   }
 
-  // @Auth('CLIENT')
-  // @Mutation(() => [FavoriteType])
-  // async getFavorites(
-  //   @Context('request') req: any,
-  // ): Promise<FavoriteType[]> {}
+  @Auth('CLIENT')
+  @Query(() => [FavoriteType])
+  async getFavorites(
+    @Context('request') { user }: { user: { id: string } },
+  ): Promise<FavoriteType[]> {
+    return await this.favoritesService.getFavoritesOwns(user.id);
+  }
 }
