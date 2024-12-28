@@ -9,9 +9,9 @@ import { PrismaService } from 'src/utils/prisma/prisma.service';
 import { AddProductArgs } from './dto/args/add.product.args';
 import { ConfigOptions, v2 as CloudinaryV2 } from 'cloudinary';
 import * as streamHelper from 'streamifier';
-import { UpdateProductReq } from './dto/requests/update.product.req';
+import { UpdateProductArgs } from './dto/requests/update.product.args';
 import { decodeBase64, encodeBase64, filterNullEntries } from '../utils/tools';
-import { UpdateProductCategoriesReq } from './dto/requests/update.product.categories.req';
+import { UpdateProductCategoriesArgs } from './dto/requests/update.product.categories.args';
 import { OperationType } from '../utils/enums/operation.enum';
 import { UpdateProductRes } from './dto/responses/update.product.images.res';
 import { Product as ProductModel } from './models/products.model';
@@ -75,7 +75,7 @@ export class ProductsService {
     });
   }
 
-  async editProductData(id: string, data: UpdateProductReq): Promise<Product> {
+  async editProductData(id: string, data: UpdateProductArgs): Promise<Product> {
     if (data.stock !== undefined) {
       if (data.stock === 0) {
         data.isAvailable = false;
@@ -405,7 +405,7 @@ export class ProductsService {
   }
 
   async updateProductCategories(
-    data: UpdateProductCategoriesReq,
+    data: UpdateProductCategoriesArgs,
   ): Promise<UpdateProductRes> {
     await this.findProductById(data.id);
     const response = new UpdateProductRes();

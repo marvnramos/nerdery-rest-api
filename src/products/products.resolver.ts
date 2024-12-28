@@ -14,9 +14,9 @@ import { plainToInstance } from 'class-transformer';
 import { Auth } from 'src/auth/decorators/auth.role.decorator';
 import { AddProductRes } from './dto/responses/create.product.res';
 import { UpdateProductRes } from './dto/responses/update.product.images.res';
-import { UpdateProductReq } from './dto/requests/update.product.req';
+import { UpdateProductArgs } from './dto/requests/update.product.args';
 import { RemoveProductRes } from './dto/responses/remove.product.res';
-import { UpdateProductCategoriesReq } from './dto/requests/update.product.categories.req';
+import { UpdateProductCategoriesArgs } from './dto/requests/update.product.categories.args';
 import { GetProductsArgs } from './dto/args/get.products.args';
 import { GetProductsRes } from './dto/responses/get.products.res';
 import { Product } from './models/products.model';
@@ -40,7 +40,7 @@ export class ProductsResolver {
   @UseFilters(new GlobalExceptionFilter())
   async updateProduct(
     @Args('id') id: string,
-    @Args('data') data: UpdateProductReq,
+    @Args('data') data: UpdateProductArgs,
   ): Promise<UpdateProductRes> {
     const product = await this.productService.editProductData(id, data);
     return plainToInstance(UpdateProductRes, product);
@@ -60,7 +60,7 @@ export class ProductsResolver {
   @Mutation(() => UpdateProductRes)
   @UseFilters(new GlobalExceptionFilter())
   async updateProductCategories(
-    @Args('data') data: UpdateProductCategoriesReq,
+    @Args('data') data: UpdateProductCategoriesArgs,
   ): Promise<UpdateProductRes> {
     const product = await this.productService.updateProductCategories(data);
     return product;

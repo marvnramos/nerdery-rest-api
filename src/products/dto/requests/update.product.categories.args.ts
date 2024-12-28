@@ -3,7 +3,7 @@ import { IsArray, IsEnum, IsNotEmpty, IsString, IsInt } from 'class-validator';
 import { OperationType } from '../../../utils/enums/operation.enum';
 
 @InputType()
-export class UpdateProductCategoriesReq {
+export class UpdateProductCategoriesArgs {
   @Field(() => ID!)
   @IsString()
   @IsNotEmpty()

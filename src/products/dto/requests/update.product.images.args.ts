@@ -8,7 +8,7 @@ import {
 import { Expose } from 'class-transformer';
 import { OperationType } from '../../../utils/enums/operation.enum';
 
-export class UpdateProductImagesReq {
+export class UpdateProductImagesArgs {
   @IsEnum(OperationType)
   op: OperationType;
 
