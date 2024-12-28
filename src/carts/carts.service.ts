@@ -116,4 +116,38 @@ export class CartsService {
     }
     return cart;
   }
+
+  async getCartDetails(userId: string) {
+    return this.prismaService.cart.findUnique({
+      where: { user_id: userId },
+      include: {
+        cart_items: {
+          include: {
+            product: {
+              include: {
+                categories: true,
+                images: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // const productIds = await this.prismaService.cartItem.findMany({
+    //   where: { cart: { user_id: userId } },
+    //   select: { product_id: true },
+    // });
+    // const filterIds = productIds.map((item) => item.product_id);
+    // const products =
+    //   await this.productService.getProductsFilteredByIds(filterIds);
+    //
+    // console.log(products);
+  }
+
+  async getCartItems(cartId: string): Promise<CartItem[]> {
+    return this.prismaService.cartItem.findMany({
+      where: { cart_id: cartId },
+    });
+  }
 }
