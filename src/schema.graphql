@@ -115,6 +115,7 @@ type AddCategoryRes {
 
 type Query {
   Orders: String!
+  getCarts: Cart!
   getProducts(data: GetProductsArgs!): GetProductsRes!
   getCategories: [Categories!]!
 }
@@ -128,7 +129,6 @@ input GetProductsArgs {
 type Mutation {
   addOrUpdateCartProduct(data: AddOrUpdateProductCartArgs!): UpdateProductCartRes!
   removeProductFromCart(data: RemoveProductFromCartArgs!): RemoveProductFromCartRes!
-  getCartDetails: Cart!
   addProduct(data: AddProductReq!): AddProductRes!
   updateProduct(id: String!, data: UpdateProductReq!): UpdateProductRes!
   removeProduct(id: String!): RemoveProductRes!
