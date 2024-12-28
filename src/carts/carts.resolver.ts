@@ -15,9 +15,9 @@ import { AddOrUpdateProductCartArgs } from './dto/args/add.or.update.product.car
 import { UpdateProductCartRes } from './dto/response/update.product.cart.res';
 import { RemoveProductFromCartArgs } from './dto/args/remove.product.from.cart.args';
 import { RemoveProductFromCartRes } from './dto/response/remove.product.from.cart.res';
-import { CartType } from './models/cart.type';
+import { CartType } from './types/cart.type';
 import { ProductsService } from '../products/products.service';
-import { CartItemType } from './models/cart.item.type';
+import { CartItemType } from './types/cart.item.type';
 
 @Resolver(() => CartType)
 @UseFilters(new GlobalExceptionFilter())
