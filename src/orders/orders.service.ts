@@ -19,43 +19,47 @@ export class OrdersService {
   async addOrder(userId: string, args: AddOrderArgs): Promise<AddOrderRes> {
     const cart = await this.cartService.findCartById(args.cartId);
     const user = await this.usersService.getUserById(userId);
-    this.cartService.validateCartOwnership(cart, user.id);
 
-    const cartItems = await this.prismaService.cartItem.findMany({
-      where: { cart_id: args.cartId },
-    });
+    if (cart.user_id !== user.id) {
+      throw new NotAcceptableException('Unauthorized to access this cart');
+    }
 
-    if (!cartItems || cartItems.length === 0) {
+    const cartItems = await this.cartService.getCartItems(args.cartId);
+    if (cartItems.length === 0) {
       throw new NotAcceptableException('Cart has no items');
     }
 
-    const order = await this.prismaService.order.create({
+    const order = await this.createOrder(args, user);
+
+    await this.createOrderDetails(order.id, cartItems);
+
+    await this.cartService.clearCartItems(args.cartId);
+
+    return plainToInstance(AddOrderRes, order);
+  }
+
+  private async createOrder(args: AddOrderArgs, user: any) {
+    return this.prismaService.order.create({
       data: {
-        address: args.address ? args.address : user.address,
+        address: args.address || user.address,
         nearby_landmark: args.nearbyLandmark || 'No landmark provided',
         user_id: user.id,
       },
     });
+  }
 
-    const orderDetails = await Promise.all(
-      cartItems.map(async (item) => ({
-        order_id: order.id,
-        product_id: item.product_id,
-        quantity: item.quantity,
-        unit_price: await this.productsService.getProductUnitPrice(
-          item.product_id,
-        ),
-      })),
-    );
+  private async createOrderDetails(orderId: string, cartItems: any[]) {
+    const orderDetails = cartItems.map(async (item) => ({
+      order_id: orderId,
+      product_id: item.product_id,
+      quantity: item.quantity,
+      unit_price: await this.productsService.getProductUnitPrice(
+        item.product_id,
+      ),
+    }));
 
-    await this.prismaService.orderDetail.createMany({
-      data: orderDetails,
+    return this.prismaService.orderDetail.createMany({
+      data: await Promise.all(orderDetails),
     });
-
-    await this.prismaService.cartItem.deleteMany({
-      where: { cart_id: args.cartId },
-    });
-
-    return plainToInstance(AddOrderRes, order);
   }
 }
