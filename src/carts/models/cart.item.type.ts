@@ -3,7 +3,7 @@ import { Product } from '../../products/models/products.model';
 import { Expose } from 'class-transformer';
 
 @ObjectType()
-export class CartItem {
+export class CartItemType {
   @Field(() => ID)
   id: string;
 

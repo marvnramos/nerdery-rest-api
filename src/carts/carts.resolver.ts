@@ -15,11 +15,11 @@ import { AddOrUpdateProductCartArgs } from './dto/args/add.or.update.product.car
 import { UpdateProductCartRes } from './dto/response/update.product.cart.res';
 import { RemoveProductFromCartArgs } from './dto/args/remove.product.from.cart.args';
 import { RemoveProductFromCartRes } from './dto/response/remove.product.from.cart.res';
-import { Cart } from './models/carts.model';
+import { CartType } from './models/cart.type';
 import { ProductsService } from '../products/products.service';
-import { CartItem } from './models/cart.items.model';
+import { CartItemType } from './models/cart.item.type';
 
-@Resolver(() => Cart)
+@Resolver(() => CartType)
 @UseFilters(new GlobalExceptionFilter())
 export class CartsResolver {
   constructor(
@@ -48,14 +48,14 @@ export class CartsResolver {
   }
 
   @Auth('CLIENT')
-  @Query(() => Cart)
-  async getCarts(@Context('request') req: any): Promise<Cart> {
+  @Query(() => CartType)
+  async getCarts(@Context('request') req: any): Promise<CartType> {
     const userId = req.user.id;
     return this.cartsService.getCartByUserId(userId);
   }
 
-  @ResolveField(() => [CartItem])
-  async cartItems(@Parent() cart: Cart): Promise<CartItem[]> {
+  @ResolveField(() => [CartItemType])
+  async cartItems(@Parent() cart: CartType): Promise<CartItemType[]> {
     return this.cartsService.getCartItemsByCartId(cart.id);
   }
 }
