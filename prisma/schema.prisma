@@ -106,7 +106,7 @@ model Product {
 
 model Cart {
   id         String       @id @default(uuid())
-  user_id    String
+  user_id    String       @unique
   created_at DateTime     @default(now())
   updated_at DateTime     @default(now()) @updatedAt
 
