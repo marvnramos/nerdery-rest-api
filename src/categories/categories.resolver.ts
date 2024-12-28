@@ -39,8 +39,7 @@ export class CategoriesResolver {
     response.deletedAt = new Date();
     return response;
   }
-
-  @Auth('MANAGER')
+  @Auth('MANAGER', 'CLIENT')
   @UseFilters(new GlobalExceptionFilter())
   @Query(() => [Categories])
   async getCategories(): Promise<Categories[]> {

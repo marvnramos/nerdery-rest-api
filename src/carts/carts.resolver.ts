@@ -16,16 +16,12 @@ import { UpdateProductCartRes } from './dto/response/update.product.cart.res';
 import { RemoveProductFromCartArgs } from './dto/args/remove.product.from.cart.args';
 import { RemoveProductFromCartRes } from './dto/response/remove.product.from.cart.res';
 import { CartType } from './types/cart.type';
-import { ProductsService } from '../products/products.service';
 import { CartItemType } from './types/cart.item.type';
 
 @Resolver(() => CartType)
 @UseFilters(new GlobalExceptionFilter())
 export class CartsResolver {
-  constructor(
-    private readonly cartsService: CartsService,
-    private readonly productsService: ProductsService,
-  ) {}
+  constructor(private readonly cartsService: CartsService) {}
 
   @Auth('CLIENT')
   @Mutation(() => UpdateProductCartRes)
