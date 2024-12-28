@@ -4,6 +4,8 @@ import { plainToInstance } from 'class-transformer';
 import { AddFavoriteRes } from './dto/responses/add.favorite.res';
 import { Favorite } from '@prisma/client';
 import { RemoveFavoriteRes } from './dto/responses/remove.favorite.res';
+import { FavoriteType } from './types/favorite.type';
+import { ProductType } from '../products/types/product.type';
 
 @Injectable()
 export class FavoritesService {
@@ -29,6 +31,29 @@ export class FavoritesService {
 
     const newFavorite = await this.addFavorite(userId, productId);
     return plainToInstance(AddFavoriteRes, newFavorite);
+  }
+
+  async getFavoritesOwns(userId: string): Promise<FavoriteType[]> {
+    const favorites = await this.prismaService.favorite.findMany({
+      where: { user_id: userId },
+      include: {
+        product: {
+          include: {
+            categories: true,
+            images: true,
+          },
+        },
+      },
+    });
+
+    return favorites.map<FavoriteType>((fav) => ({
+      id: fav.id,
+      userId: fav.user_id,
+      productId: fav.product_id,
+      createdAt: fav.created_at,
+      updatedAt: fav.updated_at,
+      product: plainToInstance(ProductType, fav.product),
+    }));
   }
 
   private async removeFavorite(favoriteId: string): Promise<void> {
