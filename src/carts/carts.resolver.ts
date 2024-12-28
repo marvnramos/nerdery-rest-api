@@ -20,6 +20,7 @@ import { ProductsService } from '../products/products.service';
 import { CartItem } from './models/cart.items.model';
 
 @Resolver(() => Cart)
+@UseFilters(new GlobalExceptionFilter())
 export class CartsResolver {
   constructor(
     private readonly cartsService: CartsService,
@@ -28,41 +29,33 @@ export class CartsResolver {
 
   @Auth('CLIENT')
   @Mutation(() => UpdateProductCartRes)
-  @UseFilters(new GlobalExceptionFilter())
   async addOrUpdateCartProduct(
-    @Args('data')
-    addOrRemoveProductQuantityCartArg: AddOrUpdateProductCartArgs,
+    @Args('data') data: AddOrUpdateProductCartArgs,
     @Context('request') req: any,
   ): Promise<UpdateProductCartRes> {
-    return this.cartsService.addProductToCart(
-      req.user.id,
-      addOrRemoveProductQuantityCartArg,
-    );
+    const userId = req.user.id;
+    return this.cartsService.addProductToCart(userId, data);
   }
 
   @Auth('CLIENT')
   @Mutation(() => RemoveProductFromCartRes)
-  @UseFilters(new GlobalExceptionFilter())
   async removeProductFromCart(
-    @Args('data')
-    removeProductFromCartArg: RemoveProductFromCartArgs,
+    @Args('data') data: RemoveProductFromCartArgs,
     @Context('request') req: any,
   ): Promise<RemoveProductFromCartRes> {
-    return this.cartsService.deleteProductFromCart(
-      req.user.id,
-      removeProductFromCartArg,
-    );
+    const userId = req.user.id;
+    return this.cartsService.deleteProductFromCart(userId, data);
   }
 
   @Auth('CLIENT')
   @Query(() => Cart)
-  @UseFilters(new GlobalExceptionFilter())
   async getCarts(@Context('request') req: any): Promise<Cart> {
-    return await this.cartsService.getCartByUserId(req.user.id);
+    const userId = req.user.id;
+    return this.cartsService.getCartByUserId(userId);
   }
 
   @ResolveField(() => [CartItem])
   async cartItems(@Parent() cart: Cart): Promise<CartItem[]> {
-    return await this.cartsService.getCartItemsByCartId(cart.id);
+    return this.cartsService.getCartItemsByCartId(cart.id);
   }
 }
