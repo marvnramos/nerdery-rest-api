@@ -2,7 +2,7 @@ import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { Expose } from 'class-transformer';
 
 @ObjectType()
-export class ProductImages {
+export class ProductImagesType {
   @Field(() => ID)
   id: string;
 

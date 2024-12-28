@@ -1,10 +1,10 @@
 import { Field, ObjectType, ID } from '@nestjs/graphql';
 import { Categories } from 'src/categories/models/categories.model';
-import { ProductImages } from './product.images.model';
+import { ProductImagesType } from './product.images.type';
 import { Expose } from 'class-transformer';
 
 @ObjectType()
-export class Product {
+export class ProductType {
   @Field(() => ID)
   id: string;
 
@@ -29,8 +29,8 @@ export class Product {
   @Field(() => [Categories])
   categories: Categories[];
 
-  @Field(() => [ProductImages])
-  images: ProductImages[];
+  @Field(() => [ProductImagesType])
+  images: ProductImagesType[];
 
   @Field({ name: 'created_at' })
   @Expose({ name: 'created_at' })

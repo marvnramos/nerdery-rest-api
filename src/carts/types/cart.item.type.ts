@@ -1,5 +1,5 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
-import { Product } from '../../products/models/products.model';
+import { ProductType } from '../../products/types/product.type';
 import { Expose } from 'class-transformer';
 
 @ObjectType()
@@ -7,8 +7,8 @@ export class CartItemType {
   @Field(() => ID)
   id: string;
 
-  @Field(() => Product)
-  product: Product;
+  @Field(() => ProductType)
+  product: ProductType;
 
   @Field()
   quantity: number;
