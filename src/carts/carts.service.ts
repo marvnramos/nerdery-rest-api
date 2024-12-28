@@ -8,7 +8,7 @@ import { AddOrUpdateProductCartArgs } from './dto/args/add.or.update.product.car
 import { UpdateProductCartRes } from './dto/response/update.product.cart.res';
 import { ProductsService } from 'src/products/products.service';
 import { Cart, CartItem } from '@prisma/client';
-import { plainToClass, plainToInstance } from 'class-transformer';
+import { plainToInstance } from 'class-transformer';
 import { RemoveProductFromCartArgs } from './dto/args/remove.product.from.cart.args';
 import { RemoveProductFromCartRes } from './dto/response/remove.product.from.cart.res';
 import { Cart as CartType } from './models/carts.model';
@@ -26,56 +26,17 @@ export class CartsService {
     data: AddOrUpdateProductCartArgs,
   ): Promise<UpdateProductCartRes> {
     const product = await this.productService.findProductById(data.productId);
-
     if (data.quantity > product.stock) {
       throw new NotAcceptableException('Insufficient product stock');
     }
 
-    let cart: Cart;
-    let cartItem: CartItem;
+    const cart = await this.getOrCreateCart(userId, data.cartId);
 
-    if (!data.cartId) {
-      cart = await this.prismaService.cart.create({
-        data: {
-          user_id: userId,
-        },
-      });
-    } else {
-      cart = await this.findCartById(data.cartId);
-
-      if (cart.user_id !== userId) {
-        throw new NotAcceptableException('Cart not belongs to user');
-      }
-    }
-
-    cartItem = await this.prismaService.cartItem.findUnique({
-      where: {
-        cart_id_product_id: {
-          cart_id: cart.id,
-          product_id: data.productId,
-        },
-      },
-    });
-
-    if (cartItem) {
-      cartItem = await this.prismaService.cartItem.update({
-        where: {
-          cart_id_product_id: {
-            cart_id: cart.id,
-            product_id: data.productId,
-          },
-        },
-        data: { quantity: data.quantity },
-      });
-    } else {
-      cartItem = await this.prismaService.cartItem.create({
-        data: {
-          cart_id: cart.id,
-          product_id: data.productId,
-          quantity: data.quantity,
-        },
-      });
-    }
+    const cartItem = await this.upsertCartItem(
+      cart.id,
+      data.productId,
+      data.quantity,
+    );
 
     return plainToInstance(UpdateProductCartRes, cartItem);
   }
@@ -87,56 +48,35 @@ export class CartsService {
     await this.productService.findProductById(data.productId);
     const cart = await this.findCartById(data.cartId);
 
-    if (cart.user_id !== userId) {
-      throw new NotAcceptableException('Cart not belongs to user');
-    }
+    this.validateCartOwnership(cart, userId);
 
-    await this.prismaService.cartItem
-      .delete({
+    try {
+      await this.prismaService.cartItem.delete({
         where: {
           cart_id_product_id: {
             cart_id: data.cartId,
             product_id: data.productId,
           },
         },
-      })
-      .catch(() => {
-        throw new NotFoundException('Product not found in cart');
       });
-
-    const response = new RemoveProductFromCartRes();
-    response.deletedAt = new Date();
-    return response;
-  }
-
-  async findCartById(cartId: string): Promise<Cart> {
-    const cart = await this.prismaService.cart.findUnique({
-      where: { id: cartId },
-    });
-    if (!cart) {
-      throw new NotFoundException('Cart not found');
+    } catch {
+      throw new NotFoundException('Product not found in cart');
     }
-    return cart;
+
+    return plainToInstance(RemoveProductFromCartRes, { deletedAt: new Date() });
   }
 
   async getCartByUserId(userId: string): Promise<CartType> {
     const cart = await this.prismaService.cart.findUnique({
       where: { user_id: userId },
-      include: {
-        cart_items: {
-          include: {
-            product: {
-              include: {
-                categories: true,
-                images: true,
-              },
-            },
-          },
-        },
-      },
+      include: this.getCartIncludeRelations(),
     });
 
-    return plainToClass(CartType, {
+    if (!cart) {
+      throw new NotFoundException('Cart not found');
+    }
+
+    return plainToInstance(CartType, {
       ...cart,
       createdAt: cart.created_at,
       updatedAt: cart.updated_at,
@@ -150,24 +90,7 @@ export class CartsService {
   async getCartItemsByCartId(cartId: string): Promise<CartItemType[]> {
     const cartItems = await this.prismaService.cartItem.findMany({
       where: { cart_id: cartId },
-      include: {
-        product: {
-          include: {
-            categories: {
-              select: {
-                category: { select: { id: true, category_name: true } },
-              },
-            },
-            images: {
-              select: {
-                id: true,
-                image_url: true,
-                public_id: true,
-              },
-            },
-          },
-        },
-      },
+      include: this.getCartItemIncludeRelations(),
     });
 
     return plainToInstance(
@@ -177,26 +100,126 @@ export class CartsService {
         quantity: item.quantity,
         created_at: item.created_at,
         updated_at: item.updated_at,
-        product: {
-          id: item.product.id,
-          productName: item.product.product_name,
-          description: item.product.description,
-          stock: item.product.stock,
-          isAvailable: item.product.is_available,
-          unitPrice: item.product.unit_price,
-          categories: item.product.categories.map((relation) => ({
-            id: relation.category.id,
-            categoryName: relation.category.category_name,
-          })),
-          images: item.product.images.map((image) => ({
-            id: image.id,
-            image_url: image.image_url,
-            public_id: image.public_id,
-          })),
-          createdAt: item.product.created_at,
-          updatedAt: item.product.updated_at,
-        },
+        product: this.transformProduct(item.product),
       })),
     );
+  }
+
+  private async getOrCreateCart(
+    userId: string,
+    cartId?: string,
+  ): Promise<Cart> {
+    if (!cartId) {
+      const existingCart = await this.prismaService.cart.findUnique({
+        where: { user_id: userId },
+      });
+
+      if (existingCart) {
+        return existingCart;
+      }
+
+      return this.prismaService.cart.create({
+        data: {
+          user: { connect: { id: userId } },
+        },
+      });
+    }
+
+    const cart = await this.findCartById(cartId);
+    this.validateCartOwnership(cart, userId);
+    return cart;
+  }
+
+  private async upsertCartItem(
+    cartId: string,
+    productId: string,
+    quantity: number,
+  ): Promise<CartItem> {
+    return this.prismaService.cartItem.upsert({
+      where: {
+        cart_id_product_id: { cart_id: cartId, product_id: productId },
+      },
+      update: { quantity },
+      create: {
+        cart_id: cartId,
+        product_id: productId,
+        quantity,
+      },
+    });
+  }
+
+  private async findCartById(cartId: string): Promise<Cart> {
+    const cart = await this.prismaService.cart.findUnique({
+      where: { id: cartId },
+    });
+
+    if (!cart) {
+      throw new NotFoundException('Cart not found');
+    }
+    return cart;
+  }
+
+  private validateCartOwnership(cart: Cart, userId: string): void {
+    if (cart.user_id !== userId) {
+      throw new NotAcceptableException('Cart does not belong to the user');
+    }
+  }
+
+  private transformProduct(product: any): any {
+    return {
+      id: product.id,
+      productName: product.product_name,
+      description: product.description,
+      stock: product.stock,
+      isAvailable: product.is_available,
+      unitPrice: product.unit_price,
+      categories: product.categories.map((relation) => ({
+        id: relation.category.id,
+        categoryName: relation.category.category_name,
+      })),
+      images: product.images.map((image) => ({
+        id: image.id,
+        image_url: image.image_url,
+        public_id: image.public_id,
+      })),
+      createdAt: product.created_at,
+      updatedAt: product.updated_at,
+    };
+  }
+
+  private getCartIncludeRelations() {
+    return {
+      cart_items: {
+        include: {
+          product: {
+            include: {
+              categories: true,
+              images: true,
+            },
+          },
+        },
+      },
+    };
+  }
+
+  private getCartItemIncludeRelations() {
+    return {
+      product: {
+        include: {
+          categories: {
+            select: {
+              category: { select: { id: true, category_name: true } },
+            },
+          },
+          images: {
+            select: {
+              id: true,
+              image_url: true,
+              public_id: true,
+            },
+          },
+        },
+      },
+    };
   }
 }
