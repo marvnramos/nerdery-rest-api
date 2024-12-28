@@ -7,7 +7,7 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
-import { AddProductReq } from './dto/requests/create.product.req';
+import { AddProductArgs } from './dto/args/add.product.args';
 import { GlobalExceptionFilter } from '../utils/GlobalExceptionFilter';
 import { ProductsService } from './products.service';
 import { plainToInstance } from 'class-transformer';
@@ -30,7 +30,7 @@ export class ProductsResolver {
   @Auth('MANAGER')
   @Mutation(() => AddProductRes)
   @UseFilters(new GlobalExceptionFilter())
-  async addProduct(@Args('data') data: AddProductReq): Promise<AddProductRes> {
+  async addProduct(@Args('data') data: AddProductArgs): Promise<AddProductRes> {
     const product = await this.productService.createProduct(data);
     return plainToInstance(AddProductRes, product);
   }

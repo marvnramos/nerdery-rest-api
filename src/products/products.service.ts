@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { Prisma, Product, ProductImages } from '@prisma/client';
 import { PrismaService } from 'src/utils/prisma/prisma.service';
-import { AddProductReq } from './dto/requests/create.product.req';
+import { AddProductArgs } from './dto/args/add.product.args';
 import { ConfigOptions, v2 as CloudinaryV2 } from 'cloudinary';
 import * as streamHelper from 'streamifier';
 import { UpdateProductReq } from './dto/requests/update.product.req';
@@ -35,7 +35,7 @@ export class ProductsService {
     this.cloudinaryService.config(cloudinaryConfig);
   }
 
-  async createProduct(data: AddProductReq): Promise<Product> {
+  async createProduct(data: AddProductArgs): Promise<Product> {
     const {
       categories,
       productName,
