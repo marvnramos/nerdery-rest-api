@@ -1,5 +1,6 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { Product } from '../../products/models/products.model';
+import { Expose } from 'class-transformer';
 
 @ObjectType()
 export class CartItem {
@@ -12,9 +13,11 @@ export class CartItem {
   @Field()
   quantity: number;
 
-  @Field({ name: 'created_at' })
+  @Field(() => Date, { name: 'created_at' })
+  @Expose({ name: 'created_at' })
   createdAt: Date;
 
-  @Field({ name: 'updated_at' })
+  @Field(() => Date, { name: 'updated_at' })
+  @Expose({ name: 'updated_at' })
   updatedAt: Date;
 }
