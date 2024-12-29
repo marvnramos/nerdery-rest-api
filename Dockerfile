@@ -1,18 +1,14 @@
-# Use Node.js as the base image
-FROM node:latest
+# Stage 1: Build the application
+FROM node:latest as builder
 
 # Set the working directory
 WORKDIR /app
 
-# Install dependencies
+# Copy package.json and package-lock.json to install dependencies
 COPY package*.json ./
-RUN npm install --production
 
-# Install development dependencies (for type definitions)
-RUN npm install --only=dev
-
-# Install NestJS CLI globally
-RUN npm install -g @nestjs/cli
+# Install all dependencies including dev dependencies
+RUN npm install
 
 # Copy the rest of the application
 COPY . .
@@ -22,6 +18,18 @@ RUN npx prisma generate
 
 # Build the NestJS application
 RUN npm run build
+
+
+# Stage 2: Create the production image
+FROM node:alpine
+
+# Set the working directory
+WORKDIR /app
+
+# Copy only the necessary files from the builder stage
+COPY --from=builder /app/package*.json /app/
+COPY --from=builder /app/dist /app/dist
+COPY --from=builder /app/node_modules /app/node_modules
 
 # Expose the port (default port for NestJS is 3000)
 EXPOSE 3000
