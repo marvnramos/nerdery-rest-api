@@ -85,16 +85,10 @@ export class OrdersService {
       };
     });
 
-    return plainToInstance(
-      OrderType,
-      {
-        ...order,
-        orderDetails,
-      },
-      {
-        excludeExtraneousValues: true,
-      },
-    );
+    return plainToInstance(OrderType, {
+      ...order,
+      orderDetails,
+    });
   }
 
   async getOrders(data: GetOrdersArgs): Promise<GetOrdersRes> {
