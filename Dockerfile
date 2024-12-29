@@ -12,7 +12,7 @@ RUN npm install --production
 COPY . .
 
 # Build the NestJS application
-RUN npm run build
+#RUN npm run build
 
 # Expose the port (the default port for NestJS is 3000)
 EXPOSE 3000
