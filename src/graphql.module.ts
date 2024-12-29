@@ -2,7 +2,8 @@ import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { join } from 'path';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { GraphqlResolver } from './graphql.resolver';
+import { OrdersResolver } from './orders/orders.resolver';
+import { OrdersModule } from './orders/orders.module';
 
 @Module({
   imports: [
@@ -12,8 +13,18 @@ import { GraphqlResolver } from './graphql.resolver';
       playground: true,
       debug: true,
       context: ({ req }) => ({ request: req }),
+      formatError: (error) => {
+        const { message, extensions } = error;
+
+        return {
+          message,
+          extensions: {
+            ...extensions,
+            stacktrace: undefined,
+          },
+        };
+      },
     }),
   ],
-  providers: [GraphqlResolver],
 })
 export class GraphqlModule {}

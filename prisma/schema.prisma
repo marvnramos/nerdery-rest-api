@@ -86,36 +86,49 @@ model VerificationTokenType {
 }
 
 model Product {
-  id           String       @id @default(uuid())
-  product_name String
-  description  String
-  stock        Int
-  is_available Boolean
-  unit_price   Float
-  created_at   DateTime     @default(now())
-  updated_at   DateTime     @default(now())   @updatedAt
+  id             String             @id @default(uuid())
+  product_name   String
+  description    String
+  stock          Int
+  is_available   Boolean            @default(true)
+  unit_price     Float
+  created_at     DateTime           @default(now())
+  updated_at     DateTime           @default(now()) @updatedAt
 
-  carts        Cart[]
-  orderDetails OrderDetail[]
-  favorites    Favorite[]
-  categories   ProductCategory[]
-  images       ProductImage[]
+  cartItems      CartItem[]
+  orderDetails   OrderDetail[]
+  favorites      Favorite[]
+  categories     ProductCategory[]
+  images         ProductImages[]
+
   @@index([id, is_available])
 }
 
 model Cart {
-  id         String    @id @default(uuid())
-  user_id    String
+  id         String       @id @default(uuid())
+  user_id    String       @unique
+  created_at DateTime     @default(now())
+  updated_at DateTime     @default(now()) @updatedAt
+
+  user       User         @relation(fields: [user_id], references: [id])
+  cart_items CartItem[]
+
+  @@index([user_id])
+}
+
+model CartItem {
+  id         String       @id @default(uuid())
+  cart_id    String
   product_id String
   quantity   Int
-  created_at DateTime  @default(now())
-  updated_at DateTime  @default(now()) @updatedAt
+  created_at DateTime     @default(now())
+  updated_at DateTime     @default(now()) @updatedAt
 
-  user       User      @relation(fields: [user_id], references: [id])
-  product    Product   @relation(fields: [product_id], references: [id])
+  cart       Cart         @relation(fields: [cart_id], references: [id])
+  product    Product      @relation(fields: [product_id], references: [id])
 
-  @@unique([user_id, product_id])
-  @@index([id, user_id])
+  @@unique([cart_id, product_id])
+  @@index([cart_id, product_id])
 }
 
 model Order {
@@ -164,9 +177,9 @@ model ProductCategory {
   product_id  String
   category_id Int
   created_at  DateTime  @default(now())
-  updated_at  DateTime  @default(now())   @updatedAt
+  updated_at  DateTime  @default(now()) @updatedAt
 
-  product     Product   @relation(fields: [product_id], references: [id])
+  product     Product   @relation(fields: [product_id], references: [id], onDelete: Cascade)
   category    Category  @relation(fields: [category_id], references: [id])
 
   @@id([product_id, category_id])
@@ -175,22 +188,23 @@ model ProductCategory {
 
 model Category {
   id           Int          @id @default(autoincrement())
-  category_name String
-  created_at   DateTime     @default(now())
-  updated_at   DateTime     @default(now())                @updatedAt
+  category_name String       @unique
+  created_at   DateTime      @default(now())
+  updated_at   DateTime      @default(now()) @updatedAt
 
   products     ProductCategory[]
 }
 
-model ProductImage {
+model ProductImages {
   id         String    @id @default(uuid())
   product_id String
   image_url  String
+  public_id  String    @unique
   created_at DateTime  @default(now())
   updated_at DateTime  @default(now()) @updatedAt
 
   product    Product   @relation(fields: [product_id], references: [id])
-  @@index([product_id, id])
+  @@index([product_id, id, public_id])
 }
 
 model PaymentDetail {

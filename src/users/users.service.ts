@@ -1,11 +1,19 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { Prisma, User, VerificationToken } from '@prisma/client';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
+import { PrismaService } from '../utils/prisma/prisma.service';
+import { Prisma, User, UserRole } from '@prisma/client';
+import { VerificationTokenService } from '../verification.token/verification.token.service';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly verificationTokenService: VerificationTokenService,
+  ) {}
 
   async create(data: Prisma.UserCreateInput): Promise<User> {
     try {
@@ -25,40 +33,6 @@ export class UsersService {
     }
   }
 
-  async encodeVerificationToken(token: string): Promise<string> {
-    return Buffer.from(token).toString('base64');
-  }
-
-  async decodeVerificationToken(encodedToken: string): Promise<string> {
-    return Buffer.from(encodedToken, 'base64').toString('utf-8');
-  }
-
-  async addVerificationToken(
-    data: Prisma.VerificationTokenCreateInput,
-  ): Promise<VerificationToken> {
-    try {
-      return await this.prismaService.verificationToken.create({ data });
-    } catch (error) {
-      console.error('Error creating verification token:', error);
-      throw new InternalServerErrorException(
-        'Failed to create verification token',
-      );
-    }
-  }
-
-  async findVerificationToken(token: string): Promise<VerificationToken> {
-    try {
-      return await this.prismaService.verificationToken.findUnique({
-        where: { token },
-      });
-    } catch (error) {
-      console.error('Error finding verification token:', error);
-      throw new InternalServerErrorException(
-        'Failed to find verification token',
-      );
-    }
-  }
-
   async hashPassword(password: string): Promise<string> {
     try {
       const saltRounds = 10;
@@ -69,26 +43,37 @@ export class UsersService {
     }
   }
 
+  async findById(id: string): Promise<User | null> {
+    try {
+      return await this.prismaService.user.findUnique({ where: { id } });
+    } catch (error) {
+      console.error(`Error finding user with id ${id}:`, error);
+      throw new InternalServerErrorException('Failed to find user by id');
+    }
+  }
+
+  async getUserRole(userId: string): Promise<UserRole | null> {
+    try {
+      const user = await this.findById(userId);
+      return this.prismaService.userRole.findUnique({
+        where: { id: user.role_id },
+      });
+    } catch (error) {
+      console.error(`Error finding user with id ${userId}:`, error);
+      throw new InternalServerErrorException('Failed to find user by user');
+    }
+  }
+
   async resetPassword(
     verificationToken: string,
     hashedPassword: string,
   ): Promise<boolean> {
     try {
-      const token = await this.findVerificationToken(verificationToken);
-      if (!token) {
-        return false;
-      }
-
-      if (token.token_type_id !== 2) {
-        return false;
-      }
-
-      if (token.is_used) {
-        return false;
-      }
-
-      const tokenExpirationDate = new Date(token.expired_at);
-      if (new Date() > tokenExpirationDate) {
+      const token =
+        await this.verificationTokenService.findVerificationToken(
+          verificationToken,
+        );
+      if (!this.isValidToken(token, 2)) {
         return false;
       }
 
@@ -97,10 +82,7 @@ export class UsersService {
         data: { password: hashedPassword },
       });
 
-      await this.prismaService.verificationToken.update({
-        where: { id: token.id },
-        data: { is_used: true },
-      });
+      await this.markTokenAsUsed(token.id);
 
       return true;
     } catch (error) {
@@ -111,39 +93,61 @@ export class UsersService {
 
   async verifyEmail(verificationToken: string): Promise<boolean> {
     try {
-      const token = await this.findVerificationToken(verificationToken);
-
-      if (!token) {
+      const token =
+        await this.verificationTokenService.findVerificationToken(
+          verificationToken,
+        );
+      if (!this.isValidToken(token, 1)) {
         return false;
       }
-
-      if (token.token_type_id !== 1) {
-        return false;
-      }
-
-      if (token.is_used) {
-        return false;
-      }
-
-      const tokenExpirationDate = new Date(token.expired_at);
-      if (new Date() > tokenExpirationDate) {
-        return false;
-      }
-
-      await this.prismaService.verificationToken.update({
-        where: { token: verificationToken },
-        data: { is_used: true },
-      });
 
       await this.prismaService.user.update({
         where: { id: token.user_id },
         data: { is_email_verified: true },
       });
 
+      await this.markTokenAsUsed(token.id);
+
       return true;
     } catch (error) {
       console.error('Error verifying email:', error);
       throw new InternalServerErrorException('Failed to verify email');
     }
+  }
+
+  async getUserById(id: string): Promise<User> {
+    const user = await this.prismaService.user.findUnique({ where: { id } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
+  }
+
+  private async markTokenAsUsed(tokenId: string): Promise<void> {
+    await this.prismaService.verificationToken.update({
+      where: { id: tokenId },
+      data: { is_used: true },
+    });
+  }
+
+  private isValidToken(token: any, expectedTypeId: number): boolean {
+    if (!token) {
+      return false;
+    }
+
+    if (token.token_type_id !== expectedTypeId) {
+      return false;
+    }
+
+    if (token.is_used) {
+      return false;
+    }
+
+    const tokenExpirationDate = new Date(token.expired_at);
+    if (new Date() > tokenExpirationDate) {
+      return false;
+    }
+
+    return true;
   }
 }
