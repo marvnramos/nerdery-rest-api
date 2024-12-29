@@ -8,6 +8,9 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install --production
 
+# Install development dependencies (for type definitions)
+RUN npm install --only=dev
+
 # Install NestJS CLI globally
 RUN npm install -g @nestjs/cli
 
