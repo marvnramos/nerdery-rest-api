@@ -24,21 +24,23 @@ export class PaymentsService {
         metadata: { orderId },
       });
 
-      await this.prisma.paymentDetail.create({
-        data: {
-          id: paymentIntent.id,
-          payment_intent_id: paymentIntent.id,
-          payment_method_id: null,
-          order_id: orderId,
-          amount,
-          status_id: 1,
-          payment_date: new Date(),
-        },
-      });
+      // await this.prisma.paymentDetail.create({
+      //   data: {
+      //     id: paymentIntent.id,
+      //     payment_intent_id: paymentIntent.id,
+      //     payment_method_id: null,
+      //     order_id: orderId,
+      //     amount,
+      //     status_id: 1,
+      //     payment_date: new Date(),
+      //   },
+      // });
 
       return { clientSecret: paymentIntent.client_secret };
     } catch (error) {
       throw new Error(`Error creating payment intent: ${error.message}`);
     }
   }
+
+  async handleStripeWebhook(body: any) {}
 }
