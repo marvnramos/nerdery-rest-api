@@ -2,15 +2,13 @@ import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { join } from 'path';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { OrdersResolver } from './orders/orders.resolver';
-import { OrdersModule } from './orders/orders.module';
 
 @Module({
   imports: [
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.graphql'),
-      playground: true,
+      playground: false,
       debug: true,
       context: ({ req }) => ({ request: req }),
       formatError: (error) => {
