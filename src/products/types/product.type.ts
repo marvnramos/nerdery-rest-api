@@ -1,11 +1,12 @@
 import { Field, ObjectType, ID } from '@nestjs/graphql';
 import { Categories } from 'src/categories/models/categories.model';
 import { ProductImagesType } from './product.images.type';
-import { Expose } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
 
 @ObjectType()
 export class ProductType {
   @Field(() => ID)
+  @Expose()
   id: string;
 
   @Field({ name: 'product_name' })
@@ -13,9 +14,11 @@ export class ProductType {
   productName: string;
 
   @Field()
+  @Expose()
   description: string;
 
   @Field()
+  @Expose()
   stock: number;
 
   @Field({ name: 'is_available' })
@@ -27,9 +30,13 @@ export class ProductType {
   unitPrice: number;
 
   @Field(() => [Categories])
+  @Type(() => Categories)
+  @Expose()
   categories: Categories[];
 
   @Field(() => [ProductImagesType])
+  @Type(() => ProductImagesType)
+  @Expose()
   images: ProductImagesType[];
 
   @Field({ name: 'created_at' })
