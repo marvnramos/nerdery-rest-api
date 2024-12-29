@@ -18,9 +18,8 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "seed": "ts-node prisma/seeds/index.seed.ts",
-    "seed:prod": "node dist/prisma/seeds/index.seed.js",
-    "start:heroku": "npm run seed:prod && npm run start:prod"
+    "seed": "node dist/prisma/seeds/index.seed.js",
+    "start:heroku": "npm run seed && npm run start:prod"
   },
   "dependencies": {
     "@apollo/server": "^4.11.2",
