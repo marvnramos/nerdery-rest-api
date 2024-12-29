@@ -6,10 +6,13 @@ WORKDIR /app
 
 # Install dependencies
 COPY package*.json ./
-RUN npm install
+RUN npm install --production
 
 # Copy the rest of the application
 COPY . .
+
+# Generate the Prisma client
+RUN npx prisma generate
 
 # Build the NestJS application
 RUN npm run build
