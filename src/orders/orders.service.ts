@@ -46,6 +46,57 @@ export class OrdersService {
     return plainToInstance(AddOrderRes, order);
   }
 
+  async getOrderById(orderId: string): Promise<OrderType> {
+    const order = await this.prismaService.order.findUnique({
+      where: { id: orderId },
+      include: {
+        orderDetails: {
+          select: {
+            id: true,
+            product_id: true,
+            quantity: true,
+            unit_price: true,
+            product: {
+              include: {
+                categories: true,
+                images: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!order) {
+      throw new NotFoundException(`Order with ID ${orderId} not found`);
+    }
+
+    const orderDetails = order.orderDetails.map((detail) => {
+      if (!detail.product_id) {
+        throw new Error(
+          `OrderDetail with missing product_id: ${JSON.stringify(detail)}`,
+        );
+      }
+
+      return {
+        ...detail,
+        productId: detail.product_id,
+        unitPrice: detail.unit_price,
+      };
+    });
+
+    return plainToInstance(
+      OrderType,
+      {
+        ...order,
+        orderDetails,
+      },
+      {
+        excludeExtraneousValues: true,
+      },
+    );
+  }
+
   async getOrders(data: GetOrdersArgs): Promise<GetOrdersRes> {
     const { userId, first, after } = data;
 
