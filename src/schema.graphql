@@ -100,6 +100,39 @@ type CartType {
   updated_at: DateTime!
 }
 
+type OrderDetailType {
+  id: String!
+  order_id: String!
+  product_id: String!
+  quantity: Int!
+  unit_price: Int!
+  created_at: DateTime!
+  updated_at: DateTime!
+  product: ProductType!
+}
+
+type OrderType {
+  id: ID!
+  user_id: ID!
+  address: String!
+  nearby_landmark: String!
+  created_at: DateTime!
+  updated_at: DateTime!
+  orderDetails: [OrderDetailType!]!
+}
+
+type OrderEdgeType {
+  cursor: String!
+  node: OrderType!
+}
+
+type GetOrdersRes {
+  totalCount: Int!
+  edges: [OrderEdgeType!]!
+  nodes: [OrderType!]!
+  pageInfo: PageInfoType!
+}
+
 type AddProductRes implements IAddRecordRes {
   id: ID!
   created_at: DateTime!
@@ -129,10 +162,17 @@ type AddCategoryRes {
 
 type Query {
   Orders: [String!]!
+  getOrders(data: GetOrdersArgs!): GetOrdersRes!
   getCarts: CartType!
   getProducts(data: GetProductsArgs!): GetProductsRes!
   getFavorites: [FavoriteType!]!
   getCategories: [Categories!]!
+}
+
+input GetOrdersArgs {
+  first: Int!
+  after: String
+  user_id: ID
 }
 
 input GetProductsArgs {
