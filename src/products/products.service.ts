@@ -467,4 +467,15 @@ export class ProductsService {
       where: { id },
     });
   }
+
+  async getProductUnitPrice(productId: string): Promise<number> {
+    const product = await this.prismaService.product.findUnique({
+      where: { id: productId },
+    });
+
+    if (!product) {
+      throw new NotFoundException(`Product with ID ${productId} not found`);
+    }
+    return product.unit_price;
+  }
 }

@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../utils/prisma/prisma.service';
 import { Prisma, User, UserRole } from '@prisma/client';
 import { VerificationTokenService } from '../verification.token/verification.token.service';
@@ -109,6 +113,14 @@ export class UsersService {
       console.error('Error verifying email:', error);
       throw new InternalServerErrorException('Failed to verify email');
     }
+  }
+
+  async getUserById(id: string): Promise<User> {
+    const user = await this.prismaService.user.findUnique({ where: { id } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
   }
 
   private async markTokenAsUsed(tokenId: string): Promise<void> {

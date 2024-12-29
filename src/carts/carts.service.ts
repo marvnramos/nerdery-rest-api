@@ -88,6 +88,8 @@ export class CartsService {
   }
 
   async getCartItemsByCartId(cartId: string): Promise<CartItemType[]> {
+    await this.findCartById(cartId);
+
     const cartItems = await this.prismaService.cartItem.findMany({
       where: { cart_id: cartId },
       include: this.getCartItemIncludeRelations(),
@@ -148,7 +150,7 @@ export class CartsService {
     });
   }
 
-  private async findCartById(cartId: string): Promise<Cart> {
+  async findCartById(cartId: string): Promise<Cart> {
     const cart = await this.prismaService.cart.findUnique({
       where: { id: cartId },
     });
@@ -159,10 +161,22 @@ export class CartsService {
     return cart;
   }
 
-  private validateCartOwnership(cart: Cart, userId: string): void {
+  validateCartOwnership(cart: Cart, userId: string): void {
     if (cart.user_id !== userId) {
       throw new NotAcceptableException('Cart does not belong to the user');
     }
+  }
+
+  async clearCartItems(cartId: string) {
+    return this.prismaService.cartItem.deleteMany({
+      where: { cart_id: cartId },
+    });
+  }
+
+  async getCartItems(cartId: string) {
+    return this.prismaService.cartItem.findMany({
+      where: { cart_id: cartId },
+    });
   }
 
   private transformProduct(product: any): any {

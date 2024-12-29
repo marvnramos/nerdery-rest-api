@@ -1,25 +1,38 @@
-import { ObjectType, ID, Field } from '@nestjs/graphql';
+import { ObjectType, Field, Int } from '@nestjs/graphql';
+import { Expose, Type } from 'class-transformer';
+import { ProductType } from '../../products/types/product.type';
 
 @ObjectType()
 export class OrderDetailType {
-  @Field(() => ID)
+  @Field(() => String)
   id: string;
 
-  @Field({ name: 'order_id' })
+  @Field(() => String, { name: 'order_id' })
+  @Expose({ name: 'order_id' })
   orderId: string;
 
-  @Field({ name: 'product_id' })
+  @Field(() => String, { name: 'product_id' })
+  @Expose({ name: 'product_id' })
   productId: string;
 
-  @Field()
+  @Field(() => Int)
+  @Expose()
   quantity: number;
 
-  @Field({ name: 'unit_price' })
+  @Field(() => Int, { name: 'unit_price' })
+  @Expose({ name: 'unit_price' })
   unitPrice: number;
 
   @Field({ name: 'created_at' })
+  @Expose({ name: 'created_at' })
   createdAt: Date;
 
   @Field({ name: 'updated_at' })
+  @Expose({ name: 'updated_at' })
   updatedAt: Date;
+
+  @Field(() => ProductType)
+  @Type(() => ProductType)
+  @Expose()
+  product: ProductType;
 }

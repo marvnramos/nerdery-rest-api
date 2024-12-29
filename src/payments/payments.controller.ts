@@ -12,4 +12,10 @@ export class PaymentsController {
   ) {
     return this.paymentService.createPaymentIntent(orderId, amount);
   }
+
+  @Post('webhook')
+  async stripeWebhook(@Body() body: any) {
+    console.log(body);
+    return this.paymentService.handleStripeWebhook(body);
+  }
 }
