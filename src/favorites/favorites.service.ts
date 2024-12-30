@@ -46,14 +46,16 @@ export class FavoritesService {
       },
     });
 
-    return favorites.map<FavoriteType>((fav) => ({
-      id: fav.id,
-      userId: fav.user_id,
-      productId: fav.product_id,
-      createdAt: fav.created_at,
-      updatedAt: fav.updated_at,
-      product: plainToInstance(ProductType, fav.product),
-    }));
+    const favoriteTypes = favorites.map((favorite) => {
+      const product = favorite.product;
+      const productType = plainToInstance(ProductType, product);
+      return {
+        ...favorite,
+        product: productType,
+      };
+    });
+
+    return favoriteTypes;
   }
 
   private async removeFavorite(favoriteId: string): Promise<void> {
