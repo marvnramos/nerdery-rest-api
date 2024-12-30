@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsEmail, IsInt, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class EmailCommand {
   @IsString()
@@ -22,4 +22,18 @@ export class EmailCommand {
   @IsString()
   @IsNotEmpty()
   subject: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  productName?: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  image?: string;
+
+  @IsInt()
+  @IsOptional()
+  unitPrice?: number;
 }
