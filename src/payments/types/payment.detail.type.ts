@@ -1,31 +1,32 @@
 import { Field, ObjectType, ID } from '@nestjs/graphql';
+import { PaymentStatus } from './status.payment.type';
 
 @ObjectType()
 export class PaymentDetail {
   @Field(() => ID)
   id: string;
 
-  @Field({ name: 'payment_intent_id' })
-  paymentIntentId: string;
+  @Field(() => String)
+  payment_intent_id: string;
 
-  @Field({ name: 'payment_method_id' })
-  paymentMethodId: string;
+  @Field(() => String)
+  payment_method_id: string;
 
-  @Field({ name: 'order_id' })
-  orderId: string;
+  @Field(() => String)
+  order_id: string;
 
   @Field()
   amount: number;
 
-  @Field({ name: 'status_id' })
-  statusId: number;
+  @Field(() => PaymentStatus)
+  status: PaymentStatus;
 
-  @Field({ name: 'created_at' })
-  createdAt: Date;
+  @Field()
+  created_at: Date;
 
-  @Field({ name: 'updated_at' })
-  updatedAt: Date;
+  @Field()
+  updated_at: Date;
 
-  @Field({ name: 'payment_date' })
-  paymentDate: string;
+  @Field()
+  payment_date: Date;
 }
