@@ -29,18 +29,18 @@ type UpdateProductRes implements IUpdateRecordRes {
   updated_at: DateTime!
 }
 
-type PageInfoType {
-  start_cursor: String
-  end_cursor: String
-  has_next_page: Boolean!
-  has_previous_page: Boolean!
-}
-
 type Categories {
   id: ID!
   category_name: String!
   created_at: DateTime!
   updated_at: DateTime!
+}
+
+type PageInfoType {
+  start_cursor: String
+  end_cursor: String
+  has_next_page: Boolean!
+  has_previous_page: Boolean!
 }
 
 type ProductImagesType {
