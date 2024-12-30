@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../utils/prisma/prisma.service';
 import { plainToInstance } from 'class-transformer';
 import { AddFavoriteRes } from './dto/responses/add.favorite.res';
@@ -6,15 +6,21 @@ import { Favorite } from '@prisma/client';
 import { RemoveFavoriteRes } from './dto/responses/remove.favorite.res';
 import { FavoriteType } from './types/favorite.type';
 import { ProductType } from '../products/types/product.type';
+import { ProductsService } from '../products/products.service';
 
 @Injectable()
 export class FavoritesService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly productService: ProductsService,
+  ) {}
 
   async checkOrUncheckAsFavorite(
     userId: string,
     productId: string,
   ): Promise<AddFavoriteRes | RemoveFavoriteRes> {
+    await this.productService.validateProductExists(productId);
+
     const existingFavorite = await this.prismaService.favorite.findUnique({
       where: {
         user_id_product_id: {
@@ -46,7 +52,7 @@ export class FavoritesService {
       },
     });
 
-    const favoriteTypes = favorites.map((favorite) => {
+    return favorites.map((favorite) => {
       const product = favorite.product;
       const productType = plainToInstance(ProductType, product);
       return {
@@ -54,8 +60,6 @@ export class FavoritesService {
         product: productType,
       };
     });
-
-    return favoriteTypes;
   }
 
   private async removeFavorite(favoriteId: string): Promise<void> {
