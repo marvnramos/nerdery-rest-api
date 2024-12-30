@@ -14,6 +14,8 @@ import { GetOrdersArgs } from './dto/args/get.orders.args';
 import { GetOrdersRes } from './dto/responses/get.orders.res';
 import { decodeBase64, encodeBase64 } from '../utils/tools';
 import { OrderType } from './types/order.type';
+import { findManyCursorConnection } from '@devoxa/prisma-relay-cursor-connection';
+import { PaginatedOrdersType } from './types/orders.connection.type';
 
 @Injectable()
 export class OrdersService {
@@ -89,6 +91,53 @@ export class OrdersService {
       ...order,
       orderDetails,
     });
+  }
+
+  async getPaginatedOrders(args: GetOrdersArgs): Promise<any> {
+    const { userId, first, after } = args;
+
+    const whereClause: any = {
+      ...(userId ? { user_id: userId } : {}),
+      ...(after ? { id: { gt: decodeBase64(after) } } : {}),
+    };
+
+    try {
+      const orders = await findManyCursorConnection(
+        (args) =>
+          this.prismaService.order.findMany({
+            where: whereClause,
+            take: first,
+            include: {
+              user: { include: { role: true } },
+              orderDetails: {
+                include: {
+                  product: {
+                    include: {
+                      categories: true,
+                      images: true,
+                    },
+                  },
+                },
+              },
+            },
+            ...args,
+          }),
+        () =>
+          this.prismaService.order.count({
+            where: whereClause,
+          }),
+        args,
+        {
+          getCursor: (record) => ({ id: encodeBase64(record.id) }),
+        },
+      );
+
+      console.log('Paginated orders:', orders);
+      return plainToInstance(PaginatedOrdersType, orders);
+    } catch (error) {
+      console.error('Error fetching paginated orders:', error);
+      throw new Error('Failed to fetch paginated orders.');
+    }
   }
 
   async getOrders(data: GetOrdersArgs): Promise<GetOrdersRes> {
