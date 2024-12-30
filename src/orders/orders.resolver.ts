@@ -7,7 +7,7 @@ import { AddOrderRes } from './dto/responses/add.order.res';
 import { AddOrderArgs } from './dto/args/add.order.args';
 import { GetOrdersArgs } from './dto/args/get.orders.args';
 import { OrderDetailType } from './types/order.detail.type';
-import { PaginatedOrdersType } from './types/orders.connection.type';
+import { PaginatedOrdersType } from './dto/responses/orders.pagination.type.res';
 import { UserRoleType } from '@prisma/client';
 import { GetOrderArgs } from './dto/args/get.order.args';
 import { OrderType } from './types/order.type';
