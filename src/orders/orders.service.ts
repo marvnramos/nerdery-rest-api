@@ -146,7 +146,6 @@ export class OrdersService {
       (findArgs) =>
         this.prismaService.order.findMany({
           where: whereClause,
-          take: args.first,
           orderBy: { id: 'asc' },
           include: {
             user: { include: { role: true } },
