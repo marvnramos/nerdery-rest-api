@@ -214,7 +214,7 @@ model ProductImages {
 
 model PaymentDetail {
   id                String   @id @default(uuid())
-  payment_intent_id String
+  payment_intent_id String   @unique
   payment_method_id String
   order_id          String   @unique
   amount            Int
