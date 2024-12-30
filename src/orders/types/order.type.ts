@@ -1,6 +1,7 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql';
 import { OrderDetailType } from './order.detail.type';
 import { User } from '../../users/models/users.model';
+import { PaymentDetail } from '../../payments/types/payment.detail.type';
 
 @ObjectType()
 export class OrderType {
@@ -27,4 +28,7 @@ export class OrderType {
 
   @Field(() => [OrderDetailType!], { name: 'order_details' })
   orderDetails: OrderDetailType[];
+
+  @Field(() => PaymentDetail, { name: 'payment_details', nullable: true })
+  paymentDetail?: PaymentDetail | null;
 }
