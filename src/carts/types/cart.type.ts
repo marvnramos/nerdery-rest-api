@@ -7,11 +7,11 @@ export class CartType {
   id: string;
 
   @Field(() => [CartItemType!]!)
-  cartItems: CartItemType[];
+  cart_item: CartItemType[];
 
-  @Field({ name: 'created_at' })
-  createdAt: Date;
+  @Field()
+  created_at: Date;
 
-  @Field({ name: 'updated_at' })
-  updatedAt: Date;
+  @Field()
+  updated_at: Date;
 }

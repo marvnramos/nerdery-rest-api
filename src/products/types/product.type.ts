@@ -1,7 +1,6 @@
 import { Field, ObjectType, ID } from '@nestjs/graphql';
 import { Categories } from 'src/categories/models/categories.model';
 import { ProductImagesType } from './product.images.type';
-import { Type } from 'class-transformer';
 
 @ObjectType()
 export class ProductType {
@@ -24,7 +23,6 @@ export class ProductType {
   unit_price: number;
 
   @Field(() => [Categories])
-  @Type(() => Categories)
   categories: Categories[];
 
   @Field(() => [ProductImagesType])
