@@ -5,6 +5,7 @@ import { PrismaService } from 'src/utils/prisma/prisma.service';
 import { OrdersService } from 'src/orders/orders.service';
 import { AddPaymentRes } from './dto/responses/add.payment.res';
 import { UserRoleType } from '@prisma/client';
+import { WebhookReq } from './dto/requests/webhook.req';
 
 @Injectable()
 export class PaymentsService {
@@ -59,5 +60,22 @@ export class PaymentsService {
     };
   }
 
-  async handleStripeWebhook(body: any) {}
+  async handleStripeWebhook(data: WebhookReq) {
+    const { id, status, amount, payment_method, order_id } = data;
+
+    const statusPayment = status === 'succeeded' ? 2 : 3;
+    return this.prisma.paymentDetail.update({
+      where: {
+        order_id: order_id || undefined,
+        payment_intent_id: id,
+      },
+      data: {
+        payment_method_id: payment_method ?? 'not provided',
+        amount: parseInt(amount),
+        status_id: statusPayment,
+        updated_at: new Date(),
+        payment_date: new Date(),
+      },
+    });
+  }
 }
