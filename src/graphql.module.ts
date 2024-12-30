@@ -10,7 +10,7 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
       autoSchemaFile: join(process.cwd(), 'src/schema.graphql'),
       playground: process.env.NODE_ENV !== 'production',
       debug: true,
-      context: ({ req }) => ({ request: req }),
+      context: ({ req, res }) => ({ request: req, response: res }),
       formatError: (error) => {
         const { message, extensions } = error;
 
