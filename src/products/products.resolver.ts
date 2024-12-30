@@ -66,6 +66,12 @@ export class ProductsResolver {
     return product;
   }
 
+  @Query(() => ProductType)
+  @UseFilters(new GlobalExceptionFilter())
+  async getProductById(@Args('id') id: string): Promise<ProductType> {
+    return this.productService.getProductById(id);
+  }
+
   @Query(() => GetProductsRes)
   @UseFilters(new GlobalExceptionFilter())
   async getProductsPagination(

@@ -19,6 +19,8 @@ import { Categories } from 'src/categories/models/categories.model';
 import { PaginatedProductsType } from './dto/responses/products.pagination.type.res';
 import { findManyCursorConnection } from '@devoxa/prisma-relay-cursor-connection';
 import { ProductImagesType } from './types/product.images.type';
+import { ProductType } from "./types/product.type";
+import retryTimes = jest.retryTimes;
 
 @Injectable()
 export class ProductsService {
@@ -63,6 +65,11 @@ export class ProductsService {
     });
     await this.createProductCategories(categories, product.id);
     return product;
+  }
+
+  async getProductById(id: string): Promise<ProductType> {
+    const product = await this.findProductById(id);
+    return plainToInstance(ProductType, product);
   }
 
   async createProductCategories(
