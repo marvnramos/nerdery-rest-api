@@ -28,8 +28,8 @@ export class PaymentsService {
       throw new NotAcceptableException('This order has already been paid.');
     }
     const order = await this.orderService.getOrderById(orderId);
-    const amount = order.orderDetails.reduce((amount, orderDetail) => {
-      amount += orderDetail.quantity * orderDetail.unitPrice;
+    const amount = order.order_details.reduce((amount, orderDetail) => {
+      amount += orderDetail.quantity * orderDetail.unit_price;
       return amount;
     }, 0);
 
