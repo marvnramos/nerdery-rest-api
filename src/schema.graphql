@@ -203,12 +203,16 @@ type AddCategoryRes {
 }
 
 type Query {
-  Orders: [String!]!
+  getOrderById(data: GetOrderArgs!): OrderType!
   getPaginatedOrders(data: GetOrdersArgs!): PaginatedOrdersType!
   getCarts: CartType!
   getProducts(data: GetProductsArgs!): GetProductsRes!
   getFavorites: [FavoriteType!]!
   getCategories: [Categories!]!
+}
+
+input GetOrderArgs {
+  order_id: ID!
 }
 
 input GetOrdersArgs {
