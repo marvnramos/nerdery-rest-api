@@ -11,7 +11,7 @@ import { Cart, CartItem } from '@prisma/client';
 import { plainToInstance } from 'class-transformer';
 import { RemoveProductFromCartArgs } from './dto/args/remove.product.from.cart.args';
 import { RemoveProductFromCartRes } from './dto/response/remove.product.from.cart.res';
-import { CartType as CartType } from './types/cart.type';
+import { CartType } from './types/cart.type';
 import { CartItemType as CartItemType } from './types/cart.item.type';
 
 @Injectable()
@@ -78,9 +78,7 @@ export class CartsService {
 
     return plainToInstance(CartType, {
       ...cart,
-      createdAt: cart.created_at,
-      updatedAt: cart.updated_at,
-      cartItems: cart.cart_items.map((item) => ({
+      cart_item: cart.cart_items.map((item) => ({
         ...item,
         product: item.product,
       })),
