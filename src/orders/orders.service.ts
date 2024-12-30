@@ -38,12 +38,7 @@ export class OrdersService {
 
   async getOrderById(orderId: string): Promise<OrderType> {
     const order = await this.fetchOrderWithDetails(orderId);
-    const orderDetails = this.validateOrderDetails(order.orderDetails);
-
-    return plainToInstance(OrderType, {
-      ...order,
-      orderDetails,
-    });
+    return plainToInstance(OrderType, order);
   }
 
   async getPaginatedOrders(args: GetOrdersArgs): Promise<PaginatedOrdersType> {
@@ -98,18 +93,20 @@ export class OrdersService {
     const order = await this.prismaService.order.findUnique({
       where: { id: orderId },
       include: {
+        user: { include: { role: true } },
         orderDetails: {
-          select: {
-            id: true,
-            product_id: true,
-            quantity: true,
-            unit_price: true,
+          include: {
             product: {
               include: {
                 categories: true,
                 images: true,
               },
             },
+          },
+        },
+        paymentDetail: {
+          include: {
+            status: true,
           },
         },
       },
@@ -120,21 +117,6 @@ export class OrdersService {
     }
 
     return order;
-  }
-
-  private validateOrderDetails(orderDetails: any[]) {
-    return orderDetails.map((detail) => {
-      if (!detail.product_id) {
-        throw new Error(
-          `OrderDetail with missing product_id: ${JSON.stringify(detail)}`,
-        );
-      }
-      return {
-        ...detail,
-        productId: detail.product_id,
-        unitPrice: detail.unit_price,
-      };
-    });
   }
 
   private async fetchPaginatedOrders(args: GetOrdersArgs) {
