@@ -1,5 +1,6 @@
 import { Field, ID, InputType, Int } from '@nestjs/graphql';
 import {
+  IsEmail,
   IsInt,
   IsNotEmpty,
   IsOptional,
@@ -27,4 +28,12 @@ export class GetOrdersArgs {
   @IsNotEmpty()
   @IsUUID()
   userId?: string;
+
+  @Field(() => String, { name: 'user_email', nullable: true })
+  @Expose({ name: 'user_email' })
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  @IsEmail()
+  userEmail?: string;
 }
