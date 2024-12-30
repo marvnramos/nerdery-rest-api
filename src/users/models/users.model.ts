@@ -1,24 +1,25 @@
 import { Field, ObjectType, ID } from '@nestjs/graphql';
+import { UserRoles } from './user.roles.model';
 
 @ObjectType()
 export class User {
   @Field(() => ID)
   id: string;
 
-  @Field({ name: 'first_name' })
-  firstName: string;
+  @Field()
+  first_name: string;
 
-  @Field({ name: 'last_name' })
-  lastName: string;
+  @Field()
+  last_name: string;
 
   @Field()
   email: string;
 
-  @Field({ name: 'is_email_verified' })
-  isEmailVerified: boolean;
+  @Field()
+  is_email_verified: boolean;
 
-  @Field({ name: 'role_id' })
-  roleId: number;
+  @Field()
+  role_id: number;
 
   @Field()
   address: string;
@@ -26,9 +27,12 @@ export class User {
   @Field()
   password: string;
 
-  @Field({ name: 'created_at' })
-  createdAt: Date;
+  @Field()
+  created_at: Date;
 
-  @Field({ name: 'updated_at' })
-  updatedAt: Date;
+  @Field()
+  updated_at: Date;
+
+  @Field(() => UserRoles)
+  role: UserRoles;
 }
