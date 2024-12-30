@@ -122,7 +122,9 @@ export class UsersController {
   @Get('reset-password/:token')
   @Render('reset-password-view')
   resetPasswordView(@Param('token') token: string, @Res() res: Response) {
+    const nonce = res.locals.nonce;
     res.cookie('token', token, { httpOnly: false, maxAge: 900_000 });
+    return { nonce };
   }
 
   @Put('reset-password')
