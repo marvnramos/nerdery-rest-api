@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+    .email-container {
+      max-width: 600px;
+      margin: 20px auto;
+      background: #ffffff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .header {
+      background-color: #4CAF50;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    .content {
+      padding: 20px;
+      text-align: center;
+    }
+    .content img {
+      max-width: 100%;
+      height: auto;
+      margin: 20px 0;
+    }
+    .footer {
+      background-color: #f1f1f1;
+      padding: 10px;
+      text-align: center;
+      font-size: 12px;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+<div class="email-container">
+  <div class="header">
+    <h1>¡Aviso de inventario bajo!</h1>
+  </div>
+  <div class="content">
+    <p>Tu producto <strong>{{nombre}}</strong> se está quedando fuera de stock.</p>
+    <img src="{{imagen}}" alt="Imagen del producto {{nombre}}">
+    <p>Precio: <strong>{{precio}}</strong></p>
+  </div>
+  <div class="footer">
+    <p>Gracias por confiar en nosotros.</p>
+    <p>&copy; 2024, Tech ecommerce</p>
+  </div>
+</div>
+</body>
+</html>
