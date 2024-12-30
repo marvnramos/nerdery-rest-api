@@ -15,6 +15,7 @@ import { decodeBase64, encodeBase64 } from '../utils/tools';
 import { OrderType } from './types/order.type';
 import { findManyCursorConnection } from '@devoxa/prisma-relay-cursor-connection';
 import { PaginatedOrdersType } from './types/orders.connection.type';
+import { UserRoleType } from '@prisma/client';
 
 @Injectable()
 export class OrdersService {
@@ -36,8 +37,16 @@ export class OrdersService {
     return plainToInstance(AddOrderRes, order);
   }
 
-  async getOrderById(orderId: string): Promise<OrderType> {
+  async getOrderById(
+    orderId: string,
+    user: { id: string; role: UserRoleType },
+  ): Promise<OrderType> {
     const order = await this.fetchOrderWithDetails(orderId);
+    if (user.role === UserRoleType.CLIENT) {
+      if (order.user_id !== user.id) {
+        throw new NotAcceptableException('Unauthorized to access this order');
+      }
+    }
     return plainToInstance(OrderType, order);
   }
 
