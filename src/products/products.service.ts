@@ -140,42 +140,46 @@ export class ProductsService {
   }
 
   private async fetchPaginatedProducts(args: GetProductsArgs) {
-    const productIds = args.categoriesIds?.length
-      ? await this.getProductIdsByCategories(args.categoriesIds)
-      : [];
     const cursorId = args.after ? decodeBase64(args.after) : null;
 
-    const where = {
+    const where: Prisma.ProductWhereInput = {
       AND: [
-        productIds.length ? { id: { in: productIds } } : {},
-        cursorId ? { id: { gt: cursorId } } : {},
+        args.categoriesIds?.length
+          ? {
+              categories: { some: { category_id: { in: args.categoriesIds } } },
+            }
+          : {},
       ],
     };
 
-    return findManyCursorConnection(
-      (findArgs) =>
-        this.prismaService.product.findMany({
-          where,
-          orderBy: { id: 'asc' },
-          include: { categories: true, images: true },
-          ...findArgs,
-        }),
-      () => this.prismaService.product.count(),
-      args,
-      { getCursor: (product) => ({ id: encodeBase64(product.id) }) },
-    );
-  }
-
-  private async getProductIdsByCategories(
-    categoryIds: number[],
-  ): Promise<string[]> {
-    const productCategories = await this.prismaService.productCategory.findMany(
-      {
-        where: { category_id: { in: categoryIds } },
-        select: { product_id: true },
+    const products = await this.prismaService.product.findMany({
+      where,
+      orderBy: { id: 'asc' },
+      include: {
+        categories: true,
+        images: true,
       },
-    );
-    return productCategories.map((relation) => relation.product_id);
+      take: args.first || 10,
+      skip: cursorId ? 1 : 0,
+      cursor: cursorId ? { id: cursorId } : undefined,
+    });
+
+    const totalCount = await this.prismaService.product.count({ where });
+
+    const lastProduct = products[products.length - 1];
+    const endCursor = lastProduct ? encodeBase64(lastProduct.id) : null;
+
+    return {
+      edges: products.map((product) => ({
+        node: product,
+        cursor: encodeBase64(product.id),
+      })),
+      pageInfo: {
+        endCursor,
+        hasNextPage: products.length === (args.first || 10),
+      },
+      totalCount,
+    };
   }
 
   async getProductImages(productId: string): Promise<ProductImagesType[]> {
