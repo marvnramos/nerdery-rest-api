@@ -1,7 +1,6 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql';
 import { OrderDetailType } from './order.detail.type';
 import { User } from '../../users/models/users.model';
-import { Expose } from "class-transformer";
 
 @ObjectType()
 export class OrderType {
@@ -26,6 +25,6 @@ export class OrderType {
   @Field(() => User, { nullable: true })
   user?: User | null;
 
-  @Field(() => [OrderDetailType!])
-  order_details: OrderDetailType[];
+  @Field(() => [OrderDetailType!], { name: 'order_details' })
+  orderDetails: OrderDetailType[];
 }
