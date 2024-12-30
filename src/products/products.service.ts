@@ -17,7 +17,6 @@ import { GetProductsArgs } from './dto/args/get.products.args';
 import { plainToInstance } from 'class-transformer';
 import { Categories } from 'src/categories/models/categories.model';
 import { PaginatedProductsType } from './dto/responses/products.pagination.type.res';
-import { findManyCursorConnection } from '@devoxa/prisma-relay-cursor-connection';
 import { ProductImagesType } from './types/product.images.type';
 import { ProductType } from './types/product.type';
 
@@ -34,7 +33,7 @@ export class ProductsService {
     this.cloudinaryService.config(cloudinaryConfig);
   }
 
-  private async validateProductExists(id: string): Promise<Product> {
+  async validateProductExists(id: string): Promise<Product> {
     const product = await this.prismaService.product.findUnique({
       where: { id },
     });
