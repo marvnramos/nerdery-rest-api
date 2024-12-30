@@ -1,7 +1,7 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { OrderType } from '../../types/order.type';
 import { OrderEdgeType } from './types/order.edge.type';
-import { PageInfoType } from '../../../utils/types/pageinfo.type';
+import { PageInfoType } from '../../../utils/pagination/pageinfo.type';
 import { Expose } from 'class-transformer';
 
 @ObjectType()
