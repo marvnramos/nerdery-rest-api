@@ -1,4 +1,5 @@
 import {
+  ForbiddenException,
   Injectable,
   NotAcceptableException,
   NotFoundException,
@@ -13,9 +14,8 @@ import { plainToInstance } from 'class-transformer';
 import { GetOrdersArgs } from './dto/args/get.orders.args';
 import { decodeBase64, encodeBase64 } from '../utils/tools';
 import { OrderType } from './types/order.type';
-import { findManyCursorConnection } from '@devoxa/prisma-relay-cursor-connection';
 import { PaginatedOrdersType } from './dto/responses/orders.pagination.type.res';
-import { UserRoleType } from '@prisma/client';
+import { Prisma, UserRoleType } from '@prisma/client';
 
 @Injectable()
 export class OrdersService {
@@ -50,7 +50,17 @@ export class OrdersService {
     return plainToInstance(OrderType, order);
   }
 
-  async getPaginatedOrders(args: GetOrdersArgs): Promise<PaginatedOrdersType> {
+  async getPaginatedOrders(
+    args: GetOrdersArgs,
+    currentUser: { id: string; role: UserRoleType },
+  ): Promise<PaginatedOrdersType> {
+    if (currentUser.role === UserRoleType.CLIENT) {
+      if (args.userEmail) {
+        throw new ForbiddenException('Unauthorized to access this resource');
+      }
+      args.userId = currentUser.id;
+    }
+
     const orders = await this.fetchPaginatedOrders(args);
     return plainToInstance(PaginatedOrdersType, orders);
   }
@@ -129,45 +139,77 @@ export class OrdersService {
   }
 
   private async fetchPaginatedOrders(args: GetOrdersArgs) {
-    const whereClause: any = {
-      ...(args.userId ? { user_id: args.userId } : {}),
-      ...(args.after ? { id: { gt: decodeBase64(args.after) } } : {}),
+    const cursorId = args.after ? decodeBase64(args.after) : null;
+
+    const where: Prisma.OrderWhereInput = {
+      user: {
+        email: args.userEmail || undefined,
+      },
+      user_id: args.userId || undefined,
     };
-    return findManyCursorConnection(
-      (findArgs) =>
-        this.prismaService.order.findMany({
-          where: whereClause,
-          orderBy: { id: 'asc' },
+
+    const orders = await this.prismaService.order.findMany({
+      where,
+      orderBy: { id: 'asc' },
+      include: {
+        user: { include: { role: true } },
+        orderDetails: {
           include: {
-            user: { include: { role: true } },
-            orderDetails: {
+            product: {
               include: {
-                product: {
-                  include: {
-                    categories: true,
-                    images: true,
-                  },
-                },
-              },
-            },
-            paymentDetail: {
-              include: {
-                status: true,
+                categories: true,
+                images: true,
               },
             },
           },
-          ...findArgs,
-        }),
-      () =>
-        this.prismaService.order.count({
-          where: whereClause,
-        }),
-      args,
-      {
-        getCursor: (order) => ({ id: encodeBase64(order.id) }),
+        },
+        paymentDetail: {
+          include: {
+            status: true,
+          },
+        },
       },
-    ).catch(() => {
-      throw new NotFoundException('No orders found');
+      take: args.first || 10,
+      skip: cursorId ? 1 : 0,
+      cursor: cursorId ? { id: cursorId } : undefined,
     });
+
+    if (!orders.length) {
+      throw new NotFoundException('No orders found');
+    }
+
+    const totalCount = await this.prismaService.order.count({ where });
+
+    const startOrder = orders[0];
+    const endOrder = orders[orders.length - 1];
+
+    const hasPreviousPage =
+      !!(cursorId && startOrder) &&
+      (await this.prismaService.order.count({
+        where: { ...where, id: { lt: startOrder.id } },
+      })) > 0;
+
+    const hasNextPage =
+      !!endOrder &&
+      (await this.prismaService.order.count({
+        where: { ...where, id: { gt: endOrder.id } },
+      })) > 0;
+
+    const startCursor = startOrder ? encodeBase64(startOrder.id) : null;
+    const endCursor = endOrder ? encodeBase64(endOrder.id) : null;
+
+    return {
+      edges: orders.map((order) => ({
+        node: order,
+        cursor: encodeBase64(order.id),
+      })),
+      pageInfo: {
+        start_cursor: startCursor,
+        end_cursor: endCursor,
+        has_next_page: hasNextPage,
+        has_previous_page: hasPreviousPage,
+      },
+      totalCount,
+    };
   }
 }
