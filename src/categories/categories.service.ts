@@ -8,20 +8,26 @@ import { Category, Prisma } from '@prisma/client';
 import { PrismaService } from 'src/utils/prisma/prisma.service';
 import { plainToInstance } from 'class-transformer';
 import { Categories } from './models/categories.model';
+import { DeleteCategoryRes } from './dto/responses/delete.category.res';
+import { AddCategoryRes } from './dto/responses/create.category.res';
 
 @Injectable()
 export class CategoriesService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async createCategory(data: Prisma.CategoryCreateInput): Promise<Category> {
-    const existingCategory = await this.findCategoryByName(data.category_name);
+  async createCategory(categoryName: string): Promise<AddCategoryRes> {
+    const existingCategory = await this.findCategoryByName(categoryName);
     if (existingCategory) {
       throw new BadRequestException('Category already exists');
     }
-    return this.prismaService.category.create({ data });
+
+    const category = await this.prismaService.category.create({
+      data: { category_name: categoryName },
+    });
+    return plainToInstance(AddCategoryRes, category);
   }
 
-  async removeCategory(id: number): Promise<Category> {
+  async removeCategory(id: number): Promise<DeleteCategoryRes> {
     const category = await this.prismaService.category.findUnique({
       where: { id },
     });
@@ -36,11 +42,13 @@ export class CategoriesService {
       },
     );
 
-    if (productCategories) {
+    if (productCategories.length > 0) {
       throw new NotAcceptableException('Category is in use');
     }
 
-    return this.prismaService.category.delete({ where: { id } });
+    await this.prismaService.category.delete({ where: { id } });
+
+    return plainToInstance(DeleteCategoryRes, { deletedAt: new Date() });
   }
 
   async getAllCategories(): Promise<Categories[]> {
