@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/utils/prisma/prisma.service';
 import { OrdersService } from 'src/orders/orders.service';
 import { AddPaymentRes } from './dto/responses/add.payment.res';
+import { UserRoleType } from '@prisma/client';
 
 @Injectable()
 export class PaymentsService {
@@ -19,7 +20,10 @@ export class PaymentsService {
     });
   }
 
-  async createPaymentIntent(orderId: string): Promise<AddPaymentRes> {
+  async createPaymentIntent(
+    orderId: string,
+    user: { id: string; role: UserRoleType },
+  ): Promise<AddPaymentRes> {
     const orderAlreadyPaid = await this.prisma.paymentDetail.findFirst({
       where: { order_id: orderId },
     });
@@ -27,7 +31,7 @@ export class PaymentsService {
     if (orderAlreadyPaid) {
       throw new NotAcceptableException('This order has already been paid.');
     }
-    const order = await this.orderService.getOrderById(orderId);
+    const order = await this.orderService.getOrderById(orderId, user);
     const amount = order.orderDetails.reduce((amount, orderDetail) => {
       amount += orderDetail.quantity * orderDetail.unit_price;
       return amount;
