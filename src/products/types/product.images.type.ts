@@ -8,27 +8,17 @@ export class ProductImagesType {
   id: string;
 
   @Field({ name: 'product_id' })
-  @Expose({ name: 'product_id' })
-  @Expose()
-  productId: string;
+  product_id: string;
 
   @Field({ name: 'image_url' })
-  @Expose({ name: 'image_url' })
-  @Expose()
-  imageUrl: string;
+  image_url: string;
 
   @Field({ name: 'public_id' })
-  @Expose({ name: 'public_id' })
-  @Expose()
-  publicId: string;
+  public_id: string;
 
   @Field({ name: 'created_at' })
-  @Expose({ name: 'created_at' })
-  @Expose()
-  createdAt: Date;
+  created_at: Date;
 
   @Field({ name: 'updated_at' })
-  @Expose({ name: 'updated_at' })
-  @Expose()
-  updatedAt: Date;
+  updated_at: Date;
 }
