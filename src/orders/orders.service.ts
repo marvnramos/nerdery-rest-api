@@ -14,7 +14,7 @@ import { GetOrdersArgs } from './dto/args/get.orders.args';
 import { decodeBase64, encodeBase64 } from '../utils/tools';
 import { OrderType } from './types/order.type';
 import { findManyCursorConnection } from '@devoxa/prisma-relay-cursor-connection';
-import { PaginatedOrdersType } from './types/orders.connection.type';
+import { PaginatedOrdersType } from './dto/responses/orders.pagination.type.res';
 import { UserRoleType } from '@prisma/client';
 
 @Injectable()
