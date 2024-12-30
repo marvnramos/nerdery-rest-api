@@ -9,6 +9,8 @@ import { GetOrdersArgs } from './dto/args/get.orders.args';
 import { OrderDetailType } from './types/order.detail.type';
 import { PaginatedOrdersType } from './types/orders.connection.type';
 import { UserRoleType } from '@prisma/client';
+import { GetOrderArgs } from './dto/args/get.order.args';
+import { OrderType } from './types/order.type';
 
 @Resolver(() => OrderDetailType)
 @UseFilters(new GlobalExceptionFilter())
@@ -24,11 +26,10 @@ export class OrdersResolver {
     return this.orderService.addOrder(user.id, data);
   }
 
-  @Auth('CLIENT')
-  @Query(() => [String])
-  Orders(@Context('request') request: any): string[] {
-    console.log(request);
-    return ["John's order", "Marta's order"];
+  @Auth('CLIENT', 'MANAGER')
+  @Query(() => OrderType)
+  getOrderById(@Args('data') args: GetOrderArgs, @Context('request') req: any) {
+    return this.orderService.getOrderById(args.orderId, req.user);
   }
 
   @Auth('CLIENT', 'MANAGER')
