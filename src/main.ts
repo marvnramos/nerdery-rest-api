@@ -5,6 +5,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import helmet from 'helmet';
 import { GlobalExceptionFilter } from './utils/GlobalExceptionFilter';
+import * as process from 'node:process';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -12,23 +13,17 @@ async function bootstrap() {
   app.use(
     helmet({
       crossOriginEmbedderPolicy: false,
-      contentSecurityPolicy: {
-        directives: {
-          imgSrc: [
-            `'self'`,
-            'data:',
-            'apollo-server-landing-page.cdn.apollographql.com',
-          ],
-          scriptSrc: [`'self'`, `https: 'unsafe-inline'`],
-          manifestSrc: [
-            `'self'`,
-            'apollo-server-landing-page.cdn.apollographql.com',
-          ],
-          frameSrc: [`'self'`, 'sandbox.embed.apollographql.com'],
-        },
-      },
+      contentSecurityPolicy:
+        process.env.NODE_ENV === 'production' ? undefined : false,
     }),
   );
+
+  app.enableCors({
+    origin: [process.env.CORS_ORIGIN, process.env.CORS_CLIENT_DOMAIN],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+  });
+
   app.useGlobalFilters(new GlobalExceptionFilter());
   app.setGlobalPrefix('api/v1');
   app.useGlobalPipes(
@@ -43,4 +38,5 @@ async function bootstrap() {
   app.setViewEngine('hbs');
   await app.listen(process.env.PORT ?? 3000);
 }
+
 bootstrap();
