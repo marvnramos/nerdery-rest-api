@@ -14,6 +14,9 @@ export class MailService {
       context: {
         name: emailCommand.fullName,
         url: emailCommand.uri,
+        productName: emailCommand.productName ? emailCommand.productName : '',
+        image: emailCommand.image ? emailCommand.image : '',
+        unitPrice: emailCommand.unitPrice ? emailCommand.unitPrice : '',
       },
     });
   }
