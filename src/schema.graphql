@@ -59,8 +59,8 @@ type ProductType {
 }
 
 type PageInfoType {
-  start_cursor: String!
-  end_cursor: String!
+  start_cursor: String
+  end_cursor: String
   has_next_page: Boolean!
   has_previous_page: Boolean!
 }
@@ -111,26 +111,68 @@ type OrderDetailType {
   product: ProductType!
 }
 
+type UserRoles {
+  id: ID!
+  role: String!
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
+type User {
+  id: ID!
+  first_name: String!
+  last_name: String!
+  email: String!
+  is_email_verified: Boolean!
+  role_id: Float!
+  address: String!
+  password: String!
+  created_at: DateTime!
+  updated_at: DateTime!
+  role: UserRoles!
+}
+
+type PaymentStatus {
+  id: ID!
+  status: String!
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
+type PaymentDetail {
+  id: ID!
+  payment_intent_id: String!
+  payment_method_id: String!
+  order_id: String!
+  amount: Float!
+  status: PaymentStatus!
+  created_at: DateTime!
+  updated_at: DateTime!
+  payment_date: DateTime!
+}
+
 type OrderType {
   id: ID!
-  user_id: ID!
+  user_id: String!
   address: String!
   nearby_landmark: String!
   created_at: DateTime!
   updated_at: DateTime!
-  orderDetails: [OrderDetailType!]!
+  user: User
+  order_details: [OrderDetailType!]!
+  payment_details: PaymentDetail
 }
 
-type OrderEdgeType {
+type OrderTypeEdge {
   cursor: String!
   node: OrderType!
 }
 
-type GetOrdersRes {
-  totalCount: Int!
-  edges: [OrderEdgeType!]!
-  nodes: [OrderType!]!
+type PaginatedOrdersType {
+  edges: [OrderTypeEdge!]
+  nodes: [OrderType!]
   pageInfo: PageInfoType!
+  totalCount: Int!
 }
 
 type AddProductRes implements IAddRecordRes {
@@ -162,7 +204,7 @@ type AddCategoryRes {
 
 type Query {
   Orders: [String!]!
-  getOrders(data: GetOrdersArgs!): GetOrdersRes!
+  getPaginatedOrders(data: GetOrdersArgs!): PaginatedOrdersType!
   getCarts: CartType!
   getProducts(data: GetProductsArgs!): GetProductsRes!
   getFavorites: [FavoriteType!]!
