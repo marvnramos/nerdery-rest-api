@@ -7,29 +7,23 @@ export class OrderDetailType {
   @Field(() => String)
   id: string;
 
-  @Field(() => String, { name: 'order_id' })
-  @Expose({ name: 'order_id' })
-  orderId: string;
+  @Field(() => String)
+  order_id: string;
 
-  @Field(() => String, { name: 'product_id' })
-  @Expose({ name: 'product_id' })
-  productId: string;
+  @Field(() => String)
+  product_id: string;
 
   @Field(() => Int)
-  @Expose()
   quantity: number;
 
-  @Field(() => Int, { name: 'unit_price' })
-  @Expose({ name: 'unit_price' })
-  unitPrice: number;
+  @Field(() => Int)
+  unit_price: number;
 
-  @Field({ name: 'created_at' })
-  @Expose({ name: 'created_at' })
-  createdAt: Date;
+  @Field()
+  created_at: Date;
 
-  @Field({ name: 'updated_at' })
-  @Expose({ name: 'updated_at' })
-  updatedAt: Date;
+  @Field()
+  updated_at: Date;
 
   @Field(() => ProductType)
   @Type(() => ProductType)
