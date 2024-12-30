@@ -211,6 +211,7 @@ type Query {
   getOrderById(data: GetOrderArgs!): OrderType!
   getPaginatedOrders(data: GetOrdersArgs!): PaginatedOrdersType!
   getCarts: CartType!
+  getProductById(id: String!): ProductType!
   getProductsPagination(data: GetProductsArgs!): GetProductsRes!
   getFavorites: [FavoriteType!]!
   getCategories: [Categories!]!
