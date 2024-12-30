@@ -68,10 +68,10 @@ export class ProductsResolver {
 
   @Query(() => GetProductsRes)
   @UseFilters(new GlobalExceptionFilter())
-  async getProducts(
+  async getProductsPagination(
     @Args('data') data: GetProductsArgs,
   ): Promise<GetProductsRes> {
-    return this.productService.getProducts(data);
+    return this.productService.getPaginatedProducts(data);
   }
 
   @ResolveField(() => [Categories])
