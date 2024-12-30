@@ -6,9 +6,12 @@ import { join } from 'path';
 import helmet from 'helmet';
 import { GlobalExceptionFilter } from './utils/GlobalExceptionFilter';
 import * as process from 'node:process';
+import { CspMiddleware } from './utils/CspMiddleware';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  app.use(new CspMiddleware().use);
 
   app.use(
     helmet({
