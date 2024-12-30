@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { AuthController } from './auth/auth.controller';
 import { AuthModule } from './auth/auth.module';
 import { GraphqlModule } from './graphql.module';
@@ -19,16 +19,13 @@ import { CategoriesModule } from './categories/categories.module';
 import { CloudinaryModule } from './utils/cloudinary/cloudinary.module';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { GlobalExceptionFilter } from './utils/GlobalExceptionFilter';
-import {
-  ThrottlerGuard,
-  ThrottlerModule,
-  ThrottlerModuleOptions,
-  seconds,
-} from '@nestjs/throttler';
+import { ThrottlerGuard, ThrottlerModule, seconds } from '@nestjs/throttler';
+import { validate } from '../env.validation';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
+      validate,
       isGlobal: true,
     }),
     AuthModule,
@@ -46,8 +43,8 @@ import {
     CloudinaryModule,
     ThrottlerModule.forRoot([
       {
-        ttl: seconds(10),
-        limit: 5,
+        ttl: seconds(parseInt(process.env.THROTTLE_TTL)),
+        limit: parseInt(process.env.THROTTLE_LIMIT),
       },
     ]),
   ],

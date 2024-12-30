@@ -22,6 +22,7 @@ import { ResetPasswordResDto } from './dto/responses/reset.password.res.dto';
 import { Response } from 'express';
 import { ResetPasswordReqDto } from './dto/requests/reset.password.req.dto';
 import { VerificationTokenService } from '../verification.token/verification.token.service';
+import { seconds, Throttle } from '@nestjs/throttler';
 
 @Controller('users')
 export class UsersController {
@@ -84,6 +85,7 @@ export class UsersController {
     }
   }
 
+  @Throttle({ default: { ttl: seconds(60), limit: 1 } })
   @Put('forgot-password')
   @HttpCode(HttpStatus.ACCEPTED)
   async forgotPassword(
@@ -119,6 +121,7 @@ export class UsersController {
     return { message: 'Email sent' };
   }
 
+  @Throttle({ default: { ttl: seconds(60), limit: 3 } })
   @Get('reset-password/:token')
   @Render('reset-password-view')
   resetPasswordView(@Param('token') token: string, @Res() res: Response) {
@@ -127,6 +130,7 @@ export class UsersController {
     return { nonce };
   }
 
+  @Throttle({ default: { ttl: seconds(60), limit: 3 } })
   @Put('reset-password')
   @HttpCode(HttpStatus.NO_CONTENT)
   async resetPassword(@Body() req: ResetPasswordReqDto) {
