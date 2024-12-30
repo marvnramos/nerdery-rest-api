@@ -7,14 +7,11 @@ export class Categories {
   id: number;
 
   @Field({ name: 'category_name' })
-  @Expose({ name: 'category_name' })
-  categoryName: string;
+  category_name: string;
 
   @Field({ name: 'created_at' })
-  @Expose({ name: 'created_at' })
-  createdAt: Date;
+  created_at: Date;
 
   @Field({ name: 'updated_at' })
-  @Expose({ name: 'updated_at' })
-  updatedAt: Date;
+  updated_at: Date;
 }
