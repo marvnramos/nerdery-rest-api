@@ -19,8 +19,7 @@ import { Categories } from 'src/categories/models/categories.model';
 import { PaginatedProductsType } from './dto/responses/products.pagination.type.res';
 import { findManyCursorConnection } from '@devoxa/prisma-relay-cursor-connection';
 import { ProductImagesType } from './types/product.images.type';
-import { ProductType } from "./types/product.type";
-import retryTimes = jest.retryTimes;
+import { ProductType } from './types/product.type';
 
 @Injectable()
 export class ProductsService {
@@ -239,12 +238,9 @@ export class ProductsService {
         include: { category: true },
       },
     );
-    return productCategories.map((relation) => ({
-      id: relation.category.id,
-      categoryName: relation.category.category_name,
-      createdAt: relation.category.created_at,
-      updatedAt: relation.category.updated_at,
-    }));
+    return productCategories.map((relation) => {
+      return plainToInstance(Categories, relation.category);
+    });
   }
 
   async removeProductImages(publicId: string): Promise<{ result: string }> {
