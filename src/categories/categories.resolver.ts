@@ -43,7 +43,6 @@ export class CategoriesResolver {
   @UseFilters(new GlobalExceptionFilter())
   @Query(() => [Categories])
   async getCategories(): Promise<Categories[]> {
-    const categories = await this.categoriesService.getAllCategories();
-    return plainToInstance(Categories, categories);
+    return this.categoriesService.getAllCategories();
   }
 }
