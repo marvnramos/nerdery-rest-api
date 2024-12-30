@@ -8,7 +8,6 @@ import { AddOrderArgs } from './dto/args/add.order.args';
 import { GetOrdersArgs } from './dto/args/get.orders.args';
 import { OrderDetailType } from './types/order.detail.type';
 import { PaginatedOrdersType } from './dto/responses/orders.pagination.type.res';
-import { UserRoleType } from '@prisma/client';
 import { GetOrderArgs } from './dto/args/get.order.args';
 import { OrderType } from './types/order.type';
 
@@ -38,9 +37,6 @@ export class OrdersResolver {
     @Args('data') args: GetOrdersArgs,
     @Context('request') request: any,
   ) {
-    if (request.user.role === UserRoleType.CLIENT) {
-      args.userId = request.user.id;
-    }
-    return this.orderService.getPaginatedOrders(args);
+    return this.orderService.getPaginatedOrders(args, request.user);
   }
 }
