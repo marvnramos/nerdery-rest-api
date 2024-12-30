@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthController } from './auth/auth.controller';
 import { AuthModule } from './auth/auth.module';
 import { GraphqlModule } from './graphql.module';
@@ -17,8 +17,14 @@ import { ProductsModule } from './products/products.module';
 import { VerificationTokenModule } from './verification.token/verification.token.module';
 import { CategoriesModule } from './categories/categories.module';
 import { CloudinaryModule } from './utils/cloudinary/cloudinary.module';
-import { APP_FILTER } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { GlobalExceptionFilter } from './utils/GlobalExceptionFilter';
+import {
+  ThrottlerGuard,
+  ThrottlerModule,
+  ThrottlerModuleOptions,
+  seconds,
+} from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -38,6 +44,12 @@ import { GlobalExceptionFilter } from './utils/GlobalExceptionFilter';
     VerificationTokenModule,
     CategoriesModule,
     CloudinaryModule,
+    ThrottlerModule.forRoot([
+      {
+        ttl: seconds(10),
+        limit: 5,
+      },
+    ]),
   ],
   controllers: [AuthController, UsersController],
   providers: [
@@ -46,6 +58,10 @@ import { GlobalExceptionFilter } from './utils/GlobalExceptionFilter';
     {
       provide: APP_FILTER,
       useClass: GlobalExceptionFilter,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
     },
   ],
 })
