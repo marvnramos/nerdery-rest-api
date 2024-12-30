@@ -9,6 +9,7 @@ import { GetOrdersRes } from './dto/responses/get.orders.res';
 import { GetOrdersArgs } from './dto/args/get.orders.args';
 import { UserRoleType } from '@prisma/client';
 import { OrderDetailType } from './types/order.detail.type';
+import { PaginatedOrdersType } from './types/orders.connection.type';
 
 @Resolver(() => OrderDetailType)
 @UseFilters(new GlobalExceptionFilter())
@@ -29,6 +30,16 @@ export class OrdersResolver {
   Orders(@Context('request') request: any): string[] {
     console.log(request);
     return ["John's order", "Marta's order"];
+  }
+
+  @Auth('CLIENT', 'MANAGER')
+  @Query(() => PaginatedOrdersType)
+  async getPaginatedOrders(
+    @Args('data') args: GetOrdersArgs,
+    @Context('request') request: any,
+  ) {
+    args.userId = request.user.id;
+    return this.orderService.getPaginatedOrders(args);
   }
 
   @Auth('CLIENT', 'MANAGER')
