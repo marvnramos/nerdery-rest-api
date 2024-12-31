@@ -1,10 +1,4 @@
-import {
-  IsEmail,
-  IsInt,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class EmailCommand {
   @IsString()
@@ -39,7 +33,8 @@ export class EmailCommand {
   @IsOptional()
   image?: string;
 
-  @IsInt()
+  @IsString()
+  @IsNotEmpty()
   @IsOptional()
-  unitPrice?: number;
+  unitPrice?: string;
 }

@@ -241,8 +241,13 @@ export class PaymentsService {
       template: './product-email',
       productName: product.product_name,
       image,
-      unitPrice: product.unit_price,
+      unitPrice: this.centsToDollars(product.unit_price),
     };
     await this.mailService.sendEmail(data);
+  }
+
+  private centsToDollars(cents: number) {
+    const price = (cents / 100).toFixed(2);
+    return `$ ${price}`;
   }
 }
