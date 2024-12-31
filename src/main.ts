@@ -7,6 +7,7 @@ import helmet from 'helmet';
 import { GlobalExceptionFilter } from './utils/GlobalExceptionFilter';
 import * as process from 'node:process';
 import { CspMiddleware } from './utils/CspMiddleware';
+import * as bodyParser from 'body-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -18,6 +19,11 @@ async function bootstrap() {
       crossOriginEmbedderPolicy: false,
       contentSecurityPolicy: false,
     }),
+  );
+
+  app.use(
+    '/api/v1/payments/webhook',
+    bodyParser.raw({ type: 'application/json' }),
   );
 
   app.enableCors({
