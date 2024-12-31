@@ -78,6 +78,11 @@ class EnvironmentVariables {
   @IsString()
   @IsDefined()
   @IsNotEmpty()
+  STRIPE_WEBHOOK_SECRET: string;
+
+  @IsString()
+  @IsDefined()
+  @IsNotEmpty()
   CLOUDINARY_CLOUD_NAME: string;
 
   @IsInt()
