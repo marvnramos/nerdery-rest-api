@@ -1,10 +1,17 @@
-import { Controller, Post, Body, UseFilters, Request } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseFilters,
+  Req,
+  Res,
+  Request as RequestDecorator,
+} from '@nestjs/common';
 import { PaymentsService } from './payments.service';
 import { GlobalExceptionFilter } from '../utils/GlobalExceptionFilter';
 import { AddPaymentReq } from './dto/requests/add.payment.req';
 import { Auth } from '../auth/decorators/auth.role.decorator';
-import { plainToInstance } from 'class-transformer';
-import { WebhookReq } from './dto/requests/webhook.req';
+import { Request, Response } from 'express';
 
 @UseFilters(GlobalExceptionFilter)
 @Controller('payments')
@@ -15,21 +22,13 @@ export class PaymentsController {
   @Post()
   async createPayment(
     @Body() req: AddPaymentReq,
-    @Request() { user }: any,
+    @RequestDecorator() { user }: any,
   ): Promise<void> {
     await this.paymentService.createPaymentIntent(req.orderId, user);
   }
 
   @Post('webhook')
-  async stripeWebhook(@Body() body: any) {
-    const paymentData = {
-      id: body.data.object.id,
-      status: body.data.object.status,
-      amount: body.data.object.amount,
-      payment_method: body.data.object.payment_method,
-      order_id: body.data.object.metadata?.orderId,
-    };
-    const dataFormatted = plainToInstance(WebhookReq, paymentData);
-    return this.paymentService.handleStripeWebhook(dataFormatted);
+  async stripeWebhook(@Req() req: Request, @Res() res: Response) {
+    return this.paymentService.handleStripeWebhook(req, res);
   }
 }
