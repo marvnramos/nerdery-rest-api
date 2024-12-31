@@ -6,6 +6,8 @@ import { OrdersService } from 'src/orders/orders.service';
 import { AddPaymentRes } from './dto/responses/add.payment.res';
 import { UserRoleType } from '@prisma/client';
 import { WebhookReq } from './dto/requests/webhook.req';
+import { MailService } from '../utils/mailer/mail.service';
+import { EmailCommand } from '../utils/mailer/dto/email.command';
 
 @Injectable()
 export class PaymentsService {
@@ -15,6 +17,7 @@ export class PaymentsService {
     private readonly configService: ConfigService,
     private readonly prisma: PrismaService,
     private readonly orderService: OrdersService,
+    private readonly mailService: MailService,
   ) {
     this.stripe = new Stripe(this.configService.get<string>('STRIPE_API_KEY'), {
       apiVersion: '2024-11-20.acacia',
@@ -43,17 +46,19 @@ export class PaymentsService {
       currency: 'usd',
       metadata: { orderId },
     });
-
-    await this.prisma.paymentDetail.create({
-      data: {
-        payment_intent_id: paymentIntent.id,
-        payment_method_id: paymentIntent.payment_method_types.join(','),
-        order: { connect: { id: orderId } },
-        amount,
-        status: { connect: { id: 1 } },
-        payment_date: new Date(),
-      },
-    });
+    await Promise.all([
+      this.updateStockAndNotify(order, user.id),
+      this.prisma.paymentDetail.create({
+        data: {
+          payment_intent_id: paymentIntent.id,
+          payment_method_id: paymentIntent.payment_method_types.join(','),
+          order: { connect: { id: orderId } },
+          amount,
+          status: { connect: { id: 1 } },
+          payment_date: new Date(),
+        },
+      }),
+    ]);
 
     return {
       clientSecret: paymentIntent.client_secret,
@@ -77,5 +82,56 @@ export class PaymentsService {
         payment_date: new Date(),
       },
     });
+  }
+
+  async updateStockAndNotify(order, userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { email: true },
+    });
+
+    const updatedProducts = await Promise.all(
+      order.orderDetails.map(async (orderDetail) => {
+        const product = await this.prisma.product.update({
+          where: { id: orderDetail.product_id },
+          data: {
+            stock: {
+              decrement: orderDetail.quantity,
+            },
+          },
+          include: {
+            images: true,
+          },
+        });
+
+        if (product.stock <= 3) {
+          await this.sendLowStockEmail(product, user.email);
+          console.log('Low stock email sent');
+        }
+
+        return product;
+      }),
+    );
+
+    const productIds = updatedProducts.map((product) => product.id);
+    return productIds;
+  }
+
+  private async sendLowStockEmail(product: any, email: string) {
+    console.log(product);
+    const image =
+      product.images?.[0]?.image_url ||
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/1024px-No_image_available.svg.png';
+
+    const data: EmailCommand = {
+      email,
+      subject: 'Low Stock Alert! 🚨',
+      fullName: '',
+      template: './product-email',
+      productName: product.product_name,
+      image,
+      unitPrice: product.unit_price,
+    };
+    await this.mailService.sendEmail(data);
   }
 }
