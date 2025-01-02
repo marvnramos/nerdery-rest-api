@@ -3,10 +3,10 @@ import {
   NotAcceptableException,
   NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from 'src/utils/prisma/prisma.service';
+import { PrismaService } from '../utils/prisma/prisma.service';
 import { AddOrUpdateProductCartArgs } from './dto/args/add.or.update.product.cart.args';
 import { UpdateProductCartRes } from './dto/response/update.product.cart.res';
-import { ProductsService } from 'src/products/products.service';
+import { ProductsService } from '../products/products.service';
 import { Cart, CartItem } from '@prisma/client';
 import { plainToInstance } from 'class-transformer';
 import { RemoveProductFromCartArgs } from './dto/args/remove.product.from.cart.args';

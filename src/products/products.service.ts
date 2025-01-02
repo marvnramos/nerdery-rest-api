@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma, Product, ProductImages } from '@prisma/client';
-import { PrismaService } from 'src/utils/prisma/prisma.service';
+import { PrismaService } from '../utils/prisma/prisma.service';
 import { AddProductArgs } from './dto/args/add.product.args';
 import { ConfigOptions, v2 as CloudinaryV2 } from 'cloudinary';
 import * as streamHelper from 'streamifier';
@@ -15,7 +15,7 @@ import { OperationType } from '../utils/enums/operation.enum';
 import { UpdateProductRes } from './dto/responses/update.product.images.res';
 import { GetProductsArgs } from './dto/args/get.products.args';
 import { plainToInstance } from 'class-transformer';
-import { Categories } from 'src/categories/models/categories.model';
+import { Categories } from '../categories/models/categories.model';
 import { PaginatedProductsType } from './dto/responses/products.pagination.type.res';
 import { ProductImagesType } from './types/product.images.type';
 import { ProductType } from './types/product.type';
