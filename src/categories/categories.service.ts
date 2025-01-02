@@ -4,7 +4,7 @@ import {
   NotAcceptableException,
   NotFoundException,
 } from '@nestjs/common';
-import { Category, Prisma } from '@prisma/client';
+import { Category } from '@prisma/client';
 import { PrismaService } from 'src/utils/prisma/prisma.service';
 import { plainToInstance } from 'class-transformer';
 import { Categories } from './models/categories.model';
