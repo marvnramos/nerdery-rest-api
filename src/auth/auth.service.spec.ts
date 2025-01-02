@@ -3,11 +3,7 @@ import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import {
-  accessTokenMock,
-  userMock,
-  userRoleMock,
-} from '../../test/mocks/auth.mocks';
+import { AuthServiceMocks } from '../../test/mocks/auth.mocks';
 
 jest.mock('bcrypt');
 
@@ -53,7 +49,9 @@ describe('AuthService', () => {
     });
 
     it('should return null if password is invalid', async () => {
-      jest.spyOn(usersService, 'findByEmail').mockResolvedValue(userMock);
+      jest
+        .spyOn(usersService, 'findByEmail')
+        .mockResolvedValue(AuthServiceMocks.user);
       jest
         .spyOn(bcrypt, 'compare')
         .mockImplementation(async (): Promise<boolean> => false);
@@ -66,7 +64,9 @@ describe('AuthService', () => {
     });
 
     it('should return the user if credentials are valid', async () => {
-      jest.spyOn(usersService, 'findByEmail').mockResolvedValue(userMock);
+      jest
+        .spyOn(usersService, 'findByEmail')
+        .mockResolvedValue(AuthServiceMocks.user);
       jest
         .spyOn(bcrypt, 'compare')
         .mockImplementation(async (): Promise<boolean> => true);
@@ -75,17 +75,21 @@ describe('AuthService', () => {
         'test@example.com',
         'password123',
       );
-      expect(result).toEqual(userMock);
+      expect(result).toEqual(AuthServiceMocks.user);
     });
   });
 
   describe('login', () => {
     it('should return an access token', async () => {
-      jest.spyOn(usersService, 'getUserRole').mockResolvedValue(userRoleMock);
-      jest.spyOn(jwtService, 'sign').mockReturnValue(accessTokenMock);
+      jest
+        .spyOn(usersService, 'getUserRole')
+        .mockResolvedValue(AuthServiceMocks.userRole);
+      jest
+        .spyOn(jwtService, 'sign')
+        .mockReturnValue(AuthServiceMocks.accessToken);
 
-      const result = await authService.login(userMock);
-      expect(result).toEqual({ accessToken: accessTokenMock });
+      const result = await authService.login(AuthServiceMocks.user);
+      expect(result).toEqual({ accessToken: AuthServiceMocks.accessToken });
     });
   });
 
