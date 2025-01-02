@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
@@ -45,11 +45,6 @@ export class AuthService {
     hashedPassword: string,
     password: string,
   ): Promise<boolean> {
-    try {
-      return await bcrypt.compare(password, hashedPassword);
-    } catch (error) {
-      console.error('Error verifying password:', error);
-      throw new InternalServerErrorException('Failed to verify password');
-    }
+    return bcrypt.compare(password, hashedPassword);
   }
 }
