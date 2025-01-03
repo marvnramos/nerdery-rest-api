@@ -1,5 +1,6 @@
 import { Cart, CartItem } from '@prisma/client';
 import { UpdateProductCartRes } from '../../src/carts/dto/response/update.product.cart.res';
+import { RemoveProductFromCartRes } from '../../src/carts/dto/response/remove.product.from.cart.res';
 
 export class CartServiceMocks {
   static cart: Cart = {
@@ -7,6 +8,59 @@ export class CartServiceMocks {
     user_id: 'c087cc65-32e2-405b-9c11-ccf413843724',
     created_at: new Date(),
     updated_at: new Date(),
+  };
+
+  static notAcceptableExceptionCart: Cart = {
+    id: 'cart123',
+    user_id: 'anotherUser',
+    created_at: new Date(),
+    updated_at: new Date(),
+  };
+
+  static cartToGetCartByUserId = (userId: string) => {
+    return {
+      id: 'cart123',
+      user_id: userId,
+      cart_items: [
+        {
+          id: 'item123',
+          product_id: 'prod123',
+          quantity: 2,
+          created_at: new Date(),
+          updated_at: new Date(),
+          product: {
+            id: 'prod123',
+            product_name: 'Sample Product',
+            description: 'Test description',
+            stock: 10,
+            is_available: true,
+            unit_price: 100,
+            categories: [],
+            images: [],
+            created_at: new Date(),
+            updated_at: new Date(),
+          },
+        },
+      ],
+      created_at: new Date(),
+      updated_at: new Date(),
+    };
+  };
+
+  static cartFromDeleteProductFromCart: Cart = {
+    id: 'cart123',
+    user_id: 'user123',
+    created_at: new Date(),
+    updated_at: new Date(),
+  };
+
+  static cartItemToDelete: CartItem = {
+    id: 'item123',
+    created_at: new Date(),
+    updated_at: new Date(),
+    cart_id: 'cart123',
+    product_id: 'prod123',
+    quantity: 1,
   };
 
   static cartItem: CartItem = {
@@ -20,6 +74,10 @@ export class CartServiceMocks {
 
   static updatedCartItem: UpdateProductCartRes = {
     updatedAt: new Date(),
+  };
+
+  static deletedCartItem: RemoveProductFromCartRes = {
+    deletedAt: new Date(),
   };
 
   static newCart: Cart = {
