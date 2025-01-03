@@ -28,6 +28,7 @@ describe('CartsService', () => {
             cartItem: {
               upsert: jest.fn(),
               delete: jest.fn(),
+              findMany: jest.fn(),
             },
           },
         },
@@ -272,6 +273,112 @@ describe('CartsService', () => {
         where: { user_id: userId },
         include: service['getCartIncludeRelations'](),
       });
+    });
+  });
+
+  describe('getCartItemsByCartId', () => {
+    const cartId = '49c84175-021f-4603-a1b4-836f1f287dea';
+
+    it('should return the cart items for the cart', async () => {
+      const mockCart = CartServiceMocks.cart;
+      const mockCartItems = CartServiceMocks.cartItemToGetCartById;
+
+      jest.spyOn(service, 'findCartById').mockResolvedValue(mockCart);
+      jest
+        .spyOn(prismaService.cartItem, 'findMany')
+        .mockResolvedValue(mockCartItems);
+
+      const result = await service.getCartItemsByCartId(cartId);
+
+      expect(service.findCartById).toHaveBeenCalledWith(cartId);
+      expect(prismaService.cartItem.findMany).toHaveBeenCalledWith({
+        where: { cart_id: cartId },
+        include: service['getCartItemIncludeRelations'](),
+      });
+
+      expect(result).toEqual(
+        expect.arrayContaining(
+          mockCartItems.map((item) =>
+            expect.objectContaining({
+              id: item.id,
+              quantity: item.quantity,
+              product: expect.objectContaining({
+                id: item.product.id,
+                productName: item.product.product_name,
+              }),
+            }),
+          ),
+        ),
+      );
+    });
+
+    it('should throw NotFoundException if the cart does not exist', async () => {
+      jest
+        .spyOn(service, 'findCartById')
+        .mockRejectedValue(new NotFoundException());
+
+      await expect(service.getCartItemsByCartId(cartId)).rejects.toThrow(
+        NotFoundException,
+      );
+
+      expect(service.findCartById).toHaveBeenCalledWith(cartId);
+      expect(prismaService.cartItem.findMany).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getOrCreateCart', () => {
+    const userId = CartServiceMocks.cart.user_id;
+    const mockCart = CartServiceMocks.cart;
+    it('should return an existing cart if it exists', async () => {
+      jest.spyOn(prismaService.cart, 'findUnique').mockResolvedValue(mockCart);
+
+      const result = await service.getOrCreateCart(userId);
+
+      expect(prismaService.cart.findUnique).toHaveBeenCalledWith({
+        where: { user_id: userId },
+      });
+
+      expect(result).toEqual(mockCart);
+    });
+
+    it('should return a new cart when none exists', async () => {
+      jest.spyOn(prismaService.cart, 'findUnique').mockResolvedValue(null);
+      jest
+        .spyOn(prismaService.cart, 'create')
+        .mockResolvedValue(CartServiceMocks.cart);
+
+      const result = await service.getOrCreateCart(userId);
+
+      expect(prismaService.cart.findUnique).toHaveBeenCalledWith({
+        where: { user_id: userId },
+      });
+
+      expect(prismaService.cart.create).toHaveBeenCalledWith({
+        data: {
+          user: { connect: { id: userId } },
+        },
+      });
+
+      expect(result).toEqual(CartServiceMocks.cart);
+    });
+
+    it('should throw NotAcceptableException if the cart does not belong to the user', async () => {
+      const userId = 'notUserOwnerId';
+
+      jest.spyOn(prismaService.cart, 'findUnique').mockResolvedValue(mockCart);
+
+      jest.spyOn(service, 'validateCartOwnership').mockImplementation(() => {
+        throw new NotAcceptableException();
+      });
+
+      await expect(
+        service.getOrCreateCart(userId, mockCart.id),
+      ).rejects.toThrow(NotAcceptableException);
+
+      expect(service.validateCartOwnership).toHaveBeenCalledWith(
+        mockCart,
+        userId,
+      );
     });
   });
 });
