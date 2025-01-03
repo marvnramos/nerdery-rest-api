@@ -17,6 +17,29 @@ export class CartServiceMocks {
     updated_at: new Date(),
   };
 
+  static cartItemToGetCartById = [
+    {
+      id: 'item123',
+      cart_id: '49c84175-021f-4603-a1b4-836f1f287dea',
+      product_id: 'prod123',
+      quantity: 2,
+      created_at: new Date(),
+      updated_at: new Date(),
+      product: {
+        id: 'prod123',
+        product_name: 'Sample Product',
+        description: 'Test description',
+        stock: 10,
+        is_available: true,
+        unit_price: 100,
+        categories: [],
+        images: [],
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+    },
+  ];
+
   static cartToGetCartByUserId = (userId: string) => {
     return {
       id: 'cart123',
