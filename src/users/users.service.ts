@@ -18,8 +18,7 @@ export class UsersService {
   async create(data: Prisma.UserCreateInput): Promise<User> {
     try {
       return await this.prismaService.user.create({ data });
-    } catch (error) {
-      console.error('Error creating user:', error);
+    } catch {
       throw new InternalServerErrorException('Failed to create user');
     }
   }
@@ -27,8 +26,7 @@ export class UsersService {
   async findByEmail(email: string): Promise<User | null> {
     try {
       return await this.prismaService.user.findUnique({ where: { email } });
-    } catch (error) {
-      console.error(`Error finding user with email ${email}:`, error);
+    } catch {
       throw new InternalServerErrorException('Failed to find user by email');
     }
   }
@@ -37,8 +35,7 @@ export class UsersService {
     try {
       const saltRounds = 10;
       return await bcrypt.hash(password, saltRounds);
-    } catch (error) {
-      console.error('Error hashing password:', error);
+    } catch {
       throw new InternalServerErrorException('Failed to hash password');
     }
   }
@@ -46,8 +43,7 @@ export class UsersService {
   async findById(id: string): Promise<User | null> {
     try {
       return await this.prismaService.user.findUnique({ where: { id } });
-    } catch (error) {
-      console.error(`Error finding user with id ${id}:`, error);
+    } catch {
       throw new InternalServerErrorException('Failed to find user by id');
     }
   }
@@ -58,8 +54,7 @@ export class UsersService {
       return this.prismaService.userRole.findUnique({
         where: { id: user.role_id },
       });
-    } catch (error) {
-      console.error(`Error finding user with id ${userId}:`, error);
+    } catch {
       throw new InternalServerErrorException('Failed to find user by user');
     }
   }
@@ -85,8 +80,7 @@ export class UsersService {
       await this.markTokenAsUsed(token.id);
 
       return true;
-    } catch (error) {
-      console.error('Error during password reset:', error);
+    } catch {
       throw new InternalServerErrorException('Failed to reset password');
     }
   }
@@ -109,8 +103,7 @@ export class UsersService {
       await this.markTokenAsUsed(token.id);
 
       return true;
-    } catch (error) {
-      console.error('Error verifying email:', error);
+    } catch {
       throw new InternalServerErrorException('Failed to verify email');
     }
   }
