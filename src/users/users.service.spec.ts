@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { Test, TestingModule } from '@nestjs/testing';
+import { UserServiceMocks } from '../../test/mocks/user.mocks';
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -57,24 +58,10 @@ describe('UsersService', () => {
       const mockUser = { id: 'user123', email: 'test@example.com' } as any;
       jest.spyOn(prismaService.user, 'create').mockResolvedValue(mockUser);
 
-      const result = await service.create({
-        first_name: 'John',
-        last_name: 'Doe',
-        email: 'test@example.com',
-        address: '123 Main St',
-        password: 'password123',
-        is_email_verified: false,
-      });
+      const result = await service.create(UserServiceMocks.user);
 
       expect(prismaService.user.create).toHaveBeenCalledWith({
-        data: {
-          first_name: 'John',
-          last_name: 'Doe',
-          email: 'test@example.com',
-          address: '123 Main St',
-          password: expect.any(String),
-          is_email_verified: false,
-        },
+        data: UserServiceMocks.userCreate,
       });
       expect(result).toEqual(mockUser);
     });
@@ -82,18 +69,11 @@ describe('UsersService', () => {
     it('should throw an InternalServerErrorException if user creation fails', async () => {
       jest
         .spyOn(prismaService.user, 'create')
-        .mockRejectedValue(new Error('Database error'));
+        .mockRejectedValue(new Error('Failed to create user'));
 
-      await expect(
-        service.create({
-          first_name: 'John',
-          last_name: 'Doe',
-          email: 'test@example.com',
-          address: '123 Main St',
-          password: 'password123',
-          is_email_verified: false,
-        }),
-      ).rejects.toThrow(InternalServerErrorException);
+      await expect(service.create(UserServiceMocks.userFail)).rejects.toThrow(
+        InternalServerErrorException,
+      );
     });
   });
 
@@ -122,7 +102,7 @@ describe('UsersService', () => {
     it('should throw an InternalServerErrorException if finding the user fails', async () => {
       jest
         .spyOn(prismaService.user, 'findUnique')
-        .mockRejectedValue(new Error('Database error'));
+        .mockRejectedValue(new Error('Failed to find user by email'));
 
       await expect(service.findByEmail('test@example.com')).rejects.toThrow(
         InternalServerErrorException,
@@ -142,7 +122,7 @@ describe('UsersService', () => {
 
     it('should throw an InternalServerErrorException if hashing fails', async () => {
       (jest.spyOn(bcrypt, 'hash') as jest.Mock).mockRejectedValue(
-        new Error('Hashing error'),
+        new Error('Failed to hash password'),
       );
 
       await expect(service.hashPassword('password123')).rejects.toThrow(
@@ -153,7 +133,7 @@ describe('UsersService', () => {
 
   describe('findById', () => {
     it('should return a user when a valid ID is provided', async () => {
-      const mockUser = { id: 'user123', email: 'test@example.com' } as any;
+      const mockUser = UserServiceMocks.userFindByEmail as any;
       jest.spyOn(prismaService.user, 'findUnique').mockResolvedValue(mockUser);
 
       const result = await service.findById('user123');
@@ -176,7 +156,7 @@ describe('UsersService', () => {
     it('should throw an InternalServerErrorException if finding the user fails', async () => {
       jest
         .spyOn(prismaService.user, 'findUnique')
-        .mockRejectedValue(new Error('Database error'));
+        .mockRejectedValue(new Error('Failed to find user by id'));
 
       await expect(service.findById('user123')).rejects.toThrow(
         InternalServerErrorException,
@@ -205,7 +185,7 @@ describe('UsersService', () => {
     it('should throw an InternalServerErrorException if finding the role fails', async () => {
       jest
         .spyOn(service, 'findById')
-        .mockRejectedValue(new Error('Database error'));
+        .mockRejectedValue(new Error('Failed to find user by user'));
 
       await expect(service.getUserRole('user123')).rejects.toThrow(
         InternalServerErrorException,
@@ -267,7 +247,7 @@ describe('UsersService', () => {
     it('should throw an InternalServerErrorException if an error occurs', async () => {
       jest
         .spyOn(verificationTokenService, 'findVerificationToken')
-        .mockRejectedValue(new Error('Database error'));
+        .mockRejectedValue(new Error('Failed to reset password'));
 
       await expect(
         service.resetPassword('validToken', 'newHashedPassword'),
