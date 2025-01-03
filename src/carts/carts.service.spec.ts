@@ -29,6 +29,7 @@ describe('CartsService', () => {
               upsert: jest.fn(),
               delete: jest.fn(),
               findMany: jest.fn(),
+              deleteMany: jest.fn(),
             },
           },
         },
@@ -44,6 +45,10 @@ describe('CartsService', () => {
     service = module.get<CartsService>(CartsService);
     prismaService = module.get<PrismaService>(PrismaService);
     productService = module.get<ProductsService>(ProductsService);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   describe('addProductToCart', () => {
@@ -379,6 +384,86 @@ describe('CartsService', () => {
         mockCart,
         userId,
       );
+    });
+  });
+  describe('upsertCartItem', () => {
+    it('should  a new cart item when it does not exist', async () => {
+      const cartId = 'cart456';
+      const productId = 'product456';
+      const quantity = 3;
+
+      const newCartItem = CartServiceMocks.newUpsertCartItem(
+        cartId,
+        productId,
+        quantity,
+      );
+
+      jest
+        .spyOn(prismaService.cartItem, 'upsert')
+        .mockResolvedValue(newCartItem);
+
+      const result = await service.upsertCartItem(cartId, productId, quantity);
+
+      expect(prismaService.cartItem.upsert).toHaveBeenCalledWith({
+        where: {
+          cart_id_product_id: { cart_id: cartId, product_id: productId },
+        },
+        update: { quantity },
+        create: {
+          cart_id: cartId,
+          product_id: productId,
+          quantity,
+        },
+      });
+
+      expect(result).toEqual(newCartItem);
+    });
+    it('should update the quantity of an existing cart item', async () => {
+      const cartId = CartServiceMocks.cart.id;
+      const productId = CartServiceMocks.cartItem.product_id;
+      const quantity = 3;
+      const updatedCartItem = CartServiceMocks.newUpsertCartItem(
+        cartId,
+        productId,
+        quantity,
+      );
+
+      jest
+        .spyOn(prismaService.cartItem, 'upsert')
+        .mockResolvedValue(updatedCartItem);
+
+      const result = await service.upsertCartItem(cartId, productId, quantity);
+
+      expect(prismaService.cartItem.upsert).toHaveBeenCalledWith({
+        where: {
+          cart_id_product_id: { cart_id: cartId, product_id: productId },
+        },
+        update: { quantity },
+        create: {
+          cart_id: cartId,
+          product_id: productId,
+          quantity,
+        },
+      });
+
+      expect(result).toEqual(updatedCartItem);
+    });
+  });
+  describe('clearCartItems', () => {
+    it('should delete all cart items for the given cart ID', async () => {
+      const cartId = 'testCart123';
+      const mockDeleteResult = { count: 3 };
+
+      jest
+        .spyOn(prismaService.cartItem, 'deleteMany')
+        .mockResolvedValue(mockDeleteResult);
+
+      const result = await service.clearCartItems(cartId);
+
+      expect(prismaService.cartItem.deleteMany).toHaveBeenCalledWith({
+        where: { cart_id: cartId },
+      });
+      expect(result).toEqual(mockDeleteResult);
     });
   });
 });
