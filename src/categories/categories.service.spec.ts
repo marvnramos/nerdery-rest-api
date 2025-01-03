@@ -9,7 +9,6 @@ import {
 } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { CategoryServiceMocks } from '../../test/mocks/category.mocks';
-import { Categories } from './models/categories.model';
 import { AddCategoryRes } from './dto/responses/create.category.res';
 
 describe('CategoriesService', () => {
@@ -58,9 +57,7 @@ describe('CategoriesService', () => {
       jest.spyOn(prismaService.category, 'findUnique').mockResolvedValue(null);
       jest
         .spyOn(prismaService.category, 'create')
-        .mockResolvedValue(
-          plainToInstance(Categories, CategoryServiceMocks.createCategoryRes),
-        );
+        .mockResolvedValue(CategoryServiceMocks.createMockCategory());
 
       const result = await service.createCategory(categoryName);
 
@@ -86,9 +83,7 @@ describe('CategoriesService', () => {
       const categoryName = 'Electronics';
       jest
         .spyOn(prismaService.category, 'findUnique')
-        .mockResolvedValue(
-          plainToInstance(Categories, CategoryServiceMocks.category),
-        );
+        .mockResolvedValue(CategoryServiceMocks.category);
 
       await expect(service.createCategory(categoryName)).rejects.toThrow(
         BadRequestException,
@@ -106,14 +101,11 @@ describe('CategoriesService', () => {
 
       jest
         .spyOn(prismaService.category, 'findUnique')
-        .mockResolvedValue(
-          plainToInstance(Categories, CategoryServiceMocks.category),
-        );
+        .mockResolvedValue(CategoryServiceMocks.category);
 
       jest
         .spyOn(prismaService.productCategory, 'findMany')
         .mockResolvedValue([]);
-
       jest.spyOn(prismaService.category, 'delete').mockResolvedValue(undefined);
 
       const result = await service.removeCategory(categoryId);
@@ -153,19 +145,19 @@ describe('CategoriesService', () => {
 
     it('should throw NotAcceptableException if category is in use', async () => {
       const categoryId = 1;
+
       jest
         .spyOn(prismaService.category, 'findUnique')
-        .mockResolvedValue(
-          plainToInstance(Categories, CategoryServiceMocks.category),
-        );
+        .mockResolvedValue(CategoryServiceMocks.category);
       jest.spyOn(prismaService.productCategory, 'findMany').mockResolvedValue([
         {
-          category_id: 1,
-          product_id: 'some-id',
+          category_id: categoryId,
+          product_id: 'product123',
           created_at: new Date(),
           updated_at: new Date(),
         },
       ]);
+
       await expect(service.removeCategory(categoryId)).rejects.toThrow(
         NotAcceptableException,
       );
@@ -173,6 +165,7 @@ describe('CategoriesService', () => {
       expect(prismaService.category.findUnique).toHaveBeenCalledWith({
         where: { id: categoryId },
       });
+      expect(prismaService.productCategory.findMany).toHaveBeenCalled();
     });
   });
 
@@ -180,20 +173,12 @@ describe('CategoriesService', () => {
     it('should return all categories', async () => {
       jest
         .spyOn(prismaService.category, 'findMany')
-        .mockResolvedValue(
-          CategoryServiceMocks.allCategories.map((category) =>
-            plainToInstance(Categories, category),
-          ),
-        );
+        .mockResolvedValue(CategoryServiceMocks.allCategories);
 
       const result = await service.getAllCategories();
 
       expect(prismaService.category.findMany).toHaveBeenCalled();
-      expect(result).toEqual(
-        CategoryServiceMocks.allCategories.map((category) =>
-          plainToInstance(Categories, category),
-        ),
-      );
+      expect(result).toEqual(CategoryServiceMocks.allCategories);
     });
 
     it('should throw NotFoundException if no categories are found', async () => {
