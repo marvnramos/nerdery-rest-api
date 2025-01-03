@@ -1,35 +1,36 @@
 export class CategoryServiceMocks {
+  static currentDate = new Date();
   static category = {
-    id: "1",
+    id: 1,
     categoryName: 'Electronics',
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    createdAt: CategoryServiceMocks.currentDate,
+    updatedAt: CategoryServiceMocks.currentDate,
   };
 
   static createCategoryRes = {
     id: '1',
-    createdAt: new Date(),
+    createdAt: CategoryServiceMocks.currentDate,
   };
 
   static anotherCategory = {
     id: 2,
     categoryName: 'Home Appliances',
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    createdAt: CategoryServiceMocks.currentDate,
+    updatedAt: CategoryServiceMocks.currentDate,
   };
 
   static allCategories = [
     {
       id: 1,
       categoryName: 'Electronics',
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: CategoryServiceMocks.currentDate,
+      updatedAt: CategoryServiceMocks.currentDate,
     },
     {
       id: 2,
       categoryName: 'Home Appliances',
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: CategoryServiceMocks.currentDate,
+      updatedAt: CategoryServiceMocks.currentDate,
     },
   ];
 
@@ -38,6 +39,6 @@ export class CategoryServiceMocks {
   };
 
   static deletedCategory = {
-    deletedAt: new Date(),
+    deletedAt: CategoryServiceMocks.currentDate,
   };
 }
