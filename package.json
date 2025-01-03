@@ -106,7 +106,16 @@
     ],
     "coverageDirectory": "../coverage",
     "coveragePathIgnorePatterns": [
-      "<rootDir>/.*\\.module\\.ts$"
+      "<rootDir>/.*\\.module\\.ts$",
+      "<rootDir>/.*\\.controller\\.ts$",
+      "<rootDir>/.*\\.args\\.ts$",
+      "<rootDir>/.*\\.res\\.ts$",
+      "<rootDir>/.*\\.dto\\.ts$",
+      "<rootDir>/.*\\.resolver\\.ts$",
+      "<rootDir>/.*\\.guard\\.ts$",
+      "<rootDir>/.*\\.strategy\\.ts$",
+      "<rootDir>/.*\\.enum\\.ts$",
+      "<rootDir>/.*\\.provider\\.ts$"
     ],
     "testEnvironment": "node"
   }
