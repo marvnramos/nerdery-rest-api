@@ -1,6 +1,5 @@
 import { Cart, CartItem } from '@prisma/client';
 import { UpdateProductCartRes } from '../../src/carts/dto/response/update.product.cart.res';
-import { RemoveProductFromCartRes } from '../../src/carts/dto/response/remove.product.from.cart.res';
 
 export class CartServiceMocks {
   static cart: Cart = {
@@ -86,6 +85,21 @@ export class CartServiceMocks {
     quantity: 1,
   };
 
+  static newUpsertCartItem = (
+    cartId: string,
+    productId: string,
+    quantity: number,
+  ) => {
+    return {
+      id: 'newCartItem456',
+      cart_id: cartId,
+      product_id: productId,
+      quantity,
+      created_at: new Date(),
+      updated_at: new Date(),
+    };
+  };
+
   static cartItem: CartItem = {
     id: '49c84175-021f-4603-a1b4-836f1f287dea',
     quantity: 1,
@@ -97,25 +111,5 @@ export class CartServiceMocks {
 
   static updatedCartItem: UpdateProductCartRes = {
     updatedAt: new Date(),
-  };
-
-  static deletedCartItem: RemoveProductFromCartRes = {
-    deletedAt: new Date(),
-  };
-
-  static newCart: Cart = {
-    id: 'newCart123',
-    user_id: 'user123',
-    created_at: new Date(),
-    updated_at: new Date(),
-  };
-
-  static newCartItem: CartItem = {
-    id: 'item123',
-    quantity: 2,
-    cart_id: 'newCart123',
-    product_id: 'prod123',
-    created_at: new Date(),
-    updated_at: new Date(),
   };
 }
