@@ -11,7 +11,6 @@ import { plainToInstance } from 'class-transformer';
 import { CategoryServiceMocks } from '../../test/mocks/category.mocks';
 import { Categories } from './models/categories.model';
 import { AddCategoryRes } from './dto/responses/create.category.res';
-import { DeleteCategoryRes } from './dto/responses/delete.category.res';
 
 describe('CategoriesService', () => {
   let service: CategoriesService;
