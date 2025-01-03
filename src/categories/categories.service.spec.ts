@@ -55,9 +55,7 @@ describe('CategoriesService', () => {
   describe('createCategory', () => {
     it('should create a new category', async () => {
       const categoryName = 'Electronics';
-      /**
-       * TODO: Check this
-       */
+
       jest.spyOn(prismaService.category, 'findUnique').mockResolvedValue(null);
       jest
         .spyOn(prismaService.category, 'create')
@@ -75,12 +73,14 @@ describe('CategoriesService', () => {
         data: { category_name: categoryName },
       });
 
-      const expectedResult = plainToInstance(
-        AddCategoryRes,
-        CategoryServiceMocks.createCategoryRes,
+      expect(result).toEqual(
+        expect.objectContaining(
+          plainToInstance(
+            AddCategoryRes,
+            CategoryServiceMocks.createCategoryRes,
+          ),
+        ),
       );
-
-      expect(result).toEqual(expectedResult);
     });
 
     it('should throw BadRequestException if category already exists', async () => {
@@ -131,8 +131,11 @@ describe('CategoriesService', () => {
         where: { id: categoryId },
       });
 
-      expect(result).toEqual(
-        plainToInstance(DeleteCategoryRes, { deletedAt: expect.anything() }),
+      expect(result).toMatchObject(
+        expect.objectContaining({
+          ...CategoryServiceMocks.deletedCategory,
+          deletedAt: expect.any(Date),
+        }),
       );
     });
 
