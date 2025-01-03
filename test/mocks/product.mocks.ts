@@ -22,4 +22,15 @@ export class ProductServiceMocks {
     created_at: new Date(),
     updated_at: new Date(),
   };
+
+  static productToDeleteProductFromCart: Product = {
+    id: 'prod123',
+    product_name: 'Sample Product',
+    description: 'A test product',
+    stock: 100,
+    is_available: true,
+    unit_price: 10.99,
+    created_at: new Date(),
+    updated_at: new Date(),
+  };
 }
