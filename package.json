@@ -105,6 +105,9 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
+    "coveragePathIgnorePatterns": [
+      "<rootDir>/.*\\.module\\.ts$"
+    ],
     "testEnvironment": "node"
   }
 }
