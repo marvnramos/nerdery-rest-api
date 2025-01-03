@@ -105,10 +105,7 @@ export class CartsService {
     );
   }
 
-  private async getOrCreateCart(
-    userId: string,
-    cartId?: string,
-  ): Promise<Cart> {
+  async getOrCreateCart(userId: string, cartId?: string): Promise<Cart> {
     if (!cartId) {
       const existingCart = await this.prismaService.cart.findUnique({
         where: { user_id: userId },
@@ -130,7 +127,7 @@ export class CartsService {
     return cart;
   }
 
-  private async upsertCartItem(
+  async upsertCartItem(
     cartId: string,
     productId: string,
     quantity: number,
