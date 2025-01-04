@@ -111,11 +111,16 @@
       "<rootDir>/.*\\.args\\.ts$",
       "<rootDir>/.*\\.res\\.ts$",
       "<rootDir>/.*\\.dto\\.ts$",
+      "<rootDir>/.*\\.req\\.ts$",
       "<rootDir>/.*\\.resolver\\.ts$",
       "<rootDir>/.*\\.guard\\.ts$",
       "<rootDir>/.*\\.strategy\\.ts$",
       "<rootDir>/.*\\.enum\\.ts$",
-      "<rootDir>/.*\\.provider\\.ts$"
+      "<rootDir>/.*\\.provider\\.ts$",
+      "<rootDir>/.*\\.decorator\\.ts$",
+      "<rootDir>/.*\\.type\\.ts$",
+      "<rootDir>/.*\\.model\\.ts$",
+      "<rootDir>/.*\\.command\\.ts$"
     ],
     "testEnvironment": "node"
   }
