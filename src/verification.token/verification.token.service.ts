@@ -12,8 +12,7 @@ export class VerificationTokenService {
   ): Promise<VerificationToken> {
     try {
       return await this.prismaService.verificationToken.create({ data });
-    } catch (error) {
-      console.error('Error creating verification token:', error);
+    } catch {
       throw new InternalServerErrorException(
         'Failed to create verification token',
       );
@@ -33,8 +32,7 @@ export class VerificationTokenService {
       return await this.prismaService.verificationToken.findUnique({
         where: { token },
       });
-    } catch (error) {
-      console.error('Error finding verification token:', error);
+    } catch {
       throw new InternalServerErrorException(
         'Failed to find verification token',
       );
