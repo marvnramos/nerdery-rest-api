@@ -196,7 +196,7 @@ export class ProductsService {
     }
   }
 
-  private async fetchPaginatedProducts(args: GetProductsArgs) {
+  async fetchPaginatedProducts(args: GetProductsArgs) {
     const cursorId = args.after ? decodeBase64(args.after) : null;
 
     const where: Prisma.ProductWhereInput = {
@@ -254,6 +254,11 @@ export class ProductsService {
   ): Promise<UpdateProductRes> {
     await this.validateProductExists(data.id);
     const update = new UpdateProductRes();
+
+    if (data.categories.length === 0) {
+      throw new BadRequestException('At least one category is required.');
+    }
+
     const categoryData = data.categories.map((categoryId) => ({
       product_id: data.id,
       category_id: categoryId,
