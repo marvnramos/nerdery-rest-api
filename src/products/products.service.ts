@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -19,6 +20,7 @@ import { Categories } from '../categories/models/categories.model';
 import { PaginatedProductsType } from './dto/responses/products.pagination.type.res';
 import { ProductImagesType } from './types/product.images.type';
 import { ProductType } from './types/product.type';
+import { UpdateProductImagesArgs } from './dto/args/update.product.images.args';
 
 @Injectable()
 export class ProductsService {
@@ -101,6 +103,24 @@ export class ProductsService {
     });
   }
 
+  async updateProductImages(
+    productId: string,
+    uploadedImages: Express.Multer.File[],
+    updateImagesDto: UpdateProductImagesArgs,
+  ): Promise<void> {
+    this.validateUpdateImagesRequest(updateImagesDto, uploadedImages);
+
+    if (updateImagesDto.op === 'add') {
+      for (const uploadedImage of uploadedImages) {
+        await this.uploadImage(uploadedImage, productId);
+      }
+    } else if (updateImagesDto.op === 'remove') {
+      for (const publicImageId of updateImagesDto.publicImageId) {
+        await this.removeProductImages(publicImageId);
+      }
+    }
+  }
+
   async uploadImage(
     image: Express.Multer.File,
     productId: string,
@@ -136,6 +156,35 @@ export class ProductsService {
     if (!product)
       throw new NotFoundException(`Product with ID ${id} not found`);
     return product;
+  }
+
+  private validateUpdateImagesRequest(
+    { op, path, publicImageId }: UpdateProductImagesArgs,
+    uploadedImages: Express.Multer.File[],
+  ): void {
+    if (path !== '/images') {
+      throw new BadRequestException(
+        'Invalid path. Only "/images" is supported.',
+      );
+    }
+
+    if (op === 'add' && (!uploadedImages || uploadedImages.length === 0)) {
+      throw new BadRequestException(
+        'At least one image file is required for the "add" operation.',
+      );
+    }
+
+    if (op === 'remove' && (!publicImageId || publicImageId.length === 0)) {
+      throw new BadRequestException(
+        'At least one image identifier is required for the "remove" operation.',
+      );
+    }
+
+    if (!['add', 'remove'].includes(op)) {
+      throw new BadRequestException(
+        'Invalid operation. Supported: "add", "remove".',
+      );
+    }
   }
 
   private async fetchPaginatedProducts(args: GetProductsArgs) {
