@@ -6,7 +6,7 @@ import { Auth } from '../auth/decorators/auth.role.decorator';
 import { DeleteCategoryReq } from './dto/requests/delete.category.req';
 import { DeleteCategoryRes } from './dto/responses/delete.category.res';
 import { AddCategoryRes } from './dto/responses/create.category.res';
-import { GlobalExceptionFilter } from '../utils/GlobalExceptionFilter';
+import { GlobalExceptionFilter } from '../utils/exception/GlobalExceptionFilter';
 import { UseFilters } from '@nestjs/common';
 
 @Resolver()

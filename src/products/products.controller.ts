@@ -10,7 +10,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
-import { GlobalExceptionFilter } from '../utils/GlobalExceptionFilter';
+import { GlobalExceptionFilter } from '../utils/exception/GlobalExceptionFilter';
 import { Auth } from '../auth/decorators/auth.role.decorator';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { UpdateProductImagesArgs } from './dto/args/update.product.images.args';

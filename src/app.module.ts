@@ -18,7 +18,7 @@ import { VerificationTokenModule } from './verification.token/verification.token
 import { CategoriesModule } from './categories/categories.module';
 import { CloudinaryModule } from './utils/cloudinary/cloudinary.module';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
-import { GlobalExceptionFilter } from './utils/GlobalExceptionFilter';
+import { GlobalExceptionFilter } from './utils/exception/GlobalExceptionFilter';
 import { ThrottlerModule, seconds } from '@nestjs/throttler';
 import { validate } from '../env.validation';
 import { ThrottlerBasedOnContextGuard } from './utils/ThrottlerBaseOnContextGuard';

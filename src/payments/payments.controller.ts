@@ -8,7 +8,7 @@ import {
   Request as RequestDecorator,
 } from '@nestjs/common';
 import { PaymentsService } from './payments.service';
-import { GlobalExceptionFilter } from '../utils/GlobalExceptionFilter';
+import { GlobalExceptionFilter } from '../utils/exception/GlobalExceptionFilter';
 import { AddPaymentReq } from './dto/requests/add.payment.req';
 import { Auth } from '../auth/decorators/auth.role.decorator';
 import { Request, Response } from 'express';
