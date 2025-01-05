@@ -6,13 +6,13 @@ import { join } from 'path';
 import helmet from 'helmet';
 import { GlobalExceptionFilter } from './utils/GlobalExceptionFilter';
 import * as process from 'node:process';
-import { CspMiddleware } from './utils/CspMiddleware';
+import { ContentSecurityPolicyMiddleware } from './utils/middleware/csp.middleware';
 import * as bodyParser from 'body-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  app.use(new CspMiddleware().use);
+  app.use(new ContentSecurityPolicyMiddleware().use);
 
   app.use(
     helmet({
