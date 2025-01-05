@@ -21,6 +21,8 @@ import { PaginatedProductsType } from './dto/responses/products.pagination.type.
 import { ProductImagesType } from './types/product.images.type';
 import { ProductType } from './types/product.type';
 import { UpdateProductImagesArgs } from './dto/args/update.product.images.args';
+import { AddProductRes } from './dto/responses/create.product.res';
+import { RemoveProductRes } from './dto/responses/remove.product.res';
 
 @Injectable()
 export class ProductsService {
@@ -54,17 +56,19 @@ export class ProductsService {
     });
   }
 
-  async createProduct(data: AddProductArgs): Promise<Product> {
+  async createProduct(data: AddProductArgs): Promise<AddProductRes> {
     const { categories, ...productData } = data;
     const product = await this.prismaService.product.create({
       data: {
-        ...productData,
-        product_name: data.productName,
-        unit_price: data.unitPrice,
+        product_name: productData.productName,
+        description: productData.description,
+        stock: productData.stock,
+        is_available: productData.isAvailable,
+        unit_price: productData.unitPrice,
       },
     });
     await this.createProductCategories(categories, product.id);
-    return product;
+    return plainToInstance(AddProductRes, product);
   }
 
   async getProductById(id: string): Promise<ProductType> {
@@ -86,7 +90,10 @@ export class ProductsService {
     });
   }
 
-  async editProductData(id: string, data: UpdateProductArgs): Promise<Product> {
+  async editProductData(
+    id: string,
+    data: UpdateProductArgs,
+  ): Promise<UpdateProductRes> {
     await this.findProductById(id);
 
     if (data.stock === 0) data.isAvailable = false;
@@ -97,10 +104,13 @@ export class ProductsService {
       is_available: data.isAvailable,
       unit_price: data.unitPrice,
     });
-    return this.prismaService.product.update({
+
+    const product = await this.prismaService.product.update({
       where: { id },
       data: toUpdateData,
     });
+
+    return plainToInstance(UpdateProductRes, product);
   }
 
   async updateProductImages(
@@ -264,7 +274,7 @@ export class ProductsService {
     return update;
   }
 
-  async removeProduct(id: string): Promise<void> {
+  async removeProduct(id: string): Promise<RemoveProductRes> {
     await this.validateProductExists(id);
 
     const productImages = await this.prismaService.productImages.findMany({
@@ -281,6 +291,10 @@ export class ProductsService {
     }
 
     await this.prismaService.product.delete({ where: { id } });
+
+    const response = new RemoveProductRes();
+    response.deletedAt = new Date();
+    return response;
   }
 
   async getProductCategories(productId: string): Promise<Categories[]> {
