@@ -21,7 +21,6 @@ describe('OrdersService', () => {
   let prismaService: PrismaService;
   let cartsService: CartsService;
   let usersService: UsersService;
-  let productsService: ProductsService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -42,21 +41,21 @@ describe('OrdersService', () => {
         {
           provide: CartsService,
           useValue: {
-            findCartById: jest.fn(), // Mocked function using jest.fn()
-            getCartItems: jest.fn(), // Mocked function using jest.fn()
-            clearCartItems: jest.fn(), // Mocked function using jest.fn()
+            findCartById: jest.fn(),
+            getCartItems: jest.fn(),
+            clearCartItems: jest.fn(),
           },
         },
         {
           provide: UsersService,
           useValue: {
-            getUserById: jest.fn(), // Mocked function using jest.fn()
+            getUserById: jest.fn(),
           },
         },
         {
           provide: ProductsService,
           useValue: {
-            getProductUnitPrice: jest.fn(), // Mocked function using jest.fn()
+            getProductUnitPrice: jest.fn(),
           },
         },
       ],
@@ -66,7 +65,6 @@ describe('OrdersService', () => {
     prismaService = module.get<PrismaService>(PrismaService);
     cartsService = module.get<CartsService>(CartsService);
     usersService = module.get<UsersService>(UsersService);
-    productsService = module.get<ProductsService>(ProductsService);
   });
 
   describe('addOrder', () => {
