@@ -46,7 +46,7 @@ export class ProductsService {
     return product;
   }
 
-  private async uploadToCloudinary(image: Express.Multer.File): Promise<any> {
+  async uploadToCloudinary(image: Express.Multer.File): Promise<any> {
     return new Promise((resolve, reject) => {
       const uploadStream = this.cloudinaryService.uploader.upload_stream(
         { resource_type: 'image' },
@@ -119,7 +119,7 @@ export class ProductsService {
     updateImagesDto: UpdateProductImagesArgs,
   ): Promise<void> {
     this.validateUpdateImagesRequest(updateImagesDto, uploadedImages);
-
+    await this.validateProductExists(productId);
     if (updateImagesDto.op === 'add') {
       for (const uploadedImage of uploadedImages) {
         await this.uploadImage(uploadedImage, productId);
@@ -131,11 +131,10 @@ export class ProductsService {
     }
   }
 
-  async uploadImage(
+  private async uploadImage(
     image: Express.Multer.File,
     productId: string,
   ): Promise<ProductImages> {
-    await this.validateProductExists(productId);
     const uploadResult = await this.uploadToCloudinary(image);
     const imageData: Prisma.ProductImagesCreateInput = {
       image_url: uploadResult.secure_url,
@@ -171,7 +170,7 @@ export class ProductsService {
   private validateUpdateImagesRequest(
     { op, path, publicImageId }: UpdateProductImagesArgs,
     uploadedImages: Express.Multer.File[],
-  ): void {
+  ) {
     if (path !== '/images') {
       throw new BadRequestException(
         'Invalid path. Only "/images" is supported.',
