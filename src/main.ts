@@ -8,12 +8,12 @@ import { GlobalExceptionFilter } from './utils/exception/GlobalExceptionFilter';
 import * as process from 'node:process';
 import { ContentSecurityPolicyMiddleware } from './utils/middleware/csp.middleware';
 import * as bodyParser from 'body-parser';
-import { ConfigService } from './config/config.service';
+import { EnvsConfigService } from './config/envs.config.service';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  const configService = app.get(ConfigService);
+  const configService = app.get(EnvsConfigService);
 
   app.use(new ContentSecurityPolicyMiddleware().use);
 
