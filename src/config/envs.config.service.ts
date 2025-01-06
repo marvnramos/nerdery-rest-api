@@ -88,4 +88,8 @@ export class EnvsConfigService {
   getThrottleLimit(): number {
     return this.configService.get<number>('THROTTLE_LIMIT');
   }
+
+  getNodeEnv(): string {
+    return this.configService.get<string>('NODE_ENV');
+  }
 }
