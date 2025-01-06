@@ -50,7 +50,7 @@ async function bootstrap() {
 
   app.setBaseViewsDir(join(process.cwd(), 'public/templates'));
   app.setViewEngine('hbs');
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(configService.getPort() ?? 3000);
 }
 
 bootstrap();
