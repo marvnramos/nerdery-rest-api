@@ -113,7 +113,6 @@
       "<rootDir>/.*\\.dto\\.ts$",
       "<rootDir>/.*\\.req\\.ts$",
       "<rootDir>/.*\\.resolver\\.ts$",
-      "<rootDir>/.*\\.guard\\.ts$",
       "<rootDir>/.*\\.strategy\\.ts$",
       "<rootDir>/.*\\.enum\\.ts$",
       "<rootDir>/.*\\.provider\\.ts$",
