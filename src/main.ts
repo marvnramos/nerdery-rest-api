@@ -8,9 +8,12 @@ import { GlobalExceptionFilter } from './utils/exception/GlobalExceptionFilter';
 import * as process from 'node:process';
 import { ContentSecurityPolicyMiddleware } from './utils/middleware/csp.middleware';
 import * as bodyParser from 'body-parser';
+import { ConfigService } from './config/config.service';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  const configService = app.get(ConfigService);
 
   app.use(new ContentSecurityPolicyMiddleware().use);
 
@@ -27,7 +30,10 @@ async function bootstrap() {
   );
 
   app.enableCors({
-    origin: [process.env.CORS_ORIGIN, process.env.CORS_CLIENT_DOMAIN],
+    origin: [
+      configService.getCorsOrigin(),
+      configService.getCorsClientDomain(),
+    ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
