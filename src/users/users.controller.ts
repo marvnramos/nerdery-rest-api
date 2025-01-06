@@ -23,6 +23,7 @@ import { Response } from 'express';
 import { ResetPasswordReqDto } from './dto/requests/reset.password.req.dto';
 import { VerificationTokenService } from '../verification.token/verification.token.service';
 import { seconds, Throttle } from '@nestjs/throttler';
+import { EnvsConfigService } from '../config/envs.config.service';
 
 @Controller('users')
 export class UsersController {
@@ -30,7 +31,10 @@ export class UsersController {
     private readonly usersService: UsersService,
     private readonly verificationTokenService: VerificationTokenService,
     private readonly mailService: MailService,
+    private readonly envsConfigService: EnvsConfigService,
   ) {}
+
+  private baseUrl = this.envsConfigService.getBaseUrl();
 
   @Post('signup')
   @HttpCode(HttpStatus.CREATED)
@@ -63,7 +67,7 @@ export class UsersController {
       email: user.email,
       fullName: `${user.first_name} ${user.last_name}`,
       subject: 'Email Verification',
-      uri: `${process.env.BASE_URL}/users/validate-email/${encodedToken}`,
+      uri: `${this.baseUrl}/users/validate-email/${encodedToken}`,
       template: './confirmation',
     });
 
@@ -112,7 +116,7 @@ export class UsersController {
       this.mailService.sendEmail({
         email: user.email,
         subject: 'Reset Password',
-        uri: `${process.env.BASE_URL}/users/reset-password/${encodedToken}`,
+        uri: `${this.baseUrl}/users/reset-password/${encodedToken}`,
         template: './reset-password',
         fullName: `${user.first_name} ${user.last_name}`,
       }),
