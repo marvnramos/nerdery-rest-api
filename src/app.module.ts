@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
 import { AuthController } from './auth/auth.controller';
 import { AuthModule } from './auth/auth.module';
 import { GraphqlModule } from './graphql.module';
@@ -19,16 +18,18 @@ import { CategoriesModule } from './categories/categories.module';
 import { CloudinaryModule } from './utils/cloudinary/cloudinary.module';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { GlobalExceptionFilter } from './utils/exception/GlobalExceptionFilter';
-import { ThrottlerModule, seconds } from '@nestjs/throttler';
-import { validate } from '../env.validation';
+import {
+  ThrottlerModule,
+  seconds,
+  ThrottlerModuleOptions,
+} from '@nestjs/throttler';
 import { ThrottlerBasedOnContextGuard } from './utils/ThrottlerBaseOnContextGuard';
+import { EnvsConfigService } from './config/envs.config.service';
+import { EnvsConfigModule } from './config/envs.config.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      validate,
-      isGlobal: true,
-    }),
+    EnvsConfigModule,
     AuthModule,
     PaymentsModule,
     GraphqlModule,
@@ -42,12 +43,20 @@ import { ThrottlerBasedOnContextGuard } from './utils/ThrottlerBaseOnContextGuar
     VerificationTokenModule,
     CategoriesModule,
     CloudinaryModule,
-    ThrottlerModule.forRoot([
-      {
-        ttl: seconds(parseInt(process.env.THROTTLE_TTL)),
-        limit: parseInt(process.env.THROTTLE_LIMIT),
+    ThrottlerModule.forRootAsync({
+      imports: [EnvsConfigModule],
+      useFactory: async (
+        envsConfigService: EnvsConfigService,
+      ): Promise<ThrottlerModuleOptions> => {
+        return [
+          {
+            ttl: seconds(envsConfigService.getThrottleTTL()),
+            limit: envsConfigService.getThrottleLimit(),
+          },
+        ];
       },
-    ]),
+      inject: [EnvsConfigService],
+    }),
   ],
   controllers: [AuthController, UsersController],
   providers: [
@@ -61,6 +70,7 @@ import { ThrottlerBasedOnContextGuard } from './utils/ThrottlerBaseOnContextGuar
       provide: APP_GUARD,
       useClass: ThrottlerBasedOnContextGuard,
     },
+    EnvsConfigService,
   ],
 })
 export class AppModule {}
