@@ -1,20 +1,10 @@
-import {
-  IsArray,
-  IsEnum,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { IsArray, IsEnum, IsOptional, IsString } from 'class-validator';
 import { Expose } from 'class-transformer';
 import { OperationType } from '../../../utils/enums/operation.enum';
 
 export class UpdateProductImagesArgs {
   @IsEnum(OperationType)
   op: OperationType;
-
-  @IsString()
-  @IsNotEmpty()
-  path: string;
 
   @IsArray()
   @IsString({ each: true })

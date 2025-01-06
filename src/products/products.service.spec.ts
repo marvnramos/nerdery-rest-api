@@ -145,7 +145,6 @@ describe('ProductsService', () => {
       ] as Express.Multer.File[];
       const updateImagesDto: UpdateProductImagesArgs = {
         op: OperationType.ADD,
-        path: '/images',
       };
 
       await service.updateProductImages(
@@ -159,29 +158,10 @@ describe('ProductsService', () => {
       expect(service.addProductImage).toHaveBeenCalledTimes(1);
     });
 
-    it('should throw BadRequestException if path is invalid', async () => {
-      const uploadedImages = [
-        { buffer: Buffer.from('image') },
-      ] as Express.Multer.File[];
-      const updateImagesDto: UpdateProductImagesArgs = {
-        op: OperationType.ADD,
-        path: '/invalid-path',
-      };
-
-      await expect(
-        service.updateProductImages(
-          'product123',
-          uploadedImages,
-          updateImagesDto,
-        ),
-      ).rejects.toThrow(BadRequestException);
-    });
-
     it('should throw BadRequestException if no images are provided for "add" operation', async () => {
       const uploadedImages: Express.Multer.File[] = [];
       const updateImagesDto: UpdateProductImagesArgs = {
         op: OperationType.ADD,
-        path: '/images',
       };
 
       await expect(
@@ -196,7 +176,6 @@ describe('ProductsService', () => {
     it('should throw BadRequestException if no public image IDs are provided for "remove" operation', async () => {
       const updateImagesDto: UpdateProductImagesArgs = {
         op: OperationType.REMOVE,
-        path: '/images',
         publicImageId: [],
       };
 
@@ -215,7 +194,6 @@ describe('ProductsService', () => {
 
       const updateImagesDto: UpdateProductImagesArgs = {
         op: OperationType.REMOVE,
-        path: '/images',
         publicImageId: ['mock_public_id_1', 'mock_public_id_2'],
       };
 

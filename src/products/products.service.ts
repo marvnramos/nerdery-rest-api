@@ -168,15 +168,9 @@ export class ProductsService {
   }
 
   private validateUpdateImagesRequest(
-    { op, path, publicImageId }: UpdateProductImagesArgs,
+    { op, publicImageId }: UpdateProductImagesArgs,
     uploadedImages: Express.Multer.File[],
   ) {
-    if (path !== '/images') {
-      throw new BadRequestException(
-        'Invalid path. Only "/images" is supported.',
-      );
-    }
-
     if (op === 'add' && (!uploadedImages || uploadedImages.length === 0)) {
       throw new BadRequestException(
         'At least one image file is required for the "add" operation.',
