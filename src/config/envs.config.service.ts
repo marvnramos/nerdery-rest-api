@@ -90,6 +90,6 @@ export class EnvsConfigService {
   }
 
   getNodeEnv(): string {
-    return this.configService.get<string>('NODE_ENV');
+    return this.configService.get<string>('NODE_ENV') ?? 'development';
   }
 }

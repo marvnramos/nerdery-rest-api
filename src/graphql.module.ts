@@ -2,26 +2,33 @@ import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { join } from 'path';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { EnvsConfigModule } from './config/envs.config.module';
+import { EnvsConfigService } from './config/envs.config.service';
 
 @Module({
   imports: [
-    GraphQLModule.forRoot<ApolloDriverConfig>({
+    EnvsConfigModule,
+    GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
-      autoSchemaFile: join(process.cwd(), 'src/schema.graphql'),
-      playground: process.env.NODE_ENV !== 'production',
-      debug: true,
-      context: ({ req, res }) => ({ request: req, response: res }),
-      formatError: (error) => {
-        const { message, extensions } = error;
+      imports: [EnvsConfigModule],
+      inject: [EnvsConfigService],
+      useFactory: async (envsConfigService: EnvsConfigService) => ({
+        autoSchemaFile: join(process.cwd(), 'src/schema.graphql'),
+        playground: envsConfigService.getNodeEnv() !== 'production',
+        debug: true,
+        context: ({ req, res }) => ({ request: req, response: res }),
+        formatError: (error) => {
+          const { message, extensions } = error;
 
-        return {
-          message,
-          extensions: {
-            ...extensions,
-            stacktrace: undefined,
-          },
-        };
-      },
+          return {
+            message,
+            extensions: {
+              ...extensions,
+              stacktrace: undefined,
+            },
+          };
+        },
+      }),
     }),
   ],
 })
