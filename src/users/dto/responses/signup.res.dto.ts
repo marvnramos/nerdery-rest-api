@@ -1,7 +1,6 @@
 import { Expose } from 'class-transformer';
-import { ICreatedResDto } from '../../../common/ICreatedResDto';
 
-export class SignUpResDto implements ICreatedResDto {
+export class SignUpResDto {
   @Expose()
   created_at: Date;
 }

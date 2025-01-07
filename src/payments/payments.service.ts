@@ -5,26 +5,30 @@ import {
   NotAcceptableException,
 } from '@nestjs/common';
 import Stripe from 'stripe';
-import { PrismaService } from 'src/utils/prisma/prisma.service';
-import { OrdersService } from 'src/orders/orders.service';
+import { PrismaService } from '../utils/prisma/prisma.service';
+import { OrdersService } from '../orders/orders.service';
 import { AddPaymentRes } from './dto/responses/add.payment.res';
 import { UserRoleType } from '@prisma/client';
 import { MailService } from '../utils/mailer/mail.service';
 import { EmailCommand } from '../utils/mailer/dto/email.command';
 import { Request, Response } from 'express';
+import { EnvsConfigService } from '../config/envs.config.service';
 
 @Injectable()
 export class PaymentsService {
   private stripe: Stripe;
-  private readonly webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-  private readonly stripeAPIKey = process.env.STRIPE_API_KEY;
+  private readonly webhookSecret: string;
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly orderService: OrdersService,
     private readonly mailService: MailService,
+    private readonly envsConfigService: EnvsConfigService,
   ) {
-    this.stripe = new Stripe(this.stripeAPIKey, {
+    this.webhookSecret = this.envsConfigService.getStripeWebhookSecret();
+    const stripeAPIKey = envsConfigService.getStripeAPIKey();
+
+    this.stripe = new Stripe(stripeAPIKey, {
       apiVersion: '2024-11-20.acacia',
     });
   }
@@ -40,10 +44,20 @@ export class PaymentsService {
     if (orderAlreadyPaid) {
       throw new NotAcceptableException('This order has already been paid.');
     }
+
     const order = await this.orderService.getOrderById(orderId, user);
-    const amount = order.orderDetails.reduce((amount, orderDetail) => {
-      amount += orderDetail.quantity * orderDetail.unit_price;
-      return amount;
+
+    order.orderDetails.forEach((orderDetail) => {
+      if (!orderDetail.product_id) {
+        throw new HttpException(
+          `Missing product ID for order detail: ${JSON.stringify(orderDetail)}`,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+    });
+
+    const amount = order.orderDetails.reduce((total, orderDetail) => {
+      return total + orderDetail.quantity * orderDetail.unit_price;
     }, 0);
 
     const paymentIntent = await this.stripe.paymentIntents.create({
@@ -51,6 +65,7 @@ export class PaymentsService {
       currency: 'usd',
       metadata: { orderId },
     });
+
     await Promise.all([
       this.updateStockAndNotify(order, user.id),
       this.prisma.paymentDetail.create({
@@ -72,6 +87,7 @@ export class PaymentsService {
 
   async handleStripeWebhook(req: Request, res: Response) {
     const sig = req.headers['stripe-signature'];
+
     try {
       const event = this.stripe.webhooks.constructEvent(
         req.body,
@@ -82,8 +98,8 @@ export class PaymentsService {
       await this.processEvent(event);
 
       res.status(HttpStatus.OK).send({ received: true });
-    } catch (error) {
-      console.error('Error al verificar el webhook:', error);
+    } catch (err) {
+      console.error('Webhook error:', err);
       throw new HttpException(
         'Webhook verification failed',
         HttpStatus.BAD_REQUEST,
@@ -102,7 +118,7 @@ export class PaymentsService {
         break;
 
       default:
-        console.warn(`Evento no manejado: ${event.type}`);
+        console.warn(`Unhandled event type: ${event.type}`);
     }
   }
 
@@ -112,13 +128,13 @@ export class PaymentsService {
     const paymentMethod =
       typeof paymentIntent.payment_method === 'string'
         ? paymentIntent.payment_method
-        : (paymentIntent.payment_method?.id ?? 'not provided');
+        : 'not provided';
 
     await this.updatePaymentDetails(paymentIntent.id, {
       status: 'succeeded',
       amount: paymentIntent.amount,
       payment_method: paymentMethod,
-      order_id: paymentIntent.metadata?.order_id,
+      order_id: paymentIntent.metadata?.orderId,
     });
   }
 
@@ -129,10 +145,9 @@ export class PaymentsService {
     const paymentMethod =
       typeof paymentIntent.payment_method === 'string'
         ? paymentIntent.payment_method
-        : (paymentIntent.payment_method as Stripe.PaymentMethod)?.id ||
-          'not provided';
+        : 'not provided';
     const amount = paymentIntent.amount;
-    const orderId = paymentIntent.metadata?.order_id;
+    const orderId = paymentIntent.metadata?.orderId;
 
     if (!orderId) {
       throw new HttpException(
@@ -148,11 +163,8 @@ export class PaymentsService {
         payment_method: paymentMethod,
         order_id: orderId,
       });
-    } catch (error) {
-      console.error(
-        'Error updating payment details for failed PaymentIntent:',
-        error,
-      );
+    } catch (err) {
+      console.error('Failed to update payment details:', err);
       throw new HttpException(
         'Failed to update payment details',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -170,9 +182,7 @@ export class PaymentsService {
     },
   ) {
     const existingPayment = await this.prisma.paymentDetail.findUnique({
-      where: {
-        payment_intent_id: paymentIntentId,
-      },
+      where: { payment_intent_id: paymentIntentId },
     });
 
     if (!existingPayment) {
@@ -185,9 +195,7 @@ export class PaymentsService {
     const statusPayment = data.status === 'succeeded' ? 2 : 3;
 
     return this.prisma.paymentDetail.update({
-      where: {
-        id: existingPayment.id,
-      },
+      where: { id: existingPayment.id },
       data: {
         payment_method_id: data.payment_method ?? 'not provided',
         amount: data.amount,
@@ -206,16 +214,19 @@ export class PaymentsService {
 
     const updatedProducts = await Promise.all(
       order.orderDetails.map(async (orderDetail) => {
+        if (!orderDetail.product_id) {
+          throw new HttpException(
+            `Missing product ID for order detail: ${JSON.stringify(orderDetail)}`,
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+
         const product = await this.prisma.product.update({
           where: { id: orderDetail.product_id },
           data: {
-            stock: {
-              decrement: orderDetail.quantity,
-            },
+            stock: { decrement: orderDetail.quantity },
           },
-          include: {
-            images: true,
-          },
+          include: { images: true },
         });
 
         if (product.stock <= 3) {

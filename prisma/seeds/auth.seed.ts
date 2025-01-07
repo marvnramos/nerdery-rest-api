@@ -1,9 +1,15 @@
 import { PrismaClient, User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { EnvsConfigService } from '../../src/config/envs.config.service';
+import { ConfigService } from '@nestjs/config';
 
 export default async (prisma: PrismaClient): Promise<User> => {
-  const email = process.env.MANAGER_EMAIL;
-  const password = bcrypt.hashSync(process.env.MANAGER_PASSWORD, 10);
+  const configService = new ConfigService();
+  const envConfigService = new EnvsConfigService(configService);
+
+  const email = envConfigService.getManagerEmail();
+  const password = bcrypt.hashSync(envConfigService.getManagerPassword(), 10);
+
   return prisma.user.upsert({
     where: { email },
     create: {

@@ -6,12 +6,14 @@ import { UsersService } from 'src/users/users.service';
 import { SignInReqDto } from './dto/request/sign.in.req.dto';
 import { AuthLocal } from './decorators/auth.local.decorator';
 import { Auth } from './decorators/auth.role.decorator';
+import { EnvsConfigService } from 'src/config/envs.config.service';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly userService: UsersService,
+    private readonly envsConfigService: EnvsConfigService,
   ) {}
 
   @Post('login')
@@ -22,7 +24,7 @@ export class AuthController {
 
     res.cookie('access_token', response.accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: this.envsConfigService.getNodeEnv() === 'production',
       maxAge: 60 * 60 * 1000,
       sameSite: 'strict',
     });

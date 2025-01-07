@@ -4,8 +4,8 @@ import {
   NotAcceptableException,
   NotFoundException,
 } from '@nestjs/common';
-import { Category, Prisma } from '@prisma/client';
-import { PrismaService } from 'src/utils/prisma/prisma.service';
+import { Category } from '@prisma/client';
+import { PrismaService } from '../utils/prisma/prisma.service';
 import { plainToInstance } from 'class-transformer';
 import { Categories } from './models/categories.model';
 import { DeleteCategoryRes } from './dto/responses/delete.category.res';

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../utils/prisma/prisma.service';
 import { plainToInstance } from 'class-transformer';
 import { AddFavoriteRes } from './dto/responses/add.favorite.res';

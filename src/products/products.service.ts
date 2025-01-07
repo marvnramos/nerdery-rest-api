@@ -1,10 +1,11 @@
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma, Product, ProductImages } from '@prisma/client';
-import { PrismaService } from 'src/utils/prisma/prisma.service';
+import { PrismaService } from '../utils/prisma/prisma.service';
 import { AddProductArgs } from './dto/args/add.product.args';
 import { ConfigOptions, v2 as CloudinaryV2 } from 'cloudinary';
 import * as streamHelper from 'streamifier';
@@ -15,20 +16,27 @@ import { OperationType } from '../utils/enums/operation.enum';
 import { UpdateProductRes } from './dto/responses/update.product.images.res';
 import { GetProductsArgs } from './dto/args/get.products.args';
 import { plainToInstance } from 'class-transformer';
-import { Categories } from 'src/categories/models/categories.model';
+import { Categories } from '../categories/models/categories.model';
 import { PaginatedProductsType } from './dto/responses/products.pagination.type.res';
 import { ProductImagesType } from './types/product.images.type';
 import { ProductType } from './types/product.type';
+import { UpdateProductImagesArgs } from './dto/args/update.product.images.args';
+import { AddProductRes } from './dto/responses/create.product.res';
+import { RemoveProductRes } from './dto/responses/remove.product.res';
+import { EnvsConfigService } from '../config/envs.config.service';
 
 @Injectable()
 export class ProductsService {
   private readonly cloudinaryService = CloudinaryV2;
 
-  constructor(private readonly prismaService: PrismaService) {
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly envsConfigService: EnvsConfigService,
+  ) {
     const cloudinaryConfig: ConfigOptions = {
-      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-      api_key: process.env.CLOUDINARY_API_KEY,
-      api_secret: process.env.CLOUDINARY_API_SECRET,
+      cloud_name: this.envsConfigService.getCloudinaryCloudName(),
+      api_key: this.envsConfigService.getCloudinaryApiKey(),
+      api_secret: this.envsConfigService.getCloudinaryApiSecret(),
     };
     this.cloudinaryService.config(cloudinaryConfig);
   }
@@ -42,7 +50,7 @@ export class ProductsService {
     return product;
   }
 
-  private async uploadToCloudinary(image: Express.Multer.File): Promise<any> {
+  async uploadToCloudinary(image: Express.Multer.File): Promise<any> {
     return new Promise((resolve, reject) => {
       const uploadStream = this.cloudinaryService.uploader.upload_stream(
         { resource_type: 'image' },
@@ -52,17 +60,19 @@ export class ProductsService {
     });
   }
 
-  async createProduct(data: AddProductArgs): Promise<Product> {
+  async createProduct(data: AddProductArgs): Promise<AddProductRes> {
     const { categories, ...productData } = data;
     const product = await this.prismaService.product.create({
       data: {
-        ...productData,
-        product_name: data.productName,
-        unit_price: data.unitPrice,
+        product_name: productData.productName,
+        description: productData.description,
+        stock: productData.stock,
+        is_available: productData.isAvailable,
+        unit_price: productData.unitPrice,
       },
     });
     await this.createProductCategories(categories, product.id);
-    return product;
+    return plainToInstance(AddProductRes, product);
   }
 
   async getProductById(id: string): Promise<ProductType> {
@@ -84,7 +94,10 @@ export class ProductsService {
     });
   }
 
-  async editProductData(id: string, data: UpdateProductArgs): Promise<Product> {
+  async editProductData(
+    id: string,
+    data: UpdateProductArgs,
+  ): Promise<UpdateProductRes> {
     await this.findProductById(id);
 
     if (data.stock === 0) data.isAvailable = false;
@@ -95,17 +108,37 @@ export class ProductsService {
       is_available: data.isAvailable,
       unit_price: data.unitPrice,
     });
-    return this.prismaService.product.update({
+
+    const product = await this.prismaService.product.update({
       where: { id },
       data: toUpdateData,
     });
+
+    return plainToInstance(UpdateProductRes, product);
   }
 
-  async uploadImage(
+  async updateProductImages(
+    productId: string,
+    uploadedImages: Express.Multer.File[],
+    updateImagesDto: UpdateProductImagesArgs,
+  ): Promise<void> {
+    this.validateUpdateImagesRequest(updateImagesDto, uploadedImages);
+    await this.validateProductExists(productId);
+    if (updateImagesDto.op === 'add') {
+      for (const uploadedImage of uploadedImages) {
+        await this.uploadImage(uploadedImage, productId);
+      }
+    } else if (updateImagesDto.op === 'remove') {
+      for (const publicImageId of updateImagesDto.publicImageId) {
+        await this.removeProductImages(publicImageId);
+      }
+    }
+  }
+
+  private async uploadImage(
     image: Express.Multer.File,
     productId: string,
   ): Promise<ProductImages> {
-    await this.validateProductExists(productId);
     const uploadResult = await this.uploadToCloudinary(image);
     const imageData: Prisma.ProductImagesCreateInput = {
       image_url: uploadResult.secure_url,
@@ -138,7 +171,30 @@ export class ProductsService {
     return product;
   }
 
-  private async fetchPaginatedProducts(args: GetProductsArgs) {
+  private validateUpdateImagesRequest(
+    { op, publicImageId }: UpdateProductImagesArgs,
+    uploadedImages: Express.Multer.File[],
+  ) {
+    if (op === 'add' && (!uploadedImages || uploadedImages.length === 0)) {
+      throw new BadRequestException(
+        'At least one image file is required for the "add" operation.',
+      );
+    }
+
+    if (op === 'remove' && (!publicImageId || publicImageId.length === 0)) {
+      throw new BadRequestException(
+        'At least one image identifier is required for the "remove" operation.',
+      );
+    }
+
+    if (!['add', 'remove'].includes(op)) {
+      throw new BadRequestException(
+        'Invalid operation. Supported: "add", "remove".',
+      );
+    }
+  }
+
+  async fetchPaginatedProducts(args: GetProductsArgs) {
     const cursorId = args.after ? decodeBase64(args.after) : null;
 
     const where: Prisma.ProductWhereInput = {
@@ -196,6 +252,11 @@ export class ProductsService {
   ): Promise<UpdateProductRes> {
     await this.validateProductExists(data.id);
     const update = new UpdateProductRes();
+
+    if (data.categories.length === 0) {
+      throw new BadRequestException('At least one category is required.');
+    }
+
     const categoryData = data.categories.map((categoryId) => ({
       product_id: data.id,
       category_id: categoryId,
@@ -215,7 +276,7 @@ export class ProductsService {
     return update;
   }
 
-  async removeProduct(id: string): Promise<void> {
+  async removeProduct(id: string): Promise<RemoveProductRes> {
     await this.validateProductExists(id);
 
     const productImages = await this.prismaService.productImages.findMany({
@@ -232,6 +293,10 @@ export class ProductsService {
     }
 
     await this.prismaService.product.delete({ where: { id } });
+
+    const response = new RemoveProductRes();
+    response.deletedAt = new Date();
+    return response;
   }
 
   async getProductCategories(productId: string): Promise<Categories[]> {

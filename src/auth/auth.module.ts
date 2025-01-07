@@ -5,14 +5,23 @@ import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './strategy/local.strategy';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './strategy/jwt.strategy';
+import { EnvsConfigModule } from '../config/envs.config.module';
+import { EnvsConfigService } from 'src/config/envs.config.service';
 
 @Module({
   imports: [
+    EnvsConfigModule,
     UsersModule,
     PassportModule,
-    JwtModule.register({
-      secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: process.env.JWT_EXPIRATION_TIME },
+    JwtModule.registerAsync({
+      imports: [EnvsConfigModule],
+      inject: [EnvsConfigService],
+      useFactory: async (envsConfigService: EnvsConfigService) => {
+        return {
+          secret: envsConfigService.getJwtSecret(),
+          signOptions: { expiresIn: envsConfigService.getJwtExpirationTime() },
+        };
+      },
     }),
   ],
   providers: [AuthService, LocalStrategy, JwtStrategy],
