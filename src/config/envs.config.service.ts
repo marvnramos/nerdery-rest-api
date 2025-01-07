@@ -9,10 +9,6 @@ export class EnvsConfigService {
     return this.configService.get<number>('PORT') ?? 3000;
   }
 
-  getDatabaseUrl(): string {
-    return this.configService.get<string>('DATABASE_URL');
-  }
-
   getJwtSecret(): string {
     return this.configService.get<string>('JWT_SECRET');
   }
