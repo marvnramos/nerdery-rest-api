@@ -12,19 +12,23 @@ import { UserRoleType } from '@prisma/client';
 import { MailService } from '../utils/mailer/mail.service';
 import { EmailCommand } from '../utils/mailer/dto/email.command';
 import { Request, Response } from 'express';
+import { EnvsConfigService } from '../config/envs.config.service';
 
 @Injectable()
 export class PaymentsService {
   private stripe: Stripe;
-  private readonly webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-  private readonly stripeAPIKey = process.env.STRIPE_API_KEY;
+  private readonly webhookSecret: string;
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly orderService: OrdersService,
     private readonly mailService: MailService,
+    private readonly envsConfigService: EnvsConfigService,
   ) {
-    this.stripe = new Stripe(this.stripeAPIKey, {
+    this.webhookSecret = this.envsConfigService.getStripeWebhookSecret();
+    const stripeAPIKey = envsConfigService.getStripeAPIKey();
+
+    this.stripe = new Stripe(stripeAPIKey, {
       apiVersion: '2024-11-20.acacia',
     });
   }
