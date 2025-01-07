@@ -23,16 +23,20 @@ import { ProductType } from './types/product.type';
 import { UpdateProductImagesArgs } from './dto/args/update.product.images.args';
 import { AddProductRes } from './dto/responses/create.product.res';
 import { RemoveProductRes } from './dto/responses/remove.product.res';
+import { EnvsConfigService } from '../config/envs.config.service';
 
 @Injectable()
 export class ProductsService {
   private readonly cloudinaryService = CloudinaryV2;
 
-  constructor(private readonly prismaService: PrismaService) {
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly envsConfigService: EnvsConfigService,
+  ) {
     const cloudinaryConfig: ConfigOptions = {
-      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-      api_key: process.env.CLOUDINARY_API_KEY,
-      api_secret: process.env.CLOUDINARY_API_SECRET,
+      cloud_name: this.envsConfigService.getCloudinaryCloudName(),
+      api_key: this.envsConfigService.getCloudinaryApiKey(),
+      api_secret: this.envsConfigService.getCloudinaryApiSecret(),
     };
     this.cloudinaryService.config(cloudinaryConfig);
   }
