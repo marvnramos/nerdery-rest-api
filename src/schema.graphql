@@ -70,11 +70,20 @@ type ProductTypeEdge {
   node: ProductType!
 }
 
-type RemoveProductFromCartRes implements IRemoveRecordRes {
+type AddProductRes implements IAddRecordRes {
+  id: ID!
+  created_at: DateTime!
+}
+
+type RemoveProductRes implements IRemoveRecordRes {
   deleted_at: DateTime!
 }
 
 interface IRemoveRecordRes {
+  deleted_at: DateTime!
+}
+
+type RemoveProductFromCartRes implements IRemoveRecordRes {
   deleted_at: DateTime!
 }
 
@@ -91,6 +100,7 @@ type CartType {
   cart_item: [CartItemType!]!
   created_at: DateTime!
   updated_at: DateTime!
+  cartItems: [CartItemType!]!
 }
 
 type OrderDetailType {
@@ -166,15 +176,6 @@ type PaginatedOrdersType {
   nodes: [OrderType!]
   pageInfo: PageInfoType!
   totalCount: Int!
-}
-
-type AddProductRes implements IAddRecordRes {
-  id: ID!
-  created_at: DateTime!
-}
-
-type RemoveProductRes implements IRemoveRecordRes {
-  deleted_at: DateTime!
 }
 
 type ProductEdgeType {
