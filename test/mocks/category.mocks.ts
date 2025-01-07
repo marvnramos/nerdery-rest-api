@@ -1,9 +1,4 @@
 export class CategoryServiceMocks {
-  /**
-   * Generates a mock category object with snake_case property names.
-   * @param overrides - Partial fields to override default values.
-   * @returns A mock category object.
-   */
   static createMockCategory(
     overrides: Partial<{
       id: number;

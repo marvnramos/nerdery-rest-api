@@ -1,13 +1,6 @@
 export class FavoriteServiceMocks {
   static currentDate = new Date();
 
-  /**
-   * Creates a mock favorite with default values and optional overrides.
-   * @param userId - ID of the user who added the favorite.
-   * @param productId - ID of the product added as favorite.
-   * @param overrides - Optional overrides for default fields.
-   * @returns A mock favorite object.
-   */
   static newFavorite = (
     userId: string,
     productId: string,
