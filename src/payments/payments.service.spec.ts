@@ -16,6 +16,7 @@ import { UsersService } from '../users/users.service';
 import { ProductsService } from '../products/products.service';
 import { MailerService } from '@nestjs-modules/mailer';
 import { VerificationTokenService } from '../verification.token/verification.token.service';
+import { EnvsConfigService } from '../config/envs.config.service';
 
 const mockStripeInstance = {
   paymentIntents: {
@@ -38,6 +39,15 @@ describe('PaymentsService', () => {
   let prismaService: PrismaService;
   let ordersService: OrdersService;
   let stripe: jest.Mocked<Stripe>;
+  const mockEnvsConfigService = {
+    getCloudinaryCloudName: jest.fn().mockReturnValue('mock-cloud-name'),
+    getCloudinaryApiKey: jest.fn().mockReturnValue('mock-api-key'),
+    getCloudinaryApiSecret: jest.fn().mockReturnValue('mock-api-secret'),
+    getStripeWebhookSecret: jest
+      .fn()
+      .mockReturnValue('mock-stripe-webhook-secret'),
+    getStripeAPIKey: jest.fn().mockReturnValue('mock-stripe-api-key'),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -57,6 +67,10 @@ describe('PaymentsService', () => {
         {
           provide: Stripe,
           useValue: mockStripeInstance,
+        },
+        {
+          provide: EnvsConfigService,
+          useValue: mockEnvsConfigService,
         },
       ],
     }).compile();
