@@ -17,3 +17,12 @@ export function encodeBase64(data: string) {
 export function decodeBase64(data: string) {
   return Buffer.from(data, 'base64').toString('utf-8');
 }
+
+export function mapResultToIds<TArray, TObjectType>(
+  entityIds: readonly TArray[],
+  entityObjects: TObjectType[],
+) {
+  return entityIds.map(
+    (id) => entityObjects.filter((entity) => entity['id'] === id) || null,
+  );
+}
