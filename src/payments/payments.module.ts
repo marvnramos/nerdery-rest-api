@@ -10,5 +10,6 @@ import { EnvsConfigModule } from '../config/envs.config.module';
   imports: [EnvsConfigModule, PrismaModule, OrdersModule, MailModule],
   controllers: [PaymentsController],
   providers: [PaymentsService],
+  exports: [PaymentsService],
 })
 export class PaymentsModule {}
