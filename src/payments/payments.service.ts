@@ -13,6 +13,8 @@ import { MailService } from '../utils/mailer/mail.service';
 import { EmailCommand } from '../utils/mailer/dto/email.command';
 import { Request, Response } from 'express';
 import { EnvsConfigService } from '../config/envs.config.service';
+import { mapResultToIds } from '../utils/tools';
+import { PaymentDetail } from './types/payment.detail.type';
 
 @Injectable()
 export class PaymentsService {
@@ -105,6 +107,16 @@ export class PaymentsService {
         HttpStatus.BAD_REQUEST,
       );
     }
+  }
+
+  async getPaymentDetailsByBatch(
+    orderIds: readonly string[],
+  ): Promise<(PaymentDetail | any)[]> {
+    const paymentDetail = await this.prisma.paymentDetail.findMany({
+      where: { order_id: { in: [...orderIds] } },
+    });
+
+    return mapResultToIds(orderIds, paymentDetail);
   }
 
   private async processEvent(event: Stripe.Event) {
