@@ -1,4 +1,4 @@
-import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Context, Mutation, Query, ResolveField, Resolver } from '@nestjs/graphql';
 import { OrdersService } from './orders.service';
 import { Auth } from '../auth/decorators/auth.role.decorator';
 import { UseFilters } from '@nestjs/common';
@@ -11,7 +11,7 @@ import { PaginatedOrdersType } from './dto/responses/orders.pagination.type.res'
 import { GetOrderArgs } from './dto/args/get.order.args';
 import { OrderType } from './types/order.type';
 
-@Resolver(() => OrderDetailType)
+@Resolver(() => OrderType)
 @UseFilters(new GlobalExceptionFilter())
 export class OrdersResolver {
   constructor(private readonly orderService: OrdersService) {}
@@ -39,4 +39,6 @@ export class OrdersResolver {
   ) {
     return this.orderService.getPaginatedOrders(args, request.user);
   }
+
+  @ResolveField()
 }
