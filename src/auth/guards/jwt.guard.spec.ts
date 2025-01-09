@@ -1,8 +1,8 @@
 import { ExecutionContext } from '@nestjs/common';
-import * as utils from '../../../utils/HandleContext';
+import * as utils from '../../../utils/handle.context.util';
 import { JwtAuthGuard } from './jwt.guard';
 
-jest.mock('../../../utils/HandleContext', () => ({
+jest.mock('../../../utils/handle.context.util', () => ({
   extractRequestFromContext: jest.fn(),
 }));
 
