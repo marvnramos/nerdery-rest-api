@@ -7,6 +7,7 @@ import { SignInReqDto } from './dto/request/sign.in.req.dto';
 import { AuthLocal } from './decorators/auth.local.decorator';
 import { Auth } from './decorators/auth.role.decorator';
 import { EnvsConfigService } from 'src/config/envs.config.service';
+import { UserRoleType } from '@prisma/client';
 
 @Controller('auth')
 export class AuthController {
@@ -33,7 +34,7 @@ export class AuthController {
   }
 
   @Post('logout')
-  @Auth('CLIENT', 'MANAGER')
+  @Auth(UserRoleType.CLIENT, UserRoleType.MANAGER)
   async logout(@Res() res: Response): Promise<void> {
     res.clearCookie('access_token');
     res.json({ message: 'Logged out successfully' });

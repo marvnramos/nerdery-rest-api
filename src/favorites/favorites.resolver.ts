@@ -6,13 +6,14 @@ import { Auth } from '../auth/decorators/auth.role.decorator';
 import { FavoriteType } from './types/favorite.type';
 import { CheckUncheckFavoriteArgs } from './dto/args/check.uncheck.favorite.args';
 import { FavoriteResponse } from './dto/responses/favorite.res';
+import { UserRoleType } from '@prisma/client';
 
 @Resolver(() => FavoriteType)
 @UseFilters(new GlobalExceptionFilter())
 export class FavoritesResolver {
   constructor(private readonly favoritesService: FavoritesService) {}
 
-  @Auth('CLIENT')
+  @Auth(UserRoleType.CLIENT)
   @Mutation(() => FavoriteResponse)
   async checkOrUncheckAsFavorite(
     @Args('data') data: CheckUncheckFavoriteArgs,
@@ -24,7 +25,7 @@ export class FavoritesResolver {
     );
   }
 
-  @Auth('CLIENT')
+  @Auth(UserRoleType.CLIENT)
   @Query(() => [FavoriteType])
   async getFavorites(
     @Context('request') { user }: { user: { id: string } },

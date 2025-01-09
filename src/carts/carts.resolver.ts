@@ -17,13 +17,14 @@ import { RemoveProductFromCartArgs } from './dto/args/remove.product.from.cart.a
 import { RemoveProductFromCartRes } from './dto/response/remove.product.from.cart.res';
 import { CartType } from './types/cart.type';
 import { CartItemType } from './types/cart.item.type';
+import { UserRoleType } from '@prisma/client';
 
 @Resolver(() => CartType)
 @UseFilters(new GlobalExceptionFilter())
 export class CartsResolver {
   constructor(private readonly cartsService: CartsService) {}
 
-  @Auth('CLIENT')
+  @Auth(UserRoleType.CLIENT)
   @Mutation(() => UpdateProductCartRes)
   async addOrUpdateCartProduct(
     @Args('data') data: AddOrUpdateProductCartArgs,
@@ -33,7 +34,7 @@ export class CartsResolver {
     return this.cartsService.addProductToCart(userId, data);
   }
 
-  @Auth('CLIENT')
+  @Auth(UserRoleType.CLIENT)
   @Mutation(() => RemoveProductFromCartRes)
   async removeProductFromCart(
     @Args('data') data: RemoveProductFromCartArgs,
@@ -43,7 +44,7 @@ export class CartsResolver {
     return this.cartsService.deleteProductFromCart(userId, data);
   }
 
-  @Auth('CLIENT')
+  @Auth(UserRoleType.CLIENT)
   @Query(() => CartType)
   async getCarts(@Context('request') req: any): Promise<CartType> {
     const userId = req.user.id;

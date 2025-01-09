@@ -21,21 +21,21 @@ import { GetProductsRes } from './dto/responses/get.products.res';
 import { ProductType } from './types/product.type';
 import { Categories } from '../categories/models/categories.model';
 import { ProductImagesType } from './types/product.images.type';
+import { UserRoleType } from '@prisma/client';
 
+@UseFilters(new GlobalExceptionFilter())
 @Resolver(() => ProductType)
 export class ProductsResolver {
   constructor(private readonly productService: ProductsService) {}
 
-  @Auth('MANAGER')
+  @Auth(UserRoleType.MANAGER)
   @Mutation(() => AddProductRes)
-  @UseFilters(new GlobalExceptionFilter())
   async addProduct(@Args('data') data: AddProductArgs): Promise<AddProductRes> {
     return this.productService.createProduct(data);
   }
 
-  @Auth('MANAGER')
+  @Auth(UserRoleType.MANAGER)
   @Mutation(() => UpdateProductRes)
-  @UseFilters(new GlobalExceptionFilter())
   async updateProduct(
     @Args('id') id: string,
     @Args('data') data: UpdateProductArgs,
@@ -43,16 +43,14 @@ export class ProductsResolver {
     return this.productService.editProductData(id, data);
   }
 
-  @Auth('MANAGER')
+  @Auth(UserRoleType.MANAGER)
   @Mutation(() => RemoveProductRes)
-  @UseFilters(new GlobalExceptionFilter())
   async removeProduct(@Args('id') id: string): Promise<RemoveProductRes> {
     return this.productService.removeProduct(id);
   }
 
-  @Auth('MANAGER')
+  @Auth(UserRoleType.MANAGER)
   @Mutation(() => UpdateProductRes)
-  @UseFilters(new GlobalExceptionFilter())
   async updateProductCategories(
     @Args('data') data: UpdateProductCategoriesArgs,
   ): Promise<UpdateProductRes> {
@@ -60,13 +58,11 @@ export class ProductsResolver {
   }
 
   @Query(() => ProductType)
-  @UseFilters(new GlobalExceptionFilter())
   async getProductById(@Args('id') id: string): Promise<ProductType> {
     return this.productService.getProductById(id);
   }
 
   @Query(() => GetProductsRes)
-  @UseFilters(new GlobalExceptionFilter())
   async getProductsPagination(
     @Args('data') data: GetProductsArgs,
   ): Promise<GetProductsRes> {

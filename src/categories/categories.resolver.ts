@@ -8,13 +8,14 @@ import { DeleteCategoryRes } from './dto/responses/delete.category.res';
 import { AddCategoryRes } from './dto/responses/create.category.res';
 import { GlobalExceptionFilter } from '../../utils/exception/GlobalExceptionFilter';
 import { UseFilters } from '@nestjs/common';
+import { UserRoleType } from '@prisma/client';
 
+@UseFilters(new GlobalExceptionFilter())
 @Resolver()
 export class CategoriesResolver {
   constructor(private readonly categoriesService: CategoriesService) {}
 
-  @Auth('MANAGER')
-  @UseFilters(new GlobalExceptionFilter())
+  @Auth(UserRoleType.MANAGER)
   @Mutation(() => AddCategoryRes)
   async addCategory(
     @Args('data') data: AddCategoryReq,
@@ -23,8 +24,7 @@ export class CategoriesResolver {
     return this.categoriesService.createCategory(categoryName);
   }
 
-  @Auth('MANAGER')
-  @UseFilters(new GlobalExceptionFilter())
+  @Auth(UserRoleType.MANAGER)
   @Mutation(() => DeleteCategoryRes)
   async deleteCategory(
     @Args('data') data: DeleteCategoryReq,
@@ -32,8 +32,7 @@ export class CategoriesResolver {
     return await this.categoriesService.removeCategory(data.id);
   }
 
-  @Auth('MANAGER', 'CLIENT')
-  @UseFilters(new GlobalExceptionFilter())
+  @Auth(UserRoleType.MANAGER, UserRoleType.CLIENT)
   @Query(() => [Categories])
   async getCategories(): Promise<Categories[]> {
     return this.categoriesService.getAllCategories();

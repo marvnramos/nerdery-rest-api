@@ -10,13 +10,14 @@ import { OrderDetailType } from './types/order.detail.type';
 import { PaginatedOrdersType } from './dto/responses/orders.pagination.type.res';
 import { GetOrderArgs } from './dto/args/get.order.args';
 import { OrderType } from './types/order.type';
+import { UserRoleType } from '@prisma/client';
 
 @Resolver(() => OrderType)
 @UseFilters(new GlobalExceptionFilter())
 export class OrdersResolver {
   constructor(private readonly orderService: OrdersService) {}
 
-  @Auth('CLIENT')
+  @Auth(UserRoleType.CLIENT)
   @Mutation(() => AddOrderRes)
   async addOrder(
     @Args('data') data: AddOrderArgs,
@@ -25,13 +26,13 @@ export class OrdersResolver {
     return this.orderService.addOrder(user.id, data);
   }
 
-  @Auth('CLIENT', 'MANAGER')
+  @Auth(UserRoleType.CLIENT, UserRoleType.MANAGER)
   @Query(() => OrderType)
   getOrderById(@Args('data') args: GetOrderArgs, @Context('request') req: any) {
     return this.orderService.getOrderById(args.orderId, req.user);
   }
 
-  @Auth('CLIENT', 'MANAGER')
+  @Auth(UserRoleType.CLIENT, UserRoleType.MANAGER)
   @Query(() => PaginatedOrdersType)
   async getPaginatedOrders(
     @Args('data') args: GetOrdersArgs,
