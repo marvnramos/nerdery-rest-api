@@ -1,9 +1,9 @@
 import { RolesGuard } from './roles.guard';
 import { Reflector } from '@nestjs/core';
 import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
-import { extractRequestFromContext } from '../../../utils/handle.context.util';
+import { extractRequestFromContext } from '../../../utils/handler.context/handle.context.util';
 
-jest.mock('../../../utils/handle.context.util', () => ({
+jest.mock('../../../utils/handler.context/handle.context.util', () => ({
   extractRequestFromContext: jest.fn(),
 }));
 
