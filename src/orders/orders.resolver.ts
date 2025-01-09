@@ -2,7 +2,7 @@ import { Args, Context, Mutation, Query, ResolveField, Resolver } from '@nestjs/
 import { OrdersService } from './orders.service';
 import { Auth } from '../auth/decorators/auth.role.decorator';
 import { UseFilters } from '@nestjs/common';
-import { GlobalExceptionFilter } from '../utils/exception/GlobalExceptionFilter';
+import { GlobalExceptionFilter } from '../../utils/exception/GlobalExceptionFilter';
 import { AddOrderRes } from './dto/responses/add.order.res';
 import { AddOrderArgs } from './dto/args/add.order.args';
 import { GetOrdersArgs } from './dto/args/get.orders.args';
