@@ -2,10 +2,8 @@ import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { join } from 'path';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { EnvsConfigModule } from './config/envs.config.module';
-import { EnvsConfigService } from './config/envs.config.service';
-import { DataLoaderModule } from './data.loader/data.loader.module';
-import { DataLoaderService } from './data.loader/data.loader.service';
+import { EnvsConfigModule } from '../utils/config/envs.config.module';
+import { EnvsConfigService } from '../utils/config/envs.config.service';
 
 @Module({
   imports: [

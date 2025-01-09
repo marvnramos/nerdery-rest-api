@@ -16,7 +16,7 @@ import { UsersService } from '../users/users.service';
 import { ProductsService } from '../products/products.service';
 import { MailerService } from '@nestjs-modules/mailer';
 import { VerificationTokenService } from '../verification.token/verification.token.service';
-import { EnvsConfigService } from '../config/envs.config.service';
+import { EnvsConfigService } from '../../utils/config/envs.config.service';
 
 const mockStripeInstance = {
   paymentIntents: {

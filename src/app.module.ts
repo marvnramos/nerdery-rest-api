@@ -24,8 +24,8 @@ import {
   ThrottlerModuleOptions,
 } from '@nestjs/throttler';
 import { ThrottlerBasedOnContextGuard } from '../utils/guard/throttler.context.guard.util';
-import { EnvsConfigService } from './config/envs.config.service';
-import { EnvsConfigModule } from './config/envs.config.module';
+import { EnvsConfigService } from '../utils/config/envs.config.service';
+import { EnvsConfigModule } from '../utils/config/envs.config.module';
 
 @Module({
   imports: [

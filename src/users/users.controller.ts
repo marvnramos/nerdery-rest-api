@@ -23,7 +23,7 @@ import { Response } from 'express';
 import { ResetPasswordReqDto } from './dto/requests/reset.password.req.dto';
 import { VerificationTokenService } from '../verification.token/verification.token.service';
 import { seconds, Throttle } from '@nestjs/throttler';
-import { EnvsConfigService } from '../config/envs.config.service';
+import { EnvsConfigService } from '../../utils/config/envs.config.service';
 
 @Controller('users')
 export class UsersController {

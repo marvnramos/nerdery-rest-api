@@ -4,7 +4,7 @@ import { PaymentsService } from './payments.service';
 import { PrismaModule } from '../prisma/prisma.module';
 import { OrdersModule } from 'src/orders/orders.module';
 import { MailModule } from '../mailer/mail.module';
-import { EnvsConfigModule } from '../config/envs.config.module';
+import { EnvsConfigModule } from '../../utils/config/envs.config.module';
 
 @Module({
   imports: [EnvsConfigModule, PrismaModule, OrdersModule, MailModule],

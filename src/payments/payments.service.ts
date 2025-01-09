@@ -12,7 +12,7 @@ import { UserRoleType } from '@prisma/client';
 import { MailService } from '../mailer/mail.service';
 import { EmailCommand } from '../mailer/dto/email.command';
 import { Request, Response } from 'express';
-import { EnvsConfigService } from '../config/envs.config.service';
+import { EnvsConfigService } from '../../utils/config/envs.config.service';
 import { mapResultToIds } from '../../utils/index.util';
 import { PaymentDetail } from './types/payment.detail.type';
 

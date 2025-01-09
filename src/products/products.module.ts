@@ -4,7 +4,7 @@ import { ProductsResolver } from './products.resolver';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { ProductsController } from './products.controller';
 import { CloudinaryModule } from '../../utils/cloudinary/cloudinary.module';
-import { EnvsConfigModule } from '../config/envs.config.module';
+import { EnvsConfigModule } from '../../utils/config/envs.config.module';
 
 @Module({
   imports: [PrismaModule, CloudinaryModule, EnvsConfigModule],

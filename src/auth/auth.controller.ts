@@ -6,7 +6,7 @@ import { UsersService } from 'src/users/users.service';
 import { SignInReqDto } from './dto/request/sign.in.req.dto';
 import { AuthLocal } from './decorators/auth.local.decorator';
 import { Auth } from './decorators/auth.role.decorator';
-import { EnvsConfigService } from 'src/config/envs.config.service';
+import { EnvsConfigService } from 'utils/config/envs.config.service';
 import { UserRoleType } from '@prisma/client';
 
 @Controller('auth')

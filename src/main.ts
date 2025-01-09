@@ -8,7 +8,7 @@ import { GlobalExceptionFilter } from '../utils/exception/GlobalExceptionFilter'
 import * as process from 'node:process';
 import { ContentSecurityPolicyMiddleware } from '../utils/middleware/csp.middleware';
 import * as bodyParser from 'body-parser';
-import { EnvsConfigService } from './config/envs.config.service';
+import { EnvsConfigService } from '../utils/config/envs.config.service';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);

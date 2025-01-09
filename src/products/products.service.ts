@@ -27,7 +27,7 @@ import { ProductType } from './types/product.type';
 import { UpdateProductImagesArgs } from './dto/args/update.product.images.args';
 import { AddProductRes } from './dto/responses/create.product.res';
 import { RemoveProductRes } from './dto/responses/remove.product.res';
-import { EnvsConfigService } from '../config/envs.config.service';
+import { EnvsConfigService } from '../../utils/config/envs.config.service';
 
 @Injectable()
 export class ProductsService {
