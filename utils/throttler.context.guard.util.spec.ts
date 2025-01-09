@@ -1,6 +1,6 @@
 import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
-import { ThrottlerBasedOnContextGuard } from './ThrottlerBaseOnContextGuard';
+import { ThrottlerBasedOnContextGuard } from './throttler.context.guard.util';
 import { ThrottlerModuleOptions, ThrottlerStorage } from '@nestjs/throttler';
 import { Reflector } from '@nestjs/core';
 

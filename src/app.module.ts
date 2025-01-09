@@ -23,7 +23,7 @@ import {
   seconds,
   ThrottlerModuleOptions,
 } from '@nestjs/throttler';
-import { ThrottlerBasedOnContextGuard } from '../utils/ThrottlerBaseOnContextGuard';
+import { ThrottlerBasedOnContextGuard } from '../utils/throttler.context.guard.util';
 import { EnvsConfigService } from './config/envs.config.service';
 import { EnvsConfigModule } from './config/envs.config.module';
 
