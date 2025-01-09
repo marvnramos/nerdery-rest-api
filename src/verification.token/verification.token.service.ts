@@ -1,7 +1,7 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { VerificationToken, Prisma } from '@prisma/client';
-import { encodeBase64, decodeBase64 } from '../../utils/tools';
+import { encodeBase64, decodeBase64 } from '../../utils/index.util';
 
 @Injectable()
 export class VerificationTokenService {
