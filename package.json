@@ -108,6 +108,9 @@
     "coverageDirectory": "../coverage",
     "coveragePathIgnorePatterns": [
       "<rootDir>/.*\\.module\\.ts$",
+      "<rootDir>/.*\\main\\.ts$",
+      "<rootDir>/.*\\.config\\.module\\.ts$",
+      "<rootDir>/.*\\.config\\.service\\.ts$",
       "<rootDir>/.*\\.controller\\.ts$",
       "<rootDir>/.*\\.args\\.ts$",
       "<rootDir>/.*\\.res\\.ts$",
