@@ -1,5 +1,5 @@
 import { Field, ObjectType } from '@nestjs/graphql';
-import { IRemoveRecordRes } from '../../../utils/interfaces/IRemoveRecordRes';
+import { IRemoveRecordRes } from '../../../../utils/interfaces/IRemoveRecordRes';
 import { Expose } from 'class-transformer';
 
 @ObjectType({

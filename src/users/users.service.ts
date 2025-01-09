@@ -3,7 +3,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from '../utils/prisma/prisma.service';
+import { PrismaService } from '../../utils/prisma/prisma.service';
 import { Prisma, User, UserRole } from '@prisma/client';
 import { VerificationTokenService } from '../verification.token/verification.token.service';
 import * as bcrypt from 'bcrypt';

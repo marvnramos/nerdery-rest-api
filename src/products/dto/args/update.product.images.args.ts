@@ -1,6 +1,6 @@
 import { IsArray, IsEnum, IsOptional, IsString } from 'class-validator';
 import { Expose } from 'class-transformer';
-import { OperationType } from '../../../utils/enums/operation.enum';
+import { OperationType } from '../../../../utils/enums/operation.enum';
 
 export class UpdateProductImagesArgs {
   @IsEnum(OperationType)

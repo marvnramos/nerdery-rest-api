@@ -1,5 +1,5 @@
 import { UsersService } from './users.service';
-import { PrismaService } from '../utils/prisma/prisma.service';
+import { PrismaService } from '../../utils/prisma/prisma.service';
 import { VerificationTokenService } from '../verification.token/verification.token.service';
 import {
   InternalServerErrorException,
