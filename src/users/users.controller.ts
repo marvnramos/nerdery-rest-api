@@ -15,7 +15,7 @@ import { UsersService } from './users.service';
 import { SignupReqDto } from './dto/requests/signup.req.dto';
 import { SignUpResDto } from './dto/responses/signup.res.dto';
 import { randomUUID } from 'crypto';
-import { MailService } from '../utils/mailer/mail.service';
+import { MailService } from '../mailer/mail.service';
 import { getExpirationTimestamp } from '../utils/tools';
 import { ForgotPasswordReqDto } from './dto/requests/forgot.password.req.dto';
 import { ResetPasswordResDto } from './dto/responses/reset.password.res.dto';
