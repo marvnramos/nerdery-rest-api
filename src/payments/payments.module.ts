@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { PaymentsController } from './payments.controller';
 import { PaymentsService } from './payments.service';
-import { PrismaModule } from '../../utils/prisma/prisma.module';
+import { PrismaModule } from '../prisma/prisma.module';
 import { OrdersModule } from 'src/orders/orders.module';
 import { MailModule } from '../mailer/mail.module';
 import { EnvsConfigModule } from '../config/envs.config.module';

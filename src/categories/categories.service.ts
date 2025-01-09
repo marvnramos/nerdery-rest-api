@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Category } from '@prisma/client';
-import { PrismaService } from '../../utils/prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { plainToInstance } from 'class-transformer';
 import { Categories } from './models/categories.model';
 import { DeleteCategoryRes } from './dto/responses/delete.category.res';

@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { OrdersService } from './orders.service';
-import { PrismaService } from '../../utils/prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { CartsService } from '../carts/carts.service';
 import { UsersService } from '../users/users.service';
 import { ProductsService } from '../products/products.service';

@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { FavoritesService } from './favorites.service';
-import { PrismaService } from '../../utils/prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { ProductsService } from '../products/products.service';
 import { plainToInstance } from 'class-transformer';
 import { FavoriteServiceMocks } from '../../test/mocks/favorite.mocks';

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../utils/prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { plainToInstance } from 'class-transformer';
 import { AddFavoriteRes } from './dto/responses/add.favorite.res';
 import { Favorite } from '@prisma/client';

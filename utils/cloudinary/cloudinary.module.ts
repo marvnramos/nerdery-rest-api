@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ProductImageProvider } from './cloudinary.provider';
-import { PrismaModule } from '../prisma/prisma.module';
+import { PrismaModule } from '../../src/prisma/prisma.module';
 
 @Module({
   imports: [PrismaModule],

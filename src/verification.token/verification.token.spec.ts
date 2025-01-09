@@ -1,4 +1,4 @@
-import { PrismaService } from '../../utils/prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { VerificationTokenService } from './verification.token.service';
 import { Test, TestingModule } from '@nestjs/testing';
 import { InternalServerErrorException } from '@nestjs/common';
