@@ -4,9 +4,9 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import helmet from 'helmet';
-import { GlobalExceptionFilter } from './utils/exception/GlobalExceptionFilter';
+import { GlobalExceptionFilter } from '../utils/exception/GlobalExceptionFilter';
 import * as process from 'node:process';
-import { ContentSecurityPolicyMiddleware } from './utils/middleware/csp.middleware';
+import { ContentSecurityPolicyMiddleware } from '../utils/middleware/csp.middleware';
 import * as bodyParser from 'body-parser';
 import { EnvsConfigService } from './config/envs.config.service';
 

@@ -1,5 +1,5 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
-import { IAddRecordRes } from '../../../utils/interfaces/IAddRecordRes';
+import { IAddRecordRes } from '../../../../utils/interfaces/IAddRecordRes';
 import { Expose } from 'class-transformer';
 
 @ObjectType({

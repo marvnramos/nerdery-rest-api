@@ -1,5 +1,5 @@
 import { CategoriesService } from './categories.service';
-import { PrismaService } from '../utils/prisma/prisma.service';
+import { PrismaService } from '../../utils/prisma/prisma.service';
 import { ProductsService } from '../products/products.service';
 import { Test, TestingModule } from '@nestjs/testing';
 import {

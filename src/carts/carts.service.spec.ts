@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CartsService } from './carts.service';
-import { PrismaService } from '../utils/prisma/prisma.service';
+import { PrismaService } from '../../utils/prisma/prisma.service';
 import { ProductsService } from '../products/products.service';
 import { NotAcceptableException, NotFoundException } from '@nestjs/common';
 import { ProductServiceMocks } from '../../test/mocks/product.mocks';

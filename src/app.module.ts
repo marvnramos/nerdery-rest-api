@@ -4,8 +4,8 @@ import { AuthModule } from './auth/auth.module';
 import { GraphqlModule } from './graphql.module';
 import { UsersController } from './users/users.controller';
 import { UsersModule } from './users/users.module';
-import { PrismaService } from './utils/prisma/prisma.service';
-import { PrismaModule } from './utils/prisma/prisma.module';
+import { PrismaService } from '../utils/prisma/prisma.service';
+import { PrismaModule } from '../utils/prisma/prisma.module';
 import { MailService } from './mailer/mail.service';
 import { MailModule } from './mailer/mail.module';
 import { PaymentsModule } from './payments/payments.module';
@@ -15,15 +15,15 @@ import { CartsModule } from './carts/carts.module';
 import { ProductsModule } from './products/products.module';
 import { VerificationTokenModule } from './verification.token/verification.token.module';
 import { CategoriesModule } from './categories/categories.module';
-import { CloudinaryModule } from './utils/cloudinary/cloudinary.module';
+import { CloudinaryModule } from '../utils/cloudinary/cloudinary.module';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
-import { GlobalExceptionFilter } from './utils/exception/GlobalExceptionFilter';
+import { GlobalExceptionFilter } from '../utils/exception/GlobalExceptionFilter';
 import {
   ThrottlerModule,
   seconds,
   ThrottlerModuleOptions,
 } from '@nestjs/throttler';
-import { ThrottlerBasedOnContextGuard } from './utils/ThrottlerBaseOnContextGuard';
+import { ThrottlerBasedOnContextGuard } from '../utils/ThrottlerBaseOnContextGuard';
 import { EnvsConfigService } from './config/envs.config.service';
 import { EnvsConfigModule } from './config/envs.config.module';
 

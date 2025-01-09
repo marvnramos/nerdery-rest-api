@@ -1,7 +1,7 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Expose } from 'class-transformer';
 import { ProductType } from 'src/products/types/product.type';
-import { PageInfoType } from 'src/utils/pagination/pageinfo.type';
+import { PageInfoType } from 'utils/pagination/pageinfo.type';
 import { ProductEdgeType } from 'src/products/types/product.edge.type';
 
 @ObjectType()

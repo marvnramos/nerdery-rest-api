@@ -4,7 +4,7 @@ import {
   NotAcceptableException,
   NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from '../utils/prisma/prisma.service';
+import { PrismaService } from '../../utils/prisma/prisma.service';
 import { AddOrderArgs } from './dto/args/add.order.args';
 import { AddOrderRes } from './dto/responses/add.order.res';
 import { CartsService } from '../carts/carts.service';
@@ -12,7 +12,7 @@ import { UsersService } from '../users/users.service';
 import { ProductsService } from '../products/products.service';
 import { plainToInstance } from 'class-transformer';
 import { GetOrdersArgs } from './dto/args/get.orders.args';
-import { decodeBase64, encodeBase64, mapResultToIds } from '../utils/tools';
+import { decodeBase64, encodeBase64, mapResultToIds } from '../../utils/tools';
 import { OrderType } from './types/order.type';
 import { PaginatedOrdersType } from './dto/responses/orders.pagination.type.res';
 import { Prisma, UserRoleType } from '@prisma/client';

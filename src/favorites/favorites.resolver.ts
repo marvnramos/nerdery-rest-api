@@ -1,6 +1,6 @@
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UseFilters } from '@nestjs/common';
-import { GlobalExceptionFilter } from '../utils/exception/GlobalExceptionFilter';
+import { GlobalExceptionFilter } from '../../utils/exception/GlobalExceptionFilter';
 import { FavoritesService } from './favorites.service';
 import { Auth } from '../auth/decorators/auth.role.decorator';
 import { FavoriteType } from './types/favorite.type';
