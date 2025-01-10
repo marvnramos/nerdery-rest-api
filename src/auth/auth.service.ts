@@ -18,6 +18,9 @@ export class AuthService {
 
   async login(req: SignInReqDto, res: Response): Promise<void> {
     const user = await this.usersService.findByEmail(req.email);
+    if (!user) {
+      throw new Error('Invalid credentials');
+    }
     const response: SignInResDto = await this.getAccessToken(user);
 
     res.cookie('access_token', response.access_token, {
