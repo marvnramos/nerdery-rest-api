@@ -12,7 +12,11 @@ import { UsersService } from '../users/users.service';
 import { ProductsService } from '../products/products.service';
 import { plainToInstance } from 'class-transformer';
 import { GetOrdersArgs } from './dto/args/get.orders.args';
-import { decodeBase64, encodeBase64, mapResultToIds } from '../../utils/index.util';
+import {
+  decodeBase64,
+  encodeBase64,
+  mapResultToIds,
+} from '../../utils/index.util';
 import { OrderType } from './types/order.type';
 import { PaginatedOrdersType } from './dto/responses/orders.pagination.type.res';
 import { Prisma, UserRoleType } from '@prisma/client';
