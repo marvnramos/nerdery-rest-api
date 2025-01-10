@@ -214,7 +214,7 @@ describe('UsersService', () => {
         .spyOn(prismaService.verificationToken, 'update')
         .mockResolvedValue({} as any);
 
-      const result = await service.resetPassword(
+      const result = await service.updatePassword(
         'validToken',
         'newHashedPassword',
       );
@@ -237,7 +237,7 @@ describe('UsersService', () => {
         .spyOn(verificationTokenService, 'findVerificationToken')
         .mockResolvedValue(null);
 
-      const result = await service.resetPassword(
+      const result = await service.updatePassword(
         'invalidToken',
         'newHashedPassword',
       );
@@ -250,7 +250,7 @@ describe('UsersService', () => {
         .mockRejectedValue(new Error('Failed to reset password'));
 
       await expect(
-        service.resetPassword('validToken', 'newHashedPassword'),
+        service.updatePassword('validToken', 'newHashedPassword'),
       ).rejects.toThrow(InternalServerErrorException);
     });
   });
