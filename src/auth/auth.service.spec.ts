@@ -88,7 +88,7 @@ describe('AuthService', () => {
         .spyOn(jwtService, 'sign')
         .mockReturnValue(AuthServiceMocks.accessToken);
 
-      const result = await authService.login(AuthServiceMocks.user);
+      const result = await authService.getAccessToken(AuthServiceMocks.user);
       expect(result).toEqual({ accessToken: AuthServiceMocks.accessToken });
     });
   });
