@@ -1,15 +1,18 @@
-import { UserRole } from '@prisma/client';
+import { UserRole, UserRoleType } from '@prisma/client';
+import { faker } from '@faker-js/faker/locale/ar';
 
 export class AuthServiceMocks {
+  static service = {};
+
   static user = {
-    id: '1',
-    email: 'test@example.com',
-    password: 'hashedPassword',
-    first_name: 'John',
-    last_name: 'Doe',
+    id: faker.string.uuid(),
+    email: faker.internet.exampleEmail({ firstName: 'test' }),
+    password: faker.internet.password(),
+    first_name: faker.person.firstName(),
+    last_name: faker.person.lastName(),
     is_email_verified: true,
     role_id: 1,
-    address: '123 Test Street',
+    address: faker.location.streetAddress(),
     created_at: new Date(),
     updated_at: new Date(),
   };
@@ -18,9 +21,8 @@ export class AuthServiceMocks {
     id: 1,
     created_at: new Date(),
     updated_at: new Date(),
-    role: 'CLIENT',
+    role: UserRoleType.CLIENT,
   };
 
-  static accessToken =
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
+  static access_token = faker.internet.jwt();
 }
