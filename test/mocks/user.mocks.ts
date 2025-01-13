@@ -34,6 +34,8 @@ export class UserServiceMocks {
     email: 'test@example.com',
   };
 
+  static email = faker.internet.exampleEmail({ firstName: 'test' });
+
   static createUserMock = {
     id: faker.string.uuid(),
     first_name: faker.person.firstName(),
