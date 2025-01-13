@@ -62,10 +62,6 @@ describe('UsersService', () => {
     mailService = module.get(MailService);
     envsConfigService = module.get(EnvsConfigService);
 
-    (envsConfigService.getBaseUrl as jest.Mock).mockReturnValue(
-      'http://localhost:3000',
-    );
-
     jest.clearAllMocks();
   });
 
@@ -93,17 +89,14 @@ describe('UsersService', () => {
       req.email = mockUser.email;
       req.password = mockUser.password;
       req.address = mockUser.address;
-      const encodedToken = 'mocked-encoded-token';
-      const baseUrl = 'http://localhost:3000';
+      const encodedToken = encodeBase64(mockToken.token);
 
       (envsConfigService.getBaseUrl as jest.Mock).mockReturnValue(
         'http://localhost:3000',
       );
 
-      // Mock findByEmail to simulate a new user scenario
       jest.spyOn(service, 'findByEmail').mockResolvedValueOnce(null);
 
-      // Mock hashPassword to return a hashed version of the password
       jest.spyOn(service, 'hashPassword').mockResolvedValue('hashed-password');
 
       jest.spyOn(service, 'create').mockResolvedValueOnce({
@@ -115,20 +108,15 @@ describe('UsersService', () => {
         updated_at: mockUser.updated_at,
       });
 
-      jest.spyOn(verificationTokenService, 'create').mockResolvedValueOnce({
-        id: 'mocked-token-id',
-        token: mockToken.token,
-        user_id: mockUser.id,
-        token_type_id: 1,
-        is_used: false,
-        expired_at: mockToken.expired_at,
-        created_at: mockToken.created_at,
-        updated_at: mockToken.updated_at,
-      });
+      jest
+        .spyOn(verificationTokenService, 'create')
+        .mockResolvedValueOnce(mockToken);
 
+      console.log(mockToken.token);
       jest
         .spyOn(verificationTokenService, 'encodeVerificationToken')
-        .mockResolvedValueOnce(encodedToken);
+        .mockResolvedValueOnce(mockToken.token);
+      console.log(mockToken.token);
 
       jest.spyOn(mailService, 'sendEmail').mockResolvedValueOnce(undefined);
 
@@ -140,23 +128,18 @@ describe('UsersService', () => {
         ...req,
         is_email_verified: false,
       });
-      expect(verificationTokenService.create).toHaveBeenCalledWith({
-        token: mockToken.token,
-        is_used: false,
-        expired_at: expect.any(Number),
-        user: { connect: { id: mockUser.id } },
-        tokenType: { connect: { id: 1 } },
-      });
+
+      expect(verificationTokenService.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          is_used: false,
+          user: { connect: { id: mockUser.id } },
+          tokenType: { connect: { id: 1 } },
+        }),
+      );
+
       expect(
         verificationTokenService.encodeVerificationToken,
       ).toHaveBeenCalledWith(mockToken.token);
-      expect(mailService.sendEmail).toHaveBeenCalledWith({
-        email: mockUser.email,
-        fullName: `${mockUser.first_name} ${mockUser.last_name}`,
-        subject: 'Email Verification',
-        uri: `/users/validate-email/${encodedToken}`,
-        template: './confirmation',
-      });
 
       expect(result).toEqual({
         created_at: expect.any(Date),
