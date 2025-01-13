@@ -14,6 +14,7 @@ import { EnvsConfigService } from '../../utils/config/envs.config.service';
 import { MailService } from '../mailer/mail.service';
 import { SignupReqDto } from './dto/requests/signup.req.dto';
 import { encodeBase64 } from '../../utils/encoder.util';
+import * as crypto from 'crypto';
 
 const mockPrisma = {
   user: {
@@ -28,6 +29,14 @@ const mockPrisma = {
     update: jest.fn(),
   },
 };
+
+jest.mock('crypto', () => {
+  const actualCrypto = jest.requireActual('crypto');
+  return {
+    ...actualCrypto,
+    randomUUID: jest.fn(),
+  };
+});
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -91,14 +100,14 @@ describe('UsersService', () => {
       req.address = mockUser.address;
       const encodedToken = encodeBase64(mockToken.token);
 
+      (crypto.randomUUID as jest.Mock).mockReturnValue(mockToken.token);
+
       (envsConfigService.getBaseUrl as jest.Mock).mockReturnValue(
         'http://localhost:3000',
       );
 
       jest.spyOn(service, 'findByEmail').mockResolvedValueOnce(null);
-
       jest.spyOn(service, 'hashPassword').mockResolvedValue('hashed-password');
-
       jest.spyOn(service, 'create').mockResolvedValueOnce({
         ...req,
         id: mockUser.id,
@@ -107,17 +116,12 @@ describe('UsersService', () => {
         created_at: mockToken.created_at,
         updated_at: mockUser.updated_at,
       });
-
       jest
         .spyOn(verificationTokenService, 'create')
         .mockResolvedValueOnce(mockToken);
-
-      console.log(mockToken.token);
       jest
         .spyOn(verificationTokenService, 'encodeVerificationToken')
-        .mockResolvedValueOnce(mockToken.token);
-      console.log(mockToken.token);
-
+        .mockResolvedValueOnce(encodedToken);
       jest.spyOn(mailService, 'sendEmail').mockResolvedValueOnce(undefined);
 
       const result = await service.signUp(req);
@@ -128,7 +132,6 @@ describe('UsersService', () => {
         ...req,
         is_email_verified: false,
       });
-
       expect(verificationTokenService.create).toHaveBeenCalledWith(
         expect.objectContaining({
           is_used: false,
@@ -136,7 +139,6 @@ describe('UsersService', () => {
           tokenType: { connect: { id: 1 } },
         }),
       );
-
       expect(
         verificationTokenService.encodeVerificationToken,
       ).toHaveBeenCalledWith(mockToken.token);
