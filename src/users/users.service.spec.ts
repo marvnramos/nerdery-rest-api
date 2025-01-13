@@ -2,6 +2,7 @@ import { UsersService } from './users.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { VerificationTokenService } from '../verification.token/verification.token.service';
 import {
+  BadRequestException,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
@@ -11,6 +12,8 @@ import { UserServiceMocks } from '../../test/mocks/user.mocks';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { EnvsConfigService } from '../../utils/config/envs.config.service';
 import { MailService } from '../mailer/mail.service';
+import { SignupReqDto } from './dto/requests/signup.req.dto';
+import { encodeBase64 } from '../../utils/encoder.util';
 
 const mockPrisma = {
   user: {
@@ -30,6 +33,8 @@ describe('UsersService', () => {
   let service: UsersService;
   let prismaService: typeof mockPrisma;
   let verificationTokenService: DeepMocked<VerificationTokenService>;
+  let mailService: DeepMocked<MailService>;
+  let envsConfigService: DeepMocked<EnvsConfigService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -54,8 +59,114 @@ describe('UsersService', () => {
     service = module.get(UsersService);
     prismaService = module.get(PrismaService);
     verificationTokenService = module.get(VerificationTokenService);
+    mailService = module.get(MailService);
+    envsConfigService = module.get(EnvsConfigService);
+
+    (envsConfigService.getBaseUrl as jest.Mock).mockReturnValue(
+      'http://localhost:3000',
+    );
 
     jest.clearAllMocks();
+  });
+
+  describe('signUp', () => {
+    it('should throw BadRequestException if the email already exists', async () => {
+      const message = 'Email already exists';
+      const req = new SignupReqDto();
+
+      jest
+        .spyOn(service, 'findByEmail')
+        .mockRejectedValueOnce(new BadRequestException(message));
+
+      req.email = UserServiceMocks.email;
+      await expect(service.signUp(req)).rejects.toThrow(
+        new BadRequestException(message),
+      );
+    });
+
+    it('should create a user and send an email verification', async () => {
+      const mockUser = UserServiceMocks.createUserMock;
+      const mockToken = UserServiceMocks.createToken(mockUser.id, 1);
+      const req = new SignupReqDto();
+      req.first_name = mockUser.first_name;
+      req.last_name = mockUser.last_name;
+      req.email = mockUser.email;
+      req.password = mockUser.password;
+      req.address = mockUser.address;
+      const encodedToken = 'mocked-encoded-token';
+      const baseUrl = 'http://localhost:3000';
+
+      (envsConfigService.getBaseUrl as jest.Mock).mockReturnValue(
+        'http://localhost:3000',
+      );
+
+      // Mock findByEmail to simulate a new user scenario
+      jest.spyOn(service, 'findByEmail').mockResolvedValueOnce(null);
+
+      // Mock hashPassword to return a hashed version of the password
+      jest.spyOn(service, 'hashPassword').mockResolvedValue('hashed-password');
+
+      jest.spyOn(service, 'create').mockResolvedValueOnce({
+        ...req,
+        id: mockUser.id,
+        is_email_verified: false,
+        role_id: mockUser.role_id,
+        created_at: mockToken.created_at,
+        updated_at: mockUser.updated_at,
+      });
+
+      jest.spyOn(verificationTokenService, 'create').mockResolvedValueOnce({
+        id: 'mocked-token-id',
+        token: mockToken.token,
+        user_id: mockUser.id,
+        token_type_id: 1,
+        is_used: false,
+        expired_at: mockToken.expired_at,
+        created_at: mockToken.created_at,
+        updated_at: mockToken.updated_at,
+      });
+
+      jest
+        .spyOn(verificationTokenService, 'encodeVerificationToken')
+        .mockResolvedValueOnce(encodedToken);
+
+      jest.spyOn(mailService, 'sendEmail').mockResolvedValueOnce(undefined);
+
+      const result = await service.signUp(req);
+
+      expect(service.findByEmail).toHaveBeenCalledWith(mockUser.email);
+      expect(service.hashPassword).toHaveBeenCalledWith(mockUser.password);
+      expect(service.create).toHaveBeenCalledWith({
+        ...req,
+        is_email_verified: false,
+      });
+      expect(verificationTokenService.create).toHaveBeenCalledWith({
+        token: mockToken.token,
+        is_used: false,
+        expired_at: expect.any(Number),
+        user: { connect: { id: mockUser.id } },
+        tokenType: { connect: { id: 1 } },
+      });
+      expect(
+        verificationTokenService.encodeVerificationToken,
+      ).toHaveBeenCalledWith(mockToken.token);
+      expect(mailService.sendEmail).toHaveBeenCalledWith({
+        email: mockUser.email,
+        fullName: `${mockUser.first_name} ${mockUser.last_name}`,
+        subject: 'Email Verification',
+        uri: `/users/validate-email/${encodedToken}`,
+        template: './confirmation',
+      });
+
+      expect(result).toEqual({
+        created_at: expect.any(Date),
+      });
+    });
+
+    it('should throw validation errors if required fields are missing', async () => {
+      const req = new SignupReqDto();
+      await expect(service.signUp(req)).rejects.toThrow();
+    });
   });
 
   describe('create', () => {
