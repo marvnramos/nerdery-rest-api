@@ -28,7 +28,9 @@ export class UsersService {
     private readonly envsConfigService: EnvsConfigService,
   ) {}
 
-  private baseUrl = this.envsConfigService.getBaseUrl();
+  private get baseUrl(): string {
+    return this.envsConfigService.getBaseUrl();
+  }
 
   async signUp(req: SignupReqDto): Promise<SignUpResDto> {
     const existingUser = await this.findByEmail(req.email);
