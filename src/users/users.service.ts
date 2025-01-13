@@ -39,18 +39,17 @@ export class UsersService {
     req.password = await this.hashPassword(req.password);
     const userData = { ...req, is_email_verified: false };
 
-    const userPromise = this.create(userData);
+    const user = await this.create(userData);
     const token = randomUUID();
     const tokenData = {
       token,
       is_used: false,
       expired_at: getExpirationTimestamp(),
-      user: { connect: { id: (await userPromise).id } },
+      user: { connect: { id: user.id } },
       tokenType: { connect: { id: 1 } },
     };
 
-    const [user, , encodedToken] = await Promise.all([
-      userPromise,
+    const [, encodedToken] = await Promise.all([
       this.verificationTokenService.create(tokenData),
       this.verificationTokenService.encodeVerificationToken(token),
     ]);
