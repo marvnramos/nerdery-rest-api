@@ -11,28 +11,6 @@ export class UserServiceMocks {
     password: 'password123',
     is_email_verified: false,
   };
-  static userCreate = {
-    first_name: 'John',
-    last_name: 'Doe',
-    email: 'test@example.com',
-    address: '123 Main St',
-    password: expect.any(String),
-    is_email_verified: false,
-  };
-
-  static userFail = {
-    first_name: 'John',
-    last_name: 'Doe',
-    email: 'test@example.com',
-    address: '123 Main St',
-    password: 'password123',
-    is_email_verified: false,
-  };
-
-  static userFindByEmail = {
-    id: 'user123',
-    email: 'test@example.com',
-  };
 
   static email = faker.internet.exampleEmail({ firstName: 'test' });
 
@@ -66,4 +44,7 @@ export class UserServiceMocks {
     created_at: new Date(),
     updated_at: new Date(),
   });
+
+  static token = faker.string.uuid();
+  static password = faker.internet.password();
 }
