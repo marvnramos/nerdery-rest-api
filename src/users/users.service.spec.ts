@@ -16,6 +16,7 @@ import { SignupReqDto } from './dto/requests/signup.req.dto';
 import { encodeBase64 } from '../../utils/encoder.util';
 import * as crypto from 'crypto';
 import { ForgotPasswordReqDto } from './dto/requests/forgot.password.req.dto';
+import { ResetPasswordReqDto } from './dto/requests/reset.password.req.dto';
 
 const mockPrisma = {
   user: {
@@ -260,6 +261,125 @@ describe('UsersService', () => {
 
       await expect(service.forgotPassword(req)).rejects.toThrow(
         new InternalServerErrorException('Failed to send email'),
+      );
+    });
+  });
+
+  describe('resetPasswordView', () => {
+    it('should set a cookie with the token and return the nonce', () => {
+      const token = 'test-token';
+      const nonce = 'test-nonce';
+      const res = {
+        locals: { nonce },
+        cookie: jest.fn(),
+      } as any;
+
+      const result = service.resetPasswordView(token, res);
+
+      expect(res.cookie).toHaveBeenCalledWith('token', token, {
+        httpOnly: false,
+        maxAge: 900_000,
+      });
+      expect(result).toEqual({ nonce });
+    });
+
+    it('should handle missing nonce in response locals', () => {
+      const token = 'test-token';
+      const res = {
+        locals: {},
+        cookie: jest.fn(),
+      } as any;
+
+      const result = service.resetPasswordView(token, res);
+
+      expect(res.cookie).toHaveBeenCalledWith('token', token, {
+        httpOnly: false,
+        maxAge: 900_000,
+      });
+      expect(result).toEqual({ nonce: undefined });
+    });
+  });
+
+  describe('resetPassword', () => {
+    let req: ResetPasswordReqDto;
+    let mockToken: any;
+    let mockUser: any;
+
+    beforeEach(() => {
+      req = new ResetPasswordReqDto();
+      mockToken = UserServiceMocks.createToken(UserServiceMocks.uuid, 2);
+      mockUser = UserServiceMocks.createUserMock;
+    });
+
+    const setupMocks = () => {
+      verificationTokenService.decodeVerificationToken.mockResolvedValue(
+        mockToken.token,
+      );
+      jest
+        .spyOn(service, 'hashPassword')
+        .mockResolvedValue('hashedPassword123');
+      verificationTokenService.findVerificationToken.mockResolvedValue(
+        mockToken,
+      );
+      jest.spyOn(service, 'updatePassword').mockResolvedValue(true);
+      jest.spyOn(service, 'findById').mockResolvedValue(mockUser);
+      mailService.sendEmail.mockResolvedValue(undefined);
+    };
+
+    it('should reset the password and send a confirmation email when valid input is provided', async () => {
+      req.token = UserServiceMocks.token;
+      req.new_password = UserServiceMocks.password;
+
+      setupMocks();
+
+      await service.resetPassword(req);
+
+      expect(
+        verificationTokenService.decodeVerificationToken,
+      ).toHaveBeenCalledWith(req.token);
+      expect(service.hashPassword).toHaveBeenCalledWith(req.new_password);
+      expect(service.updatePassword).toHaveBeenCalledWith(
+        mockToken.token,
+        'hashedPassword123',
+      );
+      expect(
+        verificationTokenService.findVerificationToken,
+      ).toHaveBeenCalledWith(mockToken.token);
+      expect(service.findById).toHaveBeenCalledWith(mockToken.user_id);
+      expect(mailService.sendEmail).toHaveBeenCalledWith({
+        email: mockUser.email,
+        fullName: `${mockUser.first_name} ${mockUser.last_name}`,
+        subject: 'Password Reset',
+        template: './reset-password-confirmation',
+      });
+    });
+
+    it('should throw BadRequestException if the token is invalid or already used', async () => {
+      req.token = 'invalid-token';
+      req.new_password = 'newPassword123';
+
+      verificationTokenService.decodeVerificationToken.mockResolvedValue(
+        'invalid-token',
+      );
+      jest.spyOn(service, 'updatePassword').mockResolvedValue(false);
+      jest.spyOn(service, 'findById').mockResolvedValue(null);
+
+      await expect(service.resetPassword(req)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('should throw InternalServerErrorException if an error occurs during email sending', async () => {
+      req.token = 'valid-token';
+      req.new_password = 'newPassword123';
+
+      setupMocks();
+      mailService.sendEmail.mockRejectedValue(
+        new Error('Failed to send email'),
+      );
+
+      await expect(service.resetPassword(req)).rejects.toThrow(
+        InternalServerErrorException,
       );
     });
   });
