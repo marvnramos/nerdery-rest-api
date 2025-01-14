@@ -15,6 +15,7 @@ import { MailService } from '../mailer/mail.service';
 import { SignupReqDto } from './dto/requests/signup.req.dto';
 import { encodeBase64 } from '../../utils/encoder.util';
 import * as crypto from 'crypto';
+import { ForgotPasswordReqDto } from './dto/requests/forgot.password.req.dto';
 
 const mockPrisma = {
   user: {
@@ -151,6 +152,115 @@ describe('UsersService', () => {
     it('should throw validation errors if required fields are missing', async () => {
       const req = new SignupReqDto();
       await expect(service.signUp(req)).rejects.toThrow();
+    });
+  });
+
+  describe('validateEmail', () => {
+    it('should verify the email and mark the token as used when valid input is provided', async () => {
+      const mockToken = UserServiceMocks.createToken(UserServiceMocks.uuid, 1);
+      verificationTokenService.decodeVerificationToken.mockResolvedValue(
+        mockToken.token,
+      );
+      jest.spyOn(service, 'verifyEmail').mockResolvedValue(true);
+
+      await service.validateEmail(mockToken.token);
+
+      expect(
+        verificationTokenService.decodeVerificationToken,
+      ).toHaveBeenCalledWith(mockToken.token);
+      expect(service.verifyEmail).toHaveBeenCalledWith(mockToken.token);
+    });
+
+    it('should throw BadRequestException if the token is invalid or already used', async () => {
+      const invalidToken = UserServiceMocks.uuid;
+      verificationTokenService.decodeVerificationToken.mockResolvedValue(
+        invalidToken,
+      );
+      jest.spyOn(service, 'verifyEmail').mockResolvedValue(false);
+
+      await expect(service.validateEmail(invalidToken)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+  });
+
+  describe('forgotPassword', () => {
+    it('should throw BadRequestException if the email is not found', async () => {
+      const req = new ForgotPasswordReqDto();
+      req.email = UserServiceMocks.email;
+
+      jest.spyOn(service, 'findByEmail').mockResolvedValue(null);
+
+      await expect(service.forgotPassword(req)).rejects.toThrow(
+        new BadRequestException('Email not found'),
+      );
+    });
+
+    it('should send a reset password email if the email exists', async () => {
+      const mockUser = UserServiceMocks.createUserMock;
+      const req = new ForgotPasswordReqDto();
+      req.email = mockUser.email;
+      const mockToken = UserServiceMocks.createToken(mockUser.id, 2);
+      const encodedToken = encodeBase64(mockToken.token);
+
+      (crypto.randomUUID as jest.Mock).mockReturnValue(mockToken.token);
+
+      (envsConfigService.getBaseUrl as jest.Mock).mockReturnValue(
+        'http://localhost:3000',
+      );
+
+      jest.spyOn(service, 'findByEmail').mockResolvedValue(mockUser);
+
+      jest
+        .spyOn(verificationTokenService, 'encodeVerificationToken')
+        .mockResolvedValue(encodedToken);
+
+      jest
+        .spyOn(verificationTokenService, 'create')
+        .mockResolvedValue(mockToken);
+
+      jest.spyOn(mailService, 'sendEmail').mockResolvedValue(undefined);
+
+      const result = await service.forgotPassword(req);
+
+      expect(service.findByEmail).toHaveBeenCalledWith(mockUser.email);
+      expect(verificationTokenService.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          token: mockToken.token,
+          user: { connect: { id: mockUser.id } },
+          tokenType: { connect: { id: 2 } },
+        }),
+      );
+
+      expect(result).toEqual({ message: 'Email sent' });
+    });
+
+    it('should throw InternalServerErrorException if an error occurs during email sending', async () => {
+      const mockUser = UserServiceMocks.createUserMock;
+      const req = new ForgotPasswordReqDto();
+      req.email = mockUser.email;
+      const mockToken = UserServiceMocks.createToken(mockUser.id, 2);
+      const encodedToken = encodeBase64(mockToken.token);
+
+      (envsConfigService.getBaseUrl as jest.Mock).mockReturnValue(
+        'http://localhost:3000',
+      );
+
+      jest.spyOn(service, 'findByEmail').mockResolvedValue(mockUser);
+
+      verificationTokenService.encodeVerificationToken.mockResolvedValue(
+        encodedToken,
+      );
+
+      verificationTokenService.create.mockResolvedValue(mockToken);
+
+      mailService.sendEmail.mockRejectedValue(
+        new Error('Failed to send email'),
+      );
+
+      await expect(service.forgotPassword(req)).rejects.toThrow(
+        new InternalServerErrorException('Failed to send email'),
+      );
     });
   });
 
