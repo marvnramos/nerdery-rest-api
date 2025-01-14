@@ -57,8 +57,9 @@ describe('CartsService', () => {
     it('should add a product to the cart if sufficient stock is available', async () => {
       const userId = faker.string.uuid();
       const cart = CartServiceMocks.createCart(userId);
+      const product = ProductServiceMocks.createProduct();
       const mockArgs = {
-        productId: faker.string.uuid(),
+        productId: product.id,
         quantity: 1,
         cartId: cart.id,
       };
@@ -68,12 +69,9 @@ describe('CartsService', () => {
         mockArgs.quantity,
       );
 
-      productService.findProductById.mockResolvedValue(
-        ProductServiceMocks.product,
-      );
+      productService.findProductById.mockResolvedValue(product);
 
       jest.spyOn(service, 'getOrCreateCart').mockResolvedValue(cart);
-
       jest.spyOn(service, 'upsertCartItem').mockResolvedValue(cartItem);
 
       const result = await service.addProductToCart(userId, mockArgs);
@@ -100,14 +98,13 @@ describe('CartsService', () => {
         productId: faker.string.uuid(),
         quantity: 2,
       };
+      const cart = CartServiceMocks.createCart(userId);
 
       const productWithLowStock = ProductServiceMocks.createProduct(1);
 
       productService.findProductById.mockResolvedValue(productWithLowStock);
 
-      jest
-        .spyOn(service, 'getOrCreateCart')
-        .mockResolvedValue(CartServiceMocks.cart);
+      jest.spyOn(service, 'getOrCreateCart').mockResolvedValue(cart);
 
       await expect(service.addProductToCart(userId, mockArgs)).rejects.toThrow(
         NotAcceptableException,
@@ -282,17 +279,17 @@ describe('CartsService', () => {
     const cartId = faker.string.uuid();
 
     it('should return the cart items for the cart', async () => {
-      const mockCart = CartServiceMocks.cart;
-      const mockCartItems = CartServiceMocks.cartItemToGetCartById;
+      const cart = CartServiceMocks.createCart(faker.string.uuid());
+      const mockCartItems = CartServiceMocks.cartItemToGetCartById();
 
-      jest.spyOn(service, 'findCartById').mockResolvedValue(mockCart);
+      jest.spyOn(service, 'findCartById').mockResolvedValue(cart);
       prismaService.cartItem.findMany.mockResolvedValue(mockCartItems);
 
-      const result = await service.getCartItemsByCartId(cartId);
+      const result = await service.getCartItemsByCartId(cart.id);
 
-      expect(service.findCartById).toHaveBeenCalledWith(cartId);
+      expect(service.findCartById).toHaveBeenCalledWith(cart.id);
       expect(prismaService.cartItem.findMany).toHaveBeenCalledWith({
-        where: { cart_id: cartId },
+        where: { cart_id: cart.id },
         include: service['getCartItemIncludeRelations'](),
       });
 
@@ -327,10 +324,10 @@ describe('CartsService', () => {
   });
 
   describe('getOrCreateCart', () => {
-    const userId = CartServiceMocks.cart.user_id;
-    const mockCart = CartServiceMocks.cart;
+    const userId = faker.string.uuid();
+    const mockCart = CartServiceMocks.createCart(userId);
     it('should return an existing cart if it exists', async () => {
-      jest.spyOn(prismaService.cart, 'findUnique').mockResolvedValue(mockCart);
+      prismaService.cart.findUnique.mockResolvedValue(mockCart);
 
       const result = await service.getOrCreateCart(userId);
 
@@ -342,10 +339,8 @@ describe('CartsService', () => {
     });
 
     it('should return a new cart when none exists', async () => {
-      jest.spyOn(prismaService.cart, 'findUnique').mockResolvedValue(null);
-      jest
-        .spyOn(prismaService.cart, 'create')
-        .mockResolvedValue(CartServiceMocks.cart);
+      prismaService.cart.findUnique.mockResolvedValue(null);
+      prismaService.cart.create.mockResolvedValue(mockCart);
 
       const result = await service.getOrCreateCart(userId);
 
@@ -359,25 +354,24 @@ describe('CartsService', () => {
         },
       });
 
-      expect(result).toEqual(CartServiceMocks.cart);
+      expect(result).toEqual(mockCart);
     });
 
     it('should throw NotAcceptableException if the cart does not belong to the user', async () => {
-      const userId = 'notUserOwnerId';
-
-      jest.spyOn(prismaService.cart, 'findUnique').mockResolvedValue(mockCart);
+      const notOwnerId = faker.string.uuid();
+      prismaService.cart.findUnique.mockResolvedValue(mockCart);
 
       jest.spyOn(service, 'validateCartOwnership').mockImplementation(() => {
         throw new NotAcceptableException();
       });
 
       await expect(
-        service.getOrCreateCart(userId, mockCart.id),
+        service.getOrCreateCart(notOwnerId, mockCart.id),
       ).rejects.toThrow(NotAcceptableException);
 
       expect(service.validateCartOwnership).toHaveBeenCalledWith(
         mockCart,
-        userId,
+        notOwnerId,
       );
     });
   });
