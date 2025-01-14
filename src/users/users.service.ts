@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
@@ -31,6 +32,8 @@ export class UsersService {
   private get baseUrl(): string {
     return this.envsConfigService.getBaseUrl();
   }
+
+  private logger = new Logger('UsersService');
 
   async signUp(req: SignupReqDto): Promise<SignUpResDto> {
     const existingUser = await this.findByEmail(req.email);
@@ -130,20 +133,26 @@ export class UsersService {
       hashedPassword,
     );
 
-    const token =
-      await this.verificationTokenService.findVerificationToken(decodedToken);
-    const user = await this.findById(token.user_id);
-    await this.mailService.sendEmail({
-      email: user.email,
-      fullName: `${user.first_name} ${user.last_name}`,
-      subject: 'Password Reset',
-      template: './reset-password-confirmation',
-    });
-
     if (!isPasswordReset) {
       throw new BadRequestException(
         'This link has expired or is already used.',
       );
+    }
+
+    const token =
+      await this.verificationTokenService.findVerificationToken(decodedToken);
+    const user = await this.findById(token.user_id);
+
+    try {
+      await this.mailService.sendEmail({
+        email: user.email,
+        fullName: `${user.first_name} ${user.last_name}`,
+        subject: 'Password Reset',
+        template: './reset-password-confirmation',
+      });
+    } catch (error) {
+      this.logger.error('Failed to send email', error);
+      throw new InternalServerErrorException('Failed to send email');
     }
   }
 
