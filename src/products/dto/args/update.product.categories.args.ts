@@ -1,6 +1,6 @@
 import { Field, InputType, ID, Int } from '@nestjs/graphql';
 import { IsArray, IsEnum, IsNotEmpty, IsString, IsInt } from 'class-validator';
-import { OperationType } from '../../../utils/enums/operation.enum';
+import { OperationType } from '../../../../utils/enums/operation.enum';
 
 @InputType()
 export class UpdateProductCategoriesArgs {

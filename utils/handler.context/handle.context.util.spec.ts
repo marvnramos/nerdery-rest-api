@@ -1,6 +1,6 @@
 import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
-import { extractRequestFromContext } from './HandleContext';
+import { extractRequestFromContext } from './handle.context.util';
 
 describe('extractRequestFromContext', () => {
   let mockHttpRequest;

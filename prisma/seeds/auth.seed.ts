@@ -1,6 +1,6 @@
 import { PrismaClient, User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
-import { EnvsConfigService } from '../../src/config/envs.config.service';
+import { EnvsConfigService } from '../../utils/config/envs.config.service';
 import { ConfigService } from '@nestjs/config';
 
 export default async (prisma: PrismaClient): Promise<User> => {

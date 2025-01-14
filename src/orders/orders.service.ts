@@ -4,7 +4,7 @@ import {
   NotAcceptableException,
   NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from '../utils/prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { AddOrderArgs } from './dto/args/add.order.args';
 import { AddOrderRes } from './dto/responses/add.order.res';
 import { CartsService } from '../carts/carts.service';
@@ -12,10 +12,15 @@ import { UsersService } from '../users/users.service';
 import { ProductsService } from '../products/products.service';
 import { plainToInstance } from 'class-transformer';
 import { GetOrdersArgs } from './dto/args/get.orders.args';
-import { decodeBase64, encodeBase64 } from '../utils/tools';
+import {
+  decodeBase64,
+  encodeBase64,
+  mapResultToIds,
+} from '../../utils/index.util';
 import { OrderType } from './types/order.type';
 import { PaginatedOrdersType } from './dto/responses/orders.pagination.type.res';
 import { Prisma, UserRoleType } from '@prisma/client';
+import { OrderDetailType } from './types/order.detail.type';
 
 @Injectable()
 export class OrdersService {
@@ -63,6 +68,19 @@ export class OrdersService {
 
     const orders = await this.fetchPaginatedOrders(args);
     return plainToInstance(PaginatedOrdersType, orders);
+  }
+
+  async getOrderDetailsByBatch(
+    orderIds: readonly string[],
+  ): Promise<(OrderDetailType | any)[]> {
+    const orderDetails = await this.prismaService.orderDetail.findMany({
+      where: { order_id: { in: [...orderIds] } },
+      include: {
+        product: true,
+      },
+    });
+
+    return mapResultToIds(orderIds, orderDetails);
   }
 
   private async validateCartOwnership(userId: string, cartId: string) {

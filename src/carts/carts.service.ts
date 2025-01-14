@@ -3,7 +3,7 @@ import {
   NotAcceptableException,
   NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from '../utils/prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { AddOrUpdateProductCartArgs } from './dto/args/add.or.update.product.cart.args';
 import { UpdateProductCartRes } from './dto/response/update.product.cart.res';
 import { ProductsService } from '../products/products.service';

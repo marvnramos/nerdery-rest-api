@@ -1,4 +1,5 @@
 import { Product } from '@prisma/client';
+import { faker } from '@faker-js/faker/locale/ar';
 
 export class ProductServiceMocks {
   static product: Product = {
@@ -11,6 +12,17 @@ export class ProductServiceMocks {
     created_at: new Date(),
     updated_at: new Date(),
   };
+
+  static createProduct = (stock?: number) => ({
+    id: faker.string.uuid(),
+    product_name: faker.commerce.product(),
+    description: faker.commerce.productDescription(),
+    unit_price: 100,
+    is_available: true,
+    stock: stock ?? 10,
+    created_at: new Date(),
+    updated_at: new Date(),
+  });
 
   static productWithLowStock: Product = {
     id: 'prod123',

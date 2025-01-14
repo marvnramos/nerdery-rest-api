@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PrismaService } from '../utils/prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { OrdersService } from '../orders/orders.service';
-import { MailService } from '../utils/mailer/mail.service';
+import { MailService } from '../mailer/mail.service';
 import { PaymentsService } from './payments.service';
 import {
   NotAcceptableException,
@@ -16,7 +16,7 @@ import { UsersService } from '../users/users.service';
 import { ProductsService } from '../products/products.service';
 import { MailerService } from '@nestjs-modules/mailer';
 import { VerificationTokenService } from '../verification.token/verification.token.service';
-import { EnvsConfigService } from '../config/envs.config.service';
+import { EnvsConfigService } from '../../utils/config/envs.config.service';
 
 const mockStripeInstance = {
   paymentIntents: {

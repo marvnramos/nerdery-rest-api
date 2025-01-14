@@ -4,13 +4,39 @@ import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { User } from '@prisma/client';
 import { SignInResDto } from './dto/response/sign.in.res.dto';
+import { Response } from 'express';
+import { EnvsConfigService } from '../../utils/config/envs.config.service';
+import { SignInReqDto } from './dto/request/sign.in.req.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
     private readonly usersService: UsersService,
+    private readonly envsConfigService: EnvsConfigService,
   ) {}
+
+  async login(req: SignInReqDto, res: Response): Promise<void> {
+    const user = await this.usersService.findByEmail(req.email);
+    if (!user) {
+      throw new Error('Invalid credentials');
+    }
+    const response: SignInResDto = await this.getAccessToken(user);
+
+    res.cookie('access_token', response.access_token, {
+      httpOnly: true,
+      secure: this.envsConfigService.getNodeEnv() === 'production',
+      maxAge: 60 * 60 * 1000,
+      sameSite: 'strict',
+    });
+
+    res.json(response);
+  }
+
+  async logout(res: Response): Promise<void> {
+    res.clearCookie('access_token');
+    res.json({ message: 'Logged out successfully' });
+  }
 
   async verifyCredentials(
     email: string,
@@ -30,14 +56,14 @@ export class AuthService {
     return user;
   }
 
-  async login(user: User): Promise<SignInResDto> {
+  async getAccessToken(user: User): Promise<SignInResDto> {
     const userRole = await this.usersService.getUserRole(user.id);
     const payload = {
       sub: user.id,
       role: userRole.role,
     };
     return {
-      accessToken: this.jwtService.sign(payload),
+      access_token: this.jwtService.sign(payload),
     };
   }
 

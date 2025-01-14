@@ -1,30 +1,27 @@
+import { faker } from '@faker-js/faker/locale/ar';
+
 export class CategoryServiceMocks {
-  static createMockCategory(
-    overrides: Partial<{
-      id: number;
-      category_name: string;
-      created_at: Date;
-      updated_at: Date;
-    }> = {},
-  ) {
+  static createMockCategory() {
     return {
-      id: overrides.id ?? 1,
-      category_name: overrides.category_name ?? 'Electronics',
-      created_at: overrides.created_at ?? this.currentDate,
-      updated_at: overrides.updated_at ?? this.currentDate,
+      id: faker.number.int({ min: 1 }),
+      category_name: faker.commerce.productAdjective(),
+      created_at: new Date(),
+      updated_at: new Date(),
     };
   }
 
   static currentDate = new Date();
 
-  static category = this.createMockCategory();
+  // static category = this.createMockCategory();
 
-  static anotherCategory = this.createMockCategory({
-    id: 2,
-    category_name: 'Home Appliances',
-  });
+  // static anotherCategory = this.createMockCategory({
+  //   id: 2,
+  //   category_name: 'Home Appliances',
+  // });
 
-  static allCategories = [this.category, this.anotherCategory];
+  // static allCategories = [this.category, this.anotherCategory];
+
+  static categories = [this.createMockCategory(), this.createMockCategory()];
 
   static createCategoryRes = {
     id: 1,

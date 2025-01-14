@@ -5,8 +5,8 @@ import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './strategy/local.strategy';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './strategy/jwt.strategy';
-import { EnvsConfigModule } from '../config/envs.config.module';
-import { EnvsConfigService } from 'src/config/envs.config.service';
+import { EnvsConfigModule } from '../../utils/config/envs.config.module';
+import { EnvsConfigService } from 'utils/config/envs.config.service';
 
 @Module({
   imports: [

@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { extractRequestFromContext } from '../../utils/HandleContext';
+import { extractRequestFromContext } from '../../../utils/handler.context/handle.context.util';
 
 @Injectable()
 export class RolesGuard implements CanActivate {

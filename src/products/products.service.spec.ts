@@ -1,14 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProductsService } from './products.service';
-import { PrismaService } from '../utils/prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { OperationType } from '../utils/enums/operation.enum';
+import { OperationType } from '../../utils/enums/operation.enum';
 import { AddProductRes } from './dto/responses/create.product.res';
 import { UpdateProductRes } from './dto/responses/update.product.images.res';
 import { RemoveProductRes } from './dto/responses/remove.product.res';
 import { UpdateProductImagesArgs } from './dto/args/update.product.images.args';
 import { ProductType } from './types/product.type';
-import { EnvsConfigService } from '../config/envs.config.service';
+import { EnvsConfigService } from '../../utils/config/envs.config.service';
 
 describe('ProductsService', () => {
   let service: ProductsService;

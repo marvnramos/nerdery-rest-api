@@ -5,14 +5,16 @@ import {
   NotAcceptableException,
 } from '@nestjs/common';
 import Stripe from 'stripe';
-import { PrismaService } from '../utils/prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { OrdersService } from '../orders/orders.service';
 import { AddPaymentRes } from './dto/responses/add.payment.res';
 import { UserRoleType } from '@prisma/client';
-import { MailService } from '../utils/mailer/mail.service';
-import { EmailCommand } from '../utils/mailer/dto/email.command';
+import { MailService } from '../mailer/mail.service';
+import { EmailCommand } from '../mailer/dto/email.command';
 import { Request, Response } from 'express';
-import { EnvsConfigService } from '../config/envs.config.service';
+import { EnvsConfigService } from '../../utils/config/envs.config.service';
+import { mapResultToIds } from '../../utils/index.util';
+import { PaymentDetail } from './types/payment.detail.type';
 
 @Injectable()
 export class PaymentsService {
@@ -105,6 +107,16 @@ export class PaymentsService {
         HttpStatus.BAD_REQUEST,
       );
     }
+  }
+
+  async getPaymentDetailsByBatch(
+    orderIds: readonly string[],
+  ): Promise<(PaymentDetail | any)[]> {
+    const paymentDetail = await this.prisma.paymentDetail.findMany({
+      where: { order_id: { in: [...orderIds] } },
+    });
+
+    return mapResultToIds(orderIds, paymentDetail);
   }
 
   private async processEvent(event: Stripe.Event) {
